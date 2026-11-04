@@ -25,8 +25,17 @@ SERVICES = {
     "pgt_previsioni_tuc": f"{_PGT}/20",  # tessuto urbano consolidato (AMB_URB; all Milan = 23)
     "pgt_paesaggio": f"{_PGT}/21",  # aree di valore paesaggistico-ambientale (TIPO_AMB)
     "pgt_sensibilita": f"{_PGT}/22",  # classi di sensibilita paesistica (CLASSE 1-5)
+    "pgt_rigenerazione": f"{_PGT}/14",  # ambiti di rigenerazione (no hit at the test points)
+    "pgt_agricole": f"{_PGT}/19",  # aree agricole (no hit at the test points)
+    "pgt_fattibilita_geo": f"{_PGT}/3",  # fattibilita geologica (CLASSE, FATTORI_PERICOLO)
     "natura2000_zsc": f"{_N2K}/0",  # ZSC/SIC (COD_SITO, NOME_SITO)
     "natura2000_zps": f"{_N2K}/1",  # ZPS (COD_ZPS, NOME_ZPS)
+    # PGRA risk classes R4-R1 (field Ris) and the APSFR areas they belong to.
+    "pgra_APSFR": f"{_PGRA}/4",  # aree a potenziale rischio significativo (nameAPSFR)
+    "pgra_R4": f"{_PGRA}/12",
+    "pgra_R3": f"{_PGRA}/13",
+    "pgra_R2": f"{_PGRA}/14",
+    "pgra_R1": f"{_PGRA}/15",
     # PGRA hazard, 2022 revision: scenario H (frequent), M (poco frequente), L (raro).
     # RP = reticolo principale, RSCM = sec. collinare/montano, RSP = sec. pianura, ACL = coste lacuali.
     "pgra_H_RP": f"{_PGRA}/17",
