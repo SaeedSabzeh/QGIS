@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+*.zip
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+~$*.docx
+.env
+# raw source PDFs and probe output stay local
+data/raw/
+scripts/out/
