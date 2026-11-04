@@ -1,0 +1,4 @@
+# PGT zone code -> NTA article ids. Filled in during Phase 1.
+# Example:
+# "TUC-ARU":
+#   articles: ["Art. 15", "Art. 16"]
