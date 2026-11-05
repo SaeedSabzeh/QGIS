@@ -1,0 +1,22 @@
+# 20 Milan points for the constraint check (spread over the city; p01-p06 are the Phase 0 test points).
+# Used by: python eval/run_eval.py --mode constraints
+- {id: p01, name: "Duomo", lat: 45.4642, lon: 9.19}
+- {id: p02, name: "Citta Studi", lat: 45.4781, lon: 9.2269}
+- {id: p03, name: "Parco Nord", lat: 45.5281, lon: 9.205}
+- {id: p04, name: "Darsena (Navigli)", lat: 45.452, lon: 9.176}
+- {id: p05, name: "Chiaravalle (Parco Agricolo Sud)", lat: 45.417, lon: 9.235}
+- {id: p06, name: "Lambro (flood positive control)", lat: 45.465, lon: 9.256}
+- {id: p07, name: "Stazione Centrale", lat: 45.4862, lon: 9.2046}
+- {id: p08, name: "San Siro stadium", lat: 45.4781, lon: 9.124}
+- {id: p09, name: "Isola / Porta Garibaldi", lat: 45.485, lon: 9.188}
+- {id: p10, name: "Linate airport", lat: 45.445, lon: 9.276}
+- {id: p11, name: "Bicocca", lat: 45.518, lon: 9.211}
+- {id: p12, name: "Quarto Oggiaro", lat: 45.506, lon: 9.139}
+- {id: p13, name: "Giambellino / Lorenteggio", lat: 45.443, lon: 9.142}
+- {id: p14, name: "Rogoredo", lat: 45.4325, lon: 9.239}
+- {id: p15, name: "Gratosoglio", lat: 45.41, lon: 9.178}
+- {id: p16, name: "Baggio (west edge)", lat: 45.465, lon: 9.092}
+- {id: p17, name: "Barona / Naviglio Pavese", lat: 45.433, lon: 9.16}
+- {id: p18, name: "Bovisa", lat: 45.507, lon: 9.158}
+- {id: p19, name: "Niguarda", lat: 45.52, lon: 9.185}
+- {id: p20, name: "Lambrate", lat: 45.484, lon: 9.233}
