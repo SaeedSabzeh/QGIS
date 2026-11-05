@@ -6,6 +6,11 @@
       "version_date": "2025-12-04"
     },
     {
+      "doc": "PTC",
+      "title": "Parco Agricolo Sud Milano – PTC, NTA (DGR 7/818 of 2000; amendments 2007 and 2009 are local, outside Milan)",
+      "version_date": "2000-08-03"
+    },
+    {
       "doc": "CG",
       "title": "Componente geologica – norme geologiche di piano",
       "version_date": "2020-02-05"
@@ -41,6 +46,31 @@
       },
       "note": "ZPS (bird protection areas) trigger the same valutazione di incidenza procedure; no Milan-specific rule in the NTA.",
       "verify": true
+    },
+    "parco_regionale": {
+      "service": "AreeProtette layer 9 \"Parchi regionali\" (NOME_PA, NOME_ENTE, DATTUA_PA)",
+      "articles": [
+        "PR-art-35"
+      ],
+      "why": "PR art. 35 \"Definizione e disciplina\" c.1: inside the perimeters of the regional parks the zoning and implementing rules of the park's PTC apply; the PTC contents are \"recepiti di diritto nel PGT e prevalgono su previsioni difformi\".",
+      "note": "KNOWN GAP: Parco Nord Milano does not appear in this layer (no hit even at its centre), so a point inside Parco Nord gets no park finding from the map service; PR art. 35 c.1-2 names it and the Parco Nord PTC is not in the corpus.",
+      "unmatched_note": "The PTC of this park is not in the corpus: only PR art. 35 is cited; consult the park's own PTC.",
+      "verify": true,
+      "by_value": {
+        "NOME_PA": {
+          "Parco Agricolo Sud Milano": {
+            "articles": [
+              "PTC-art-1"
+            ],
+            "general_articles": [
+              "PTC-art-24",
+              "PTC-art-12"
+            ],
+            "why": "PTC art. 1 c.5: the PTC's urban-planning provisions are \"immediatamente vincolanti per chiunque\", are incorporated by right in the municipal general plans and replace conflicting provisions. PTC art. 24 \"Articolazione del territorio del parco\" divides the park into territori (art. 25 cintura metropolitana, art. 26 cintura urbana, art. 27 collegamento citta-campagna); which zone and rule apply at the point depends on the PTC zoning maps (Tav. A, not in the corpus). PTC art. 12 covers the opinions and authorisations of the park authority (ente gestore).",
+            "note": "PTC text is DGR 7/818 of 03/08/2000. The two later amendments (DGR 8/4516 of 2007, Tav. 26 at Colturano; DGR 8/10833 of 2009, new art. 30 bis, fontanile Rile at Settala) were checked and are local changes outside Milan: the 2000 text is current for Milan. The zone-specific PTC articles stay candidates on the PGT findings until the PTC zoning at the point is checked. Annexes A-D of the PTC are not in the corpus."
+          }
+        }
+      }
     },
     "pgra_hazard": {
       "service": "direttiva_alluvioni_2022 layers 17-27 (Codscenar H/M/L, Tritorno)",

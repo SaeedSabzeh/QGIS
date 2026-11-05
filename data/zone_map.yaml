@@ -19,7 +19,7 @@ sources:
   - {doc: PR, title: "Piano delle Regole – Norme di attuazione", version_date: "2025-12-04"}
   - {doc: PS, title: "Piano dei Servizi – Norme di attuazione", version_date: "2022-12-19"}
   - {doc: DP, title: "Documento di Piano – Norme di attuazione", version_date: "2019-10-14"}
-  - {doc: PTC, title: "Parco Agricolo Sud Milano – PTC, NTA (DGR 7/818 of 2000, without later amendments)", version_date: "2000-08-03"}
+  - {doc: PTC, title: "Parco Agricolo Sud Milano – PTC, NTA (DGR 7/818 of 2000; the later amendments of 2007 and 2009 are local, outside Milan)", version_date: "2000-08-03"}
   - {doc: CG, title: "Componente geologica – norme geologiche di piano", version_date: "2020-02-05"}
   - {doc: CGS, title: "Componente sismica – Allegato 7", version_date: "2020-02-05"}
   - {doc: DPA1, title: "Documento di Piano – Allegato 1, contenuti paesaggistici (explanatory)", version_date: "2019-10-14"}
@@ -93,6 +93,11 @@ layers:
       listed articles are NOT the governing discipline of the area; only the two PCU values below
       have a verified governing text, in the park's PTC.
     verify: true
+    inside_parco_sud:
+      general_articles: [PTC-art-1]
+      note: >-
+        The point is inside the Parco Agricolo Sud Milano: PTC art. 1 c.5 makes the PTC
+        provisions immediately binding and prevailing over conflicting municipal ones.
     by_value:
       AMB_TRAS:
         "26":
@@ -104,8 +109,8 @@ layers:
             Parco est «Idroscalo»" gives the orientamenti e indirizzi for it.
           note: >-
             The match PCU4 = PTC comparto 4 rests on the name ("Idroscalo") and the number; the
-            transformation area is not described as such in the PTC. PTC text of 2000 without
-            the later amendments. Inside the park the PTC prevails (PR art. 35 c.1, PS art. 12).
+            transformation area is not described as such in the PTC. PTC text of 2000 (later amendments are outside Milan).
+            Inside the park the PTC prevails (PR art. 35 c.1, PS art. 12).
           verify: true
         "29":
           articles: [PTC-art-26, PTC-all-A]
@@ -116,7 +121,7 @@ layers:
             gives the orientamenti e indirizzi for it.
           note: >-
             The match PCU3 = PTC comparto 3 rests on the name ("Abbazie") and the number. PTC
-            text of 2000 without the later amendments. Inside the park the PTC prevails (PR art.
+            text of 2000 (later amendments are outside Milan). Inside the park the PTC prevails (PR art.
             35 c.1, PS art. 12).
           verify: true
 
@@ -190,7 +195,16 @@ layers:
       The agricole layer does not say whether the point is inside the Parco Agricolo Sud Milano,
       so the PTC articles are candidates: use them only where the park perimeter applies. Art. 25
       refers to LR 12/2005 title III part II and the PTCP for the detailed agricultural rules.
-      The PTC text is the one of DGR 7/818 of 2000, without the later NTA amendments.
+      The PTC text is the one of DGR 7/818 of 2000; the later NTA amendments (2007, 2009) are
+      local changes outside Milan.
+    inside_parco_sud:
+      verify: true
+      general_articles: [PTC-art-15, PTC-art-1]
+      why: >-
+        The point is inside the Parco Agricolo Sud Milano (parchi_regionali layer): the PTC
+        prevails (PR art. 35 c.1). PTC art. 15 "Norme generali di tutela dell'attivita agricola"
+        applies park-wide. Which territory applies (art. 25 cintura metropolitana, art. 26
+        cintura urbana, ...) depends on the PTC zoning map, so art. 25 and 26 stay candidates.
 
   paesaggio:
     layer_id: 21
@@ -212,7 +226,15 @@ layers:
     note: >-
       The layer's TIPO_AMB codes (e.g. 502 traditional agrarian landscape) are not listed in the
       NTA; the match to art. 34 and its Allegato 1 is by subject, not by code. The PTC articles
-      are candidates: they apply only inside the park perimeter, which this layer does not give.
+      are candidates: they apply only inside the park perimeter, which this layer does not give
+      (the parchi_regionali layer does).
+    inside_parco_sud:
+      general_articles: [PTC-art-16, PTC-art-1]
+      why: >-
+        The point is inside the Parco Agricolo Sud Milano: the PTC prevails (PR art. 35 c.1) and
+        PTC art. 16 "Norme generali di tutela ambientale-paesaggistica" applies park-wide. PTC
+        art. 34 "Zona di tutela e valorizzazione paesistica" applies only in that PTC zone, which
+        is read on the PTC maps, so it stays a candidate.
     verify: true
 
   sensibilita:

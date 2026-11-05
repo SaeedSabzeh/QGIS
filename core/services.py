@@ -13,6 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 # the query sends lon/lat (inSR=4326) and the server reprojects.
 _PGT = "https://www.cartografia.servizirl.it/arcgis1/rest/services/territorio/tav_previsioni_b/MapServer"
 _N2K = "https://www.cartografia.servizirl.it/arcgis2/rest/services/ambiente/Rete_Natura_2000/MapServer"
+_AREE_PROTETTE = "https://www.cartografia.servizirl.it/arcgis2/rest/services/ambiente/AreeProtette/MapServer"
 _PGRA = "https://www.cartografia.servizirl.it/expo/rest/services/gpt/direttiva_alluvioni_2022/MapServer"
 
 SERVICES = {
@@ -28,6 +29,9 @@ SERVICES = {
     "pgt_fattibilita_geo": f"{_PGT}/3",  # fattibilita geologica (CLASSE, FATTORI_PERICOLO)
     "natura2000_zsc": f"{_N2K}/0",  # ZSC/SIC (COD_SITO, NOME_SITO)
     "natura2000_zps": f"{_N2K}/1",  # ZPS (COD_ZPS, NOME_ZPS)
+    # Regional parks (NOME_PA, NOME_ENTE, DATTUA_PA; wkid 32632). Known gap: Parco Nord Milano is
+    # NOT in this layer (no hit even at its centre); Parco Agricolo Sud Milano is.
+    "parchi_regionali": f"{_AREE_PROTETTE}/9",
     # PGRA risk classes R4-R1 (field Ris) and the APSFR areas they belong to.
     "pgra_APSFR": f"{_PGRA}/4",  # aree a potenziale rischio significativo (nameAPSFR)
     "pgra_R4": f"{_PGRA}/12",

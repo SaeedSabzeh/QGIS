@@ -91,7 +91,7 @@ def sources_used(ids, data_dir=None):
     for code in seen:
         d = docs.get(code) or {}
         v = d.get("version_date")
-        extra = {"PTC": ", without later amendments", "DPA1": ", explanatory"}.get(code, "")
+        extra = {"PTC": ", 2000 text; later amendments are local, outside Milan", "DPA1": ", explanatory"}.get(code, "")
         name = d.get("name", code)
         parts.append("%s (%s%s)" % (name, v, extra) if v else name)
     return "; ".join(parts)
@@ -113,6 +113,7 @@ LAYER_RULES = {
     "pgt_fattibilita_geo": ("zone", "fattibilita_geologica"),
     "natura2000_zsc": ("constraint", "natura2000_zsc_sic"),
     "natura2000_zps": ("constraint", "natura2000_zps"),
+    "parchi_regionali": ("constraint", "parco_regionale"),
     "pgra_R1": ("constraint", "pgra_risk"),
     "pgra_R2": ("constraint", "pgra_risk"),
     "pgra_R3": ("constraint", "pgra_risk"),
@@ -135,6 +136,7 @@ KEY_FIELDS = {
     "fattibilita_geologica": ["CLASSE", "DESCR_FATTIBILITA", "FATTORI_PERICOLO"],
     "natura2000_zsc_sic": ["COD_SITO", "NOME_SITO"],
     "natura2000_zps": ["COD_ZPS", "NOME_ZPS"],
+    "parco_regionale": ["NOME_PA", "NOME_ENTE", "DATTUA_PA"],
     "pgra_hazard": ["Codscenar", "Tritorno", "Nomeelidr", "Ambitoter"],
     "pgra_risk": ["Ris", "Danno", "CatUE", "Nomeelidr"],
 }
@@ -187,7 +189,19 @@ def _ids(lst):
     return [article_id(n) for n in lst or []]
 
 
-def _zone_finding(layer, key, entry, attrs):
+PARCO_SUD = "parco agricolo sud milano"
+
+
+def in_parco_sud(query_result):
+    """True when a parchi_regionali hit of `query_result` is the Parco Agricolo Sud Milano."""
+    for attrs in ((query_result.get("layers") or {}).get("parchi_regionali")) or []:
+        name = _get(attrs, "NOME_PA")
+        if isinstance(name, str) and name.strip().lower() == PARCO_SUD:
+            return True
+    return False
+
+
+def _zone_finding(layer, key, entry, attrs, in_park=False):
     articles = _ids(entry.get("articles"))
     general = _ids(entry.get("general_articles"))
     explanatory = _ids(entry.get("explanatory_articles"))
@@ -213,6 +227,17 @@ def _zone_finding(layer, key, entry, attrs):
         if sub.get("note"):
             note = (note + " " + sub["note"]).strip()
         verify = verify or bool(sub.get("verify", False))
+    park = entry.get("inside_parco_sud")
+    if in_park and park:
+        # inside the Parco Agricolo Sud Milano the PTC candidates named here are promoted
+        articles = _union(articles, _ids(park.get("articles")))
+        general = _union(general, _ids(park.get("general_articles")))
+        explanatory = _union(explanatory, _ids(park.get("explanatory_articles")))
+        if park.get("why"):
+            why = (why + " " + park["why"]).strip()
+        if park.get("note"):
+            note = (note + " " + park["note"]).strip()
+        verify = verify or bool(park.get("verify", False))
     general = [n for n in general if n not in articles]
     explanatory = [n for n in explanatory if n not in articles and n not in general]
     candidates = [n for n in candidates
@@ -230,6 +255,7 @@ def _zone_finding(layer, key, entry, attrs):
 CONSTRAINT_LABELS = {
     "natura2000_zsc_sic": "Natura 2000: ZSC/SIC",
     "natura2000_zps": "Natura 2000: ZPS",
+    "parco_regionale": "Parco regionale",
     "pgra_hazard": "Pericolosita alluvioni (PGRA)",
     "pgra_risk": "Rischio alluvioni (PGRA)",
 }
@@ -239,9 +265,24 @@ def _constraint_finding(layer, key, entry, attrs):
     articles = _ids(entry.get("articles"))
     why = entry.get("why", "")
     note = entry.get("note", "")
-    general = []
+    general = _ids(entry.get("general_articles"))
     values = _key_values(key, attrs)
     matched = {}
+    by_value = entry.get("by_value") or {}
+    hit = False
+    for field, table in by_value.items():
+        raw = _get(attrs, field)
+        sub = None if _blank(raw) else table.get(str(raw).strip())
+        if not sub:
+            continue
+        hit = True
+        matched[field] = str(raw).strip()
+        articles = _union(articles, _ids(sub.get("articles")))
+        general = _union(general, _ids(sub.get("general_articles")))
+        why = (why + " " + sub.get("why", "")).strip()
+        note = (note + " " + sub.get("note", "")).strip()
+    if by_value and not hit and entry.get("unmatched_note"):
+        note = (note + " " + entry["unmatched_note"]).strip()
     mapping = entry.get("hazard_mapping")
     if mapping:
         scen = _get(attrs, "Codscenar") or _get(attrs, "CodScen")
@@ -254,14 +295,14 @@ def _constraint_finding(layer, key, entry, attrs):
             matched["Codscenar"] = scen
             values["nta_scenario"] = hz.get("nta_scenario")
             hz_ids = _ids(hz.get("articles"))
-            general = [n for n in articles if n not in hz_ids]
+            general = _union(general, [n for n in articles if n not in hz_ids])
             articles = hz_ids
             note = (note + " " + entry.get("hazard_mapping_note", "")).strip()
     return {
         "layer": layer, "category": key, "source": "constraint_map",
         "label": CONSTRAINT_LABELS.get(key, layer), "values": values, "matched_values": matched,
-        "articles": articles, "general_articles": general, "explanatory_articles": [],
-        "candidate_articles": [],
+        "articles": articles, "general_articles": [n for n in general if n not in articles],
+        "explanatory_articles": [], "candidate_articles": [],
         "why": why, "note": note, "verify": bool(entry.get("verify", False)),
         "external_rule": entry.get("external_rule"),
     }
@@ -300,6 +341,7 @@ def lookup(query_result, data_dir=None):
     zone_layers = zone_map.get("layers", {})
     constraints = constraint_map.get("constraints", {})
     findings = []
+    in_park = in_parco_sud(query_result)
     for layer, hits in (query_result.get("layers") or {}).items():
         for attrs in hits or []:
             if layer == "pgra_APSFR":
@@ -312,7 +354,7 @@ def lookup(query_result, data_dir=None):
             if src == "zone":
                 entry = zone_layers.get(key)
                 if entry:
-                    f = _zone_finding(layer, key, entry, attrs)
+                    f = _zone_finding(layer, key, entry, attrs, in_park)
                     if key == "fattibilita_geologica":
                         _add_geology_constraint(f, constraints.get("geologia"))
                     findings.append(f)
