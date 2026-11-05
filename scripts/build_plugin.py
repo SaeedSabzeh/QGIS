@@ -2,7 +2,8 @@
 
     python scripts/build_plugin.py
 
-Only the runtime data files are shipped (articles.json, zone_map.json, constraint_map.json);
+Only the runtime data files are shipped (articles.json, documents.json, zone_map.json,
+constraint_map.json);
 data/raw and the YAML sources stay out. Zip entries use forward slashes, with the top-level
 folder norme_milano/ as QGIS expects.
 """
@@ -15,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 NAME = "norme_milano"
-RUNTIME_DATA = ("articles.json", "zone_map.json", "constraint_map.json")
+RUNTIME_DATA = ("articles.json", "documents.json", "zone_map.json", "constraint_map.json")
 SKIP_DIRS = {"__pycache__"}
 SKIP_SUFFIXES = {".pyc", ".pyo"}
 

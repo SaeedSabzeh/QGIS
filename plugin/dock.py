@@ -8,7 +8,7 @@ from qgis.PyQt.QtWidgets import (
     QTextBrowser, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
-from ._compat import enum, prompts
+from ._compat import enum, prompts, retrieval
 
 MAX_VALUE_CHARS = 80
 MIN_WIDTH = 320
@@ -16,6 +16,11 @@ MIN_WIDTH = 320
 
 def _wrap(text):
     return " ".join(str(text).split())
+
+
+def _refs(ids):
+    """"Piano dei Servizi \u2013 art. 11, Piano delle Regole \u2013 art. 8" for a list of ids."""
+    return ", ".join(retrieval.ref_label(n) for n in ids)
 
 
 def finding_summary(f):
@@ -30,9 +35,10 @@ def finding_summary(f):
     lines = []
     for key, title in (("articles", "Governing articles / Articoli"),
                        ("general_articles", "General articles"),
+                       ("explanatory_articles", "Explanatory sections (non-normative)"),
                        ("candidate_articles", "Candidate articles (uncertain)")):
         if f.get(key):
-            lines.append("%s: %s" % (title, ", ".join("Art. %s" % n for n in f[key])))
+            lines.append("%s: %s" % (title, _refs(f[key])))
     if f.get("why"):
         lines.append("Why: " + _wrap(f["why"]))
     if f.get("note"):
@@ -41,7 +47,7 @@ def finding_summary(f):
         lines.append("VERIFY: this link is uncertain, not confirmed by a human.")
     ext = f.get("external_rule")
     if ext:
-        lines.append("External rule (outside the NTA%s): %s" % (
+        lines.append("External rule (outside the PGT texts%s): %s" % (
             ", unverified" if ext.get("verify") else "", _wrap(ext.get("text", ""))))
     return head, lines
 
@@ -61,10 +67,10 @@ def finding_html(f):
     out.append("</p>")
     for key, title in (("articles", "Governing articles / Articoli"),
                        ("general_articles", "General articles"),
+                       ("explanatory_articles", "Explanatory sections (non-normative)"),
                        ("candidate_articles", "Candidate articles (uncertain)")):
         if f.get(key):
-            out.append("%s<i>%s:</i> %s</p>" % (
-                para, escape(title), escape(", ".join("Art. %s" % n for n in f[key]))))
+            out.append("%s<i>%s:</i> %s</p>" % (para, escape(title), escape(_refs(f[key]))))
     if f.get("why"):
         out.append("%s<b>Why:</b> %s</p>" % (para, escape(_wrap(f["why"]))))
     if f.get("note"):
@@ -73,7 +79,7 @@ def finding_html(f):
         out.append(para + "<b>VERIFY:</b> this link is uncertain, not confirmed by a human.</p>")
     ext = f.get("external_rule")
     if ext:
-        out.append("%s<b>External rule (outside the NTA%s):</b> %s</p>" % (
+        out.append("%s<b>External rule (outside the PGT texts%s):</b> %s</p>" % (
             para, ", unverified" if ext.get("verify") else "",
             escape(_wrap(ext.get("text", "")))))
     return "".join(out) + "<hr>"
@@ -145,6 +151,9 @@ class RulesDock(QDockWidget):
         split.addWidget(box3)
 
         # permanent footer
+        self.sources_label = QLabel("")
+        self.sources_label.setWordWrap(True)
+        root.addWidget(self.sources_label)
         footer = QLabel("<small>%s<br>%s<br>%s<br>%s</small>" % tuple(escape(t) for t in (
             prompts.DISCLAIMER_EN, prompts.DISCLAIMER_IT, prompts.LIMITATION_EN,
             prompts.LIMITATION_IT)))
@@ -157,6 +166,11 @@ class RulesDock(QDockWidget):
     # ------------------------------------------------------------------ status / state
     def set_status(self, text):
         self.status.setText(text)
+
+    def set_sources(self, text):
+        """Line naming the documents (with version) behind the articles shown."""
+        self.sources_label.setText(
+            "<small>Documents used: %s.</small>" % escape(text) if text else "")
 
     def set_querying(self, lat, lon):
         self.status.setText("Querying / Interrogazione in corso... (lat %.5f, lon %.5f)"
@@ -196,6 +210,7 @@ class RulesDock(QDockWidget):
         self.set_status(msg.strip())
         self.show_findings(res["findings"], errors)
         self.show_articles(res["articles"])
+        self.set_sources(res.get("sources", ""))
 
     def show_findings(self, findings, errors=None):
         parts = []
@@ -222,7 +237,10 @@ class RulesDock(QDockWidget):
         for r in rows:
             roles = ", ".join(r["roles"])
             tags = roles + ("; cited" if r["id"] in cited else "")
-            label = "Art. %s \u2013 %s\n[%s]" % (r["number"], r["title"], tags)
+            cite = r.get("cite") or ("Art. %s" % r.get("number"))
+            if r.get("normative") is False:
+                tags += "; explanatory, non-normative"
+            label = "%s \u2013 %s\n[%s]" % (cite, r["title"], tags)
             item = QTreeWidgetItem([label])
             item.setToolTip(0, label)
             item.setData(0, enum(Qt, "ItemDataRole", "UserRole"), r["id"])
@@ -262,6 +280,7 @@ class RulesDock(QDockWidget):
         self.answer.setHtml("".join(parts))
         self.show_articles(ans.get("articles", []), cited=ans["cited_articles"])
         self.set_status("Answered by %s." % ans.get("model", "?"))
+        self.set_sources(ans.get("sources", ""))
 
     def show_error(self, text):
         self.set_status(text)

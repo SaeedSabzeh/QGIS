@@ -99,21 +99,61 @@ def articles():
     return json.loads(ARTICLES.read_text(encoding="utf-8"))
 
 
-def test_articles_json_complete(articles):
-    assert len(articles) == 53
-    assert [a["number"] for a in articles] == list(range(1, 54))
+def _by_doc(articles, doc):
+    return [a for a in articles if a["doc"] == doc]
+
+
+def test_corpus_counts_and_pr_ids_unchanged(articles):
+    pr = _by_doc(articles, "PR")
+    assert [a["number"] for a in pr] == list(range(1, 54))       # 53 articles, ids as before
+    assert [a["id"] for a in pr] == [f"PR-art-{n}" for n in range(1, 54)]
+    assert [a["id"] for a in articles[:53]] == [a["id"] for a in pr]   # PR comes first
+    assert len(_by_doc(articles, "PS")) == 14
+    assert [a["number"] for a in _by_doc(articles, "PS")] == list(range(1, 15))
+    assert len(_by_doc(articles, "DP")) == 8
+    ptc = _by_doc(articles, "PTC")
+    assert [a["number"] for a in ptc if a["id"].startswith("PTC-art-")] == list(range(1, 55))
+    assert any(a["id"] == "PTC-all-A" for a in ptc)
+    assert [a["number"] for a in _by_doc(articles, "CG")] == list(range(42, 52))
+    assert len(_by_doc(articles, "CGS")) == 2
+    assert len(_by_doc(articles, "DPA1")) >= 20
+
+
+def test_corpus_records_are_well_formed(articles):
+    ids = [a["id"] for a in articles]
+    assert len(ids) == len(set(ids))
+    docs = {d["doc"]: d for d in json.loads((ROOT / "data" / "documents.json").read_text("utf-8"))}
+    assert set(docs) == {a["doc"] for a in articles}
     for a in articles:
-        assert a["id"] == f"PR-art-{a['number']}"
-        assert a["text"].strip(), a["id"]
-        assert a["title"].strip(), a["id"]
-        assert a["version_date"] == "2022-12-19"
+        d = docs[a["doc"]]
+        assert a["text"].strip() and a["title"].strip(), a["id"]
+        assert a["normative"] is d["normative"] and a["doc_name"] == d["name"]
+        assert a["version_date"] == d["version_date"] and a["source_file"] == d["file"]
         assert a["pages"][0] <= a["pages"][1]
-        assert "�" not in a["text"]
-        assert "\xa0" not in a["text"]
+        assert a["label"], a["id"]
+        assert "�" not in a["text"] and "�" not in a["title"], a["id"]
+        assert " " not in a["text"]
+        # no leftover page furniture / PDF encoding artefacts
+        for line in a["text"].split(chr(10)):
+            assert line.strip() not in ("Piano dei Servizi", "Documento di Piano",
+                                        "Norme di attuazione"), a["id"]
+        assert "`" not in a["text"] or a["doc"] != "PTC", a["id"]
+        if a["doc"] == "DPA1":
+            assert a["normative"] is False
+        else:
+            assert a["normative"] is True
+    assert all(a["version_date"] == "2025-12-04" for a in _by_doc(articles, "PR"))
+    assert "without later amendments" in docs["PTC"]["version_note"].replace("NOT included", "without later amendments")         or "NOT included" in docs["PTC"]["version_note"]
+
+
+def test_pr_2025_text_is_the_source(articles):
+    a45 = {a["id"]: a for a in articles}["PR-art-45"]
+    assert "torrente Seveso" in a45["text"] and "iiibis" in a45["text"]   # new in the 2025 text
+    assert "PR_Norme_Attuazione_20251204.pdf" == a45["source_file"]
 
 
 def _article_refs(node, key_suffix="articles"):
-    """Collect every int under a key that ends with `articles` (recursively)."""
+    """Collect every reference under a key that ends with `articles` (recursively)."""
     found = []
     if isinstance(node, dict):
         for k, v in node.items():
@@ -127,13 +167,41 @@ def _article_refs(node, key_suffix="articles"):
     return found
 
 
-@pytest.mark.parametrize("name", ["zone_map.yaml", "constraint_map.yaml"])
+def _as_id(ref):
+    return f"PR-art-{ref}" if isinstance(ref, int) else str(ref)
+
+
+@pytest.mark.parametrize("name", ["zone_map", "constraint_map"])
 def test_mapped_articles_exist(articles, name):
+    ids = {a["id"] for a in articles}
+    for ext in ("json", "yaml"):
+        path = ROOT / "data" / f"{name}.{ext}"
+        if ext == "yaml":
+            yaml = pytest.importorskip("yaml")
+            data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        else:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        refs = _article_refs(data)
+        assert refs, f"no article references found in {path.name}"
+        missing = sorted({_as_id(r) for r in refs if _as_id(r) not in ids})
+        assert not missing, f"{path.name} cites ids not in articles.json: {missing}"
+        assert all(isinstance(r, str) and "-" in r for r in refs)    # ids, not bare numbers
+
+
+def test_map_json_matches_yaml():
     yaml = pytest.importorskip("yaml")
-    data = yaml.safe_load((ROOT / "data" / name).read_text(encoding="utf-8"))
-    refs = _article_refs(data)
-    assert refs, f"no article references found in {name}"
-    numbers = {a["number"] for a in articles}
-    missing = sorted({r for r in refs if r not in numbers})
-    assert not missing, f"{name} cites articles not in articles.json: {missing}"
-    assert all(isinstance(r, int) for r in refs)
+    for name in ("zone_map", "constraint_map"):
+        y = yaml.safe_load((ROOT / "data" / f"{name}.yaml").read_text(encoding="utf-8"))
+        j = json.loads((ROOT / "data" / f"{name}.json").read_text(encoding="utf-8"))
+        assert y == j, f"{name}.json is stale: run scripts/build_maps.py"
+
+
+def test_explanatory_ids_are_not_normative(articles):
+    by_id = {a["id"]: a for a in articles}
+    zone = json.loads((ROOT / "data" / "zone_map.json").read_text(encoding="utf-8"))
+    for key, entry in zone["layers"].items():
+        for ref in _article_refs(entry, "explanatory_articles"):
+            assert by_id[ref]["normative"] is False, (key, ref)
+        for role in ("articles", "general_articles"):
+            for ref in entry.get(role, []):
+                assert by_id[_as_id(ref)]["normative"] is True, (key, ref)

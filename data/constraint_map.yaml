@@ -1,19 +1,21 @@
-# Constraint layer -> PR articles that mention/apply, the higher-level rule (EXTERNAL, not in
-# this NTA) and a plain one-line note. Built by reading data/articles.json
-# (Piano delle Regole - Norme di attuazione, PGT Milano 2030, text of 19/12/2022).
+# Constraint layer -> PGT articles that mention/apply, the higher-level rule (EXTERNAL, not in
+# the PGT norms) and a plain one-line note. Built by reading data/articles.json (PR Piano delle
+# Regole text of 04/12/2025, CG geological norms of 2020; see data/documents.json).
 #
-#   articles       PR articles that genuinely refer to the constraint (verified in the text)
+#   articles       ids ("PR-art-N", "CG-art-N", ...) that genuinely refer to the constraint
+#                  (verified in the text); a bare number is read as PR-art-N
 #   external_rule  rule that lives OUTSIDE this document; kept apart on purpose, never cite
 #                  it as an NTA article
 #   verify: true   uncertain, needs human confirmation
 
-source: "Piano delle Regole – Norme di attuazione, PGT Milano 2030"
-version_date: "2022-12-19"
+sources:
+  - {doc: PR, title: "Piano delle Regole – Norme di attuazione", version_date: "2025-12-04"}
+  - {doc: CG, title: "Componente geologica – norme geologiche di piano", version_date: "2020-02-05"}
 
 constraints:
   natura2000_zsc_sic:
     service: "Rete_Natura_2000 layer 0 (COD_SITO)"
-    articles: [3, 36]
+    articles: [PR-art-3, PR-art-36]
     why: >-
       No article of this NTA mentions Natura 2000, ZSC, SIC, ZPS or valutazione di incidenza
       (text searched). Only generic hooks: art. 3 c.1 a. "Rapporti con gli altri strumenti di
@@ -29,7 +31,7 @@ constraints:
 
   natura2000_zps:
     service: "Rete_Natura_2000 layer 1 (COD_ZPS)"
-    articles: [3, 36]
+    articles: [PR-art-3, PR-art-36]
     why: "As for ZSC/SIC: the NTA has no Natura 2000 text; only art. 3 and art. 36 are generic hooks."
     external_rule:
       text: "Valutazione di incidenza: DPR 357/1997 art. 5; Birds Directive 2009/147/EC for ZPS."
@@ -40,17 +42,20 @@ constraints:
 
   pgra_hazard:
     service: "direttiva_alluvioni_2022 layers 17-27 (Codscenar H/M/L, Tritorno)"
-    articles: [43, 44, 45, 46]
+    articles: [PR-art-43, PR-art-44, PR-art-45, PR-art-46, CG-art-43, CG-art-44, CG-art-45, CG-art-46]
     why: >-
       Art. 43 "Classi di fattibilità geologica" says the classes are integrated with the PAI and
       PGRA hazard limits. The NTA names PGRA scenarios P1/P2/P3 (not H/M/L): P3 "frequente;
       tempo di ritorno inferiore o uguale a 10 anni" (art. 45), P2 "poco frequente" (art. 45),
       P1 "rara" (art. 44). P1 -> art. 44 (class II); P2/P3 -> art. 45 (classes IIIa/IIIb, c.3-4)
       and art. 46 (class IVa, outside the built-up area).
+      CG-art-43 to CG-art-46 (geological norms annex, 2020) reproduce the same articles; where
+      they differ the current PR text prevails (the 2025 PR adds torrente Seveso rules in art.
+      43-46).
     hazard_mapping:
-      H: {nta_scenario: P3, articles: [45, 46]}
-      M: {nta_scenario: P2, articles: [44, 45, 46]}
-      L: {nta_scenario: P1, articles: [44]}
+      H: {nta_scenario: P3, articles: [PR-art-45, PR-art-46, CG-art-45, CG-art-46]}
+      M: {nta_scenario: P2, articles: [PR-art-44, PR-art-45, PR-art-46, CG-art-44, CG-art-45, CG-art-46]}
+      L: {nta_scenario: P1, articles: [PR-art-44, CG-art-44]}
     hazard_mapping_note: >-
       H/M/L = P3/P2/P1 is the standard PGRA convention and matches the return periods in art.
       45 and the Lambro features (Tritorno 10, 200, 500), but the NTA itself never writes H/M/L.
@@ -65,7 +70,7 @@ constraints:
 
   pgra_risk:
     service: "direttiva_alluvioni_2022 layers 12-15 (Ris R1-R4)"
-    articles: [43, 45, 46, 48]
+    articles: [PR-art-43, PR-art-45, PR-art-46, PR-art-48]
     why: >-
       The NTA does not use the R1-R4 risk classes (text searched). It addresses flood risk
       through the hazard-based classes (art. 45 "Classe III", art. 46 "Classe IV") and art. 48
@@ -79,15 +84,15 @@ constraints:
 
   geologia:
     service: "tav_previsioni_b layer 3 (CLASSE)"
-    articles: [42, 43, 44, 45, 46, 47, 48]
+    articles: [PR-art-42, PR-art-43, PR-art-44, PR-art-45, PR-art-46, PR-art-47, PR-art-48]
     why: >-
       Titolo IV Capo V "Componente geologica, idrogeologica e sismica": art. 42, 43 "Classi di
       fattibilità geologica", 44 "Classe II", 45 "Classe III", 46 "Classe IV", 47 "Pericolosità
       sismica e microzonazione", 48 "Documento semplificato del rischio idraulico".
     classes:
-      II: {articles: [44], note: "Modest limitations (art. 44)."}
-      III: {articles: [45], note: "Considerable limitations, sub-classes IIIa-IIIe (art. 45)."}
-      IV: {articles: [46], note: "Serious limitations, sub-classes IVa-IVc; new building generally not allowed (art. 46 c.1)."}
+      II: {articles: [PR-art-44], note: "Modest limitations (art. 44)."}
+      III: {articles: [PR-art-45], note: "Considerable limitations, sub-classes IIIa-IIIe (art. 45)."}
+      IV: {articles: [PR-art-46], note: "Serious limitations, sub-classes IVa-IVc; new building generally not allowed (art. 46 c.1)."}
     external_rule:
       text: "LR 12/2005 art. 57 (componente geologica del PGT); the NTA itself cites LR 12/2005 art. 8 c.1 c. and art. 10 c.1 d. in art. 42."
       external: true

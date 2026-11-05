@@ -7,12 +7,14 @@
 from . import llm, prompts, retrieval, services
 
 ROLE_NAMES = {"articles": "governing", "general_articles": "general",
-              "candidate_articles": "candidate", "bm25": "search"}
-ROLE_ORDER = ("governing", "general", "candidate", "search")
+              "explanatory_articles": "explanatory", "candidate_articles": "candidate",
+              "bm25": "search"}
+ROLE_ORDER = ("governing", "general", "explanatory", "candidate", "search")
 
 
 def article_rows(ids, provenance, by_id):
-    """Rows for display: id, number, title, capo, text, roles (governing/general/...)."""
+    """Rows for display: id, document, label ("art. 11"), cite ("Piano dei Servizi \u2013 art. 11"),
+    number, title, capo, text, normative, roles (governing/general/...)."""
     rows = []
     for aid in ids:
         a = by_id.get(aid)
@@ -20,8 +22,11 @@ def article_rows(ids, provenance, by_id):
             continue
         roles = {ROLE_NAMES.get(x.get("role"), x.get("role")) for x in provenance.get(aid, [])}
         roles = [r for r in ROLE_ORDER if r in roles]
-        rows.append({"id": aid, "number": a.get("number"), "title": a.get("title", ""),
-                     "capo": a.get("capo", ""), "text": a.get("text", ""), "roles": roles})
+        rows.append({"id": aid, "doc": a.get("doc"), "doc_name": a.get("doc_name"),
+                     "label": a.get("label"), "cite": retrieval.cite_label(a),
+                     "number": a.get("number"), "title": a.get("title", ""),
+                     "capo": a.get("capo", ""), "text": a.get("text", ""),
+                     "normative": a.get("normative", True), "roles": roles})
     return rows
 
 
@@ -36,6 +41,7 @@ def query_point(lat, lon, fetch=None, data_dir=None):
         "point": raw["point"], "raw": raw, "findings": findings, "errors": errors,
         "layers_total": total, "all_failed": bool(total) and len(errors) == total,
         "articles": article_rows(ret["ids"], ret["provenance"], retrieval.articles_by_id(data_dir)),
+        "sources": retrieval.sources_used(ret["ids"], data_dir),
     }
 
 
@@ -63,6 +69,7 @@ def ask(question, point_result, client, k=5, data_dir=None):
     ans["keywords"] = keywords
     ans["warnings"] = warnings
     ans["articles"] = article_rows(ret["ids"], ret["provenance"], by_id)
+    ans["sources"] = retrieval.sources_used(prompt["article_ids"], data_dir)
     return ans
 
 

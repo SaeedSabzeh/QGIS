@@ -1,8 +1,10 @@
-"""Zone-table lookup plus a small BM25 search over NTA articles (Phase 2).
+"""Zone-table lookup plus a small BM25 search over the PGT norms (Phase 2).
 
 Standard library only. `lookup` turns the layer hits from `services.query_all` into findings using
 data/zone_map.json and data/constraint_map.json (generated from the YAML by scripts/build_maps.py).
-`search` is BM25 over data/articles.json. `retrieve` combines both: mapped articles first.
+`search` is BM25 over data/articles.json, which holds several documents (data/documents.json):
+ids look like "PR-art-45", "PS-art-11", "CG-art-45", "DPA1-sec-21". `retrieve` combines both:
+mapped articles first, then search hits from normative documents before explanatory ones.
 """
 
 import json
@@ -13,7 +15,7 @@ from collections import Counter
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
-ID_PREFIX = "PR-art-"
+ID_PREFIX = "PR-art-"      # a bare article number means the Piano delle Regole
 
 # ---------------------------------------------------------------------------------------------
 # Data loading (cached)
@@ -39,12 +41,60 @@ def load_maps(data_dir=None):
     return _load_json("zone_map.json", data_dir), _load_json("constraint_map.json", data_dir)
 
 
-def article_id(number):
-    return ID_PREFIX + str(int(number))
+def load_documents(data_dir=None):
+    """The document registry (data/documents.json) as {doc code: row}; {} when absent."""
+    try:
+        rows = _load_json("documents.json", data_dir)
+    except (OSError, ValueError):
+        return {}
+    return {r["doc"]: r for r in rows}
+
+
+def article_id(ref):
+    """Normalise an article reference to an id: 45, "45" -> "PR-art-45"; ids such as
+    "PS-art-11" or "DPA1-sec-21" are returned as they are."""
+    if isinstance(ref, int):
+        return ID_PREFIX + str(ref)
+    s = str(ref).strip()
+    if s.isdigit():
+        return ID_PREFIX + str(int(s))
+    return s
 
 
 def articles_by_id(data_dir=None):
     return {a["id"]: a for a in load_articles(data_dir)}
+
+
+def cite_label(a):
+    """"Piano dei Servizi \u2013 art. 11" for an article record (degrades to "art. 11")."""
+    name = a.get("doc_name") or a.get("doc") or ""
+    lab = a.get("label") or ("art. %s" % a.get("number", ""))
+    return ("%s \u2013 %s" % (name, lab)) if name else lab
+
+
+def ref_label(ref, data_dir=None):
+    """Label of the record a reference points to (falls back to the id)."""
+    aid = article_id(ref)
+    a = articles_by_id(data_dir).get(aid)
+    return cite_label(a) if a else aid
+
+
+def sources_used(ids, data_dir=None):
+    """One line naming the documents (with version) behind the given ids, for the disclaimers."""
+    by_id, docs = articles_by_id(data_dir), load_documents(data_dir)
+    seen = []
+    for aid in ids:
+        code = (by_id.get(article_id(aid)) or {}).get("doc")
+        if code and code not in seen:
+            seen.append(code)
+    parts = []
+    for code in seen:
+        d = docs.get(code) or {}
+        v = d.get("version_date")
+        extra = {"PTC": ", without later amendments", "DPA1": ", explanatory"}.get(code, "")
+        name = d.get("name", code)
+        parts.append("%s (%s%s)" % (name, v, extra) if v else name)
+    return "; ".join(parts)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -133,10 +183,15 @@ def _norm_value(v):
     return ROMAN.get(s.upper(), s)
 
 
+def _ids(lst):
+    return [article_id(n) for n in lst or []]
+
+
 def _zone_finding(layer, key, entry, attrs):
-    articles = list(entry.get("articles", []))
-    general = list(entry.get("general_articles", []))
-    candidates = list(entry.get("candidate_articles", []))
+    articles = _ids(entry.get("articles"))
+    general = _ids(entry.get("general_articles"))
+    explanatory = _ids(entry.get("explanatory_articles"))
+    candidates = _ids(entry.get("candidate_articles"))
     why = entry.get("why", "")
     note = entry.get("note", "")
     verify = bool(entry.get("verify", False))
@@ -149,21 +204,25 @@ def _zone_finding(layer, key, entry, attrs):
         if not sub:
             continue
         matched[field] = _norm_value(raw)
-        articles = _union(articles, sub.get("articles"))
-        general = _union(general, sub.get("general_articles"))
-        candidates = _union(candidates, sub.get("candidate_articles"))
+        articles = _union(articles, _ids(sub.get("articles")))
+        general = _union(general, _ids(sub.get("general_articles")))
+        explanatory = _union(explanatory, _ids(sub.get("explanatory_articles")))
+        candidates = _union(candidates, _ids(sub.get("candidate_articles")))
         if sub.get("why"):
             why = (why + " " + sub["why"]).strip()
         if sub.get("note"):
             note = (note + " " + sub["note"]).strip()
         verify = verify or bool(sub.get("verify", False))
     general = [n for n in general if n not in articles]
-    candidates = [n for n in candidates if n not in articles and n not in general]
+    explanatory = [n for n in explanatory if n not in articles and n not in general]
+    candidates = [n for n in candidates
+                  if n not in articles and n not in general and n not in explanatory]
     return {
         "layer": layer, "category": key, "source": "zone_map",
         "label": entry.get("description", key),
         "values": _key_values(key, attrs), "matched_values": matched,
-        "articles": articles, "general_articles": general, "candidate_articles": candidates,
+        "articles": articles, "general_articles": general, "explanatory_articles": explanatory,
+        "candidate_articles": candidates,
         "why": why, "note": note, "verify": verify, "external_rule": entry.get("external_rule"),
     }
 
@@ -177,7 +236,7 @@ CONSTRAINT_LABELS = {
 
 
 def _constraint_finding(layer, key, entry, attrs):
-    articles = list(entry.get("articles", []))
+    articles = _ids(entry.get("articles"))
     why = entry.get("why", "")
     note = entry.get("note", "")
     general = []
@@ -194,13 +253,15 @@ def _constraint_finding(layer, key, entry, attrs):
             hz = mapping[scen]
             matched["Codscenar"] = scen
             values["nta_scenario"] = hz.get("nta_scenario")
-            general = [n for n in articles if n not in hz.get("articles", [])]
-            articles = list(hz.get("articles", []))
+            hz_ids = _ids(hz.get("articles"))
+            general = [n for n in articles if n not in hz_ids]
+            articles = hz_ids
             note = (note + " " + entry.get("hazard_mapping_note", "")).strip()
     return {
         "layer": layer, "category": key, "source": "constraint_map",
         "label": CONSTRAINT_LABELS.get(key, layer), "values": values, "matched_values": matched,
-        "articles": articles, "general_articles": general, "candidate_articles": [],
+        "articles": articles, "general_articles": general, "explanatory_articles": [],
+        "candidate_articles": [],
         "why": why, "note": note, "verify": bool(entry.get("verify", False)),
         "external_rule": entry.get("external_rule"),
     }
@@ -215,7 +276,8 @@ def _apsfr_finding(layer, attrs):
         "layer": layer, "category": "pgra_apsfr", "source": "constraint_map",
         "label": "Area a potenziale rischio significativo di alluvione (APSFR)",
         "values": vals, "matched_values": {}, "articles": [], "general_articles": [],
-        "candidate_articles": [], "why": "", "verify": False, "external_rule": None,
+        "explanatory_articles": [], "candidate_articles": [], "why": "", "verify": False,
+        "external_rule": None,
         "note": "Context only: see the PGRA hazard and risk findings for the rules.",
     }
 
@@ -261,8 +323,9 @@ def lookup(query_result, data_dir=None):
     return findings
 
 
-# Role order: directly governing articles first, then general, then candidates.
-ROLES = ("articles", "general_articles", "candidate_articles")
+# Role order: directly governing articles first, then general, explanatory (non-normative), then
+# candidates.
+ROLES = ("articles", "general_articles", "explanatory_articles", "candidate_articles")
 
 
 def article_provenance(findings):
@@ -356,12 +419,15 @@ class BM25:
 
 def article_search_text(a):
     # the title counts three times: a hit in the title is a strong signal
-    return " ".join([a.get("title", "")] * 3 + [a.get("capo", ""), a.get("text", "")])
+    return " ".join([a.get("title") or ""] * 3 + [a.get("capo") or "", a.get("text") or ""])
 
 
 def build_index(articles=None, data_dir=None):
     articles = articles if articles is not None else load_articles(data_dir)
-    return BM25([(a["id"], article_search_text(a)) for a in articles])
+    # records that merely reproduce another document (CG = PR art. 42-51) are not searched:
+    # they would crowd the real article out of the hits. They stay citable when mapped.
+    return BM25([(a["id"], article_search_text(a)) for a in articles
+                 if not a.get("duplicate_of")])
 
 
 _index_cache = {}
@@ -381,8 +447,10 @@ def retrieve(query_result, question=None, k=5, index=None, data_dir=None, findin
     """Mapped articles first, then up to `k` BM25 extras from `question` (no duplicates).
 
     The question should already be Italian keywords (see prompts.keywords_prompt). `k` bounds
-    only the extras: every mapped article is kept. Returns a dict: findings, mapped, extras, ids
-    (ordered), provenance ({id: [...]}; extras are tagged role "bm25" with the score).
+    only the extras: every mapped article is kept. Extras come from all documents; hits of
+    normative documents rank before those of explanatory ones (score order inside each group).
+    Returns a dict: findings, mapped, extras, ids (ordered), provenance ({id: [...]}; extras
+    are tagged role "bm25" with the score).
     """
     if findings is None:
         findings = lookup(query_result, data_dir)
@@ -390,7 +458,10 @@ def retrieve(query_result, question=None, k=5, index=None, data_dir=None, findin
     mapped = list(prov)
     extras = []
     if question and question.strip():
-        hits = search(question, k=k + len(mapped), index=index, data_dir=data_dir)
+        hits = search(question, k=4 * k + len(mapped), index=index, data_dir=data_dir)
+        by_id = articles_by_id(data_dir)
+        # stable partition: normative first (the sort is stable, the hits are score-ordered)
+        hits = sorted(hits, key=lambda h: not by_id.get(h[0], {}).get("normative", True))
         for aid, score in hits:
             if aid in prov or len(extras) >= k:
                 continue

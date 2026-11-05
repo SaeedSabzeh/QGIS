@@ -1,4 +1,9 @@
-"""Phase 1: split the NTA PDF at each `art. N` heading and write data/articles.json.
+"""Split an NTA PDF at each `art. N` heading (the Piano delle Regole by default).
+
+The whole multi-document corpus (data/articles.json + data/documents.json) is built by
+scripts/build_corpus.py, which reuses `split_articles` from here. Running this script writes the
+PR articles only (to the given output file; default data/articles.json would drop the other
+documents, so prefer build_corpus.py).
 
 Usage: python scripts/parse_nta.py [path/to/NTA.pdf] [output.json]
 
@@ -13,11 +18,11 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_PDF = ROOT / "data" / "raw" / "PR_Norme_Attuazione_20230308.pdf"
-DEFAULT_OUT = ROOT / "data" / "articles.json"
+DEFAULT_PDF = ROOT / "data" / "raw" / "PR_Norme_Attuazione_20251204.pdf"
+DEFAULT_OUT = ROOT / "data" / "articles_pr_only.json"
 
 SOURCE = "Piano delle Regole – Norme di attuazione, PGT Milano 2030"
-VERSION_DATE = "2022-12-19"  # DCC 100 of 19/12/2022 (modified text)
+VERSION_DATE = "2025-12-04"  # DCC 93 of 04/12/2025 (in force, BURL n.5 of 28/01/2026)
 
 FURNITURE = {"norme di attuazione", "piano delle regole"}
 FURNITURE_WINDOW = 4  # furniture sits in the first lines of each page
@@ -33,40 +38,51 @@ def _clean(s):
     return s.replace("\xa0", " ").replace("\xad", "").strip()
 
 
-def _page_lines(text):
-    """Yield (page_no, line) with page furniture removed."""
-    for pno, page in enumerate(text.split("\f"), start=1):
-        lines = page.split("\n")
+def _page_lines(text, furniture=FURNITURE, furniture_re=None, drop_re=None):
+    """Yield (page_no, line) with page furniture removed.
+
+    `furniture`: lowercase lines dropped when they sit in the first lines of a page (page
+    numbers too). `furniture_re`: same, but a compiled regex. `drop_re`: a regex for lines
+    dropped wherever they are on the page (running headers, separators, lone page numbers).
+    """
+    for pno, page in enumerate(text.split(chr(12)), start=1):
         head = 0  # count of non-empty lines seen at page top
-        for line in lines:
+        for line in page.split(chr(10)):
             c = _clean(line)
             if c and head < FURNITURE_WINDOW:
                 head += 1
-                if c.lower() in FURNITURE or c.isdigit():
+                if c.lower() in furniture or c.isdigit() or (furniture_re and furniture_re.match(c)):
                     continue
+            if c and drop_re and drop_re.match(c):
+                continue
             yield pno, c
 
 
-def _chain(lines, start):
-    """Follow sequential `art. N` headings from lines[start] (an art. 1).
+def _chain(lines, start, art_re=ART_RE, first=1):
+    """Follow sequential `art. N` headings from lines[start] (the first article).
     Returns the list of (line_index, number)."""
-    out = [(start, 1)]
-    expect = 2
+    out = [(start, first)]
+    expect = first + 1
     for i in range(start + 1, len(lines)):
-        m = ART_RE.match(lines[i][1])
+        m = art_re.match(lines[i][1])
         if m and int(m.group(1)) == expect:
             out.append((i, expect))
             expect += 1
     return out
 
 
-def _join(parts):
-    """Join wrapped lines of one paragraph; keep compound hyphens, drop soft ones."""
+def _join(parts, dehyphen=False):
+    """Join wrapped lines of one paragraph; keep compound hyphens, drop soft ones.
+
+    With `dehyphen` (texts typeset with syllable hyphenation: "agrico-" + "lo") a hyphen at
+    the end of a line before a lowercase continuation is dropped."""
     out = ""
     for p in parts:
         if not out:
             out = p
         elif out.endswith("¬"):  # soft hyphen artefact of the PDF
+            out = out[:-1] + p
+        elif dehyphen and out.endswith("-") and out[-2:-1].isalpha() and p[:1].islower():
             out = out[:-1] + p
         elif out.endswith("-") and out[-2:-1].isalpha() and p[:1].isalpha():
             out += p  # "plano-" + "volumetriche" -> "plano-volumetriche"
@@ -75,18 +91,26 @@ def _join(parts):
     return out.replace("¬", "")
 
 
-def _paragraphs(lines):
+def _paragraphs(lines, item_re=ITEM_RE, dehyphen=False, prose=False):
     """lines: list of cleaned strings ('' = blank). Returns text with each
-    numbered item / paragraph on its own line."""
+    numbered item / paragraph on its own line. With `prose`, a line that follows a
+    sentence-ending line clearly shorter than the column also starts a paragraph."""
+    full = 0
+    if prose:
+        lens = sorted(len(x) for x in lines if x)
+        full = lens[int(len(lens) * 0.9)] if lens else 0
     paras, cur = [], []
     for ln in lines:
         if not ln:
             if cur:
                 paras.append(cur)
                 cur = []
-        elif ITEM_RE.match(ln):
+        elif item_re.match(ln):
             if cur:
                 paras.append(cur)
+            cur = [ln]
+        elif prose and cur and cur[-1][-1:] in ".:;!?" and len(cur[-1]) < 0.8 * full:
+            paras.append(cur)
             cur = [ln]
         else:
             cur.append(ln)
@@ -95,42 +119,76 @@ def _paragraphs(lines):
     # a bare "2." line followed by its text stays together on one line
     out = []
     for p in paras:
-        if len(p) > 1 and ITEM_RE.match(p[0]) and re.fullmatch(r"(\d+\.|[a-z]{1,2}\.)", p[0]):
+        if len(p) > 1 and item_re.match(p[0]) and re.fullmatch(r"(\d+\.|[a-z]{1,2}\.)", p[0]):
             p = [p[0] + " " + p[1]] + p[2:]
-        out.append(_join(p))
+        out.append(_join(p, dehyphen))
     return "\n".join(out)
 
 
-def split_articles(text):
+_CONT_END = re.compile(r"(?:^|\s)(?:a|ad|di|del|dei|della|delle|dello|degli|e|ed|il|la|le|lo|in|nel|nella|"
+                       r"nei|per|con|da|dal|dalla|al|alla|alle|agli|ai|o|su|sul|sulla)$|[-,]$", re.I)
+
+
+def split_articles(text, prefix="PR", art_re=ART_RE, first=1, furniture=FURNITURE,
+                   furniture_re=None, drop_re=None, item_re=ITEM_RE, dehyphen=False,
+                   prose=False, stop_re=None, block_titles=False):
     """Split NTA text into a list of article dicts (id, number, title, titolo,
-    capo, text, pages). Table-of-contents entries are skipped."""
-    lines = list(_page_lines(text))
+    capo, text, pages). Table-of-contents entries are skipped.
+
+    Defaults reproduce the Piano delle Regole ("art. N Title" on one line, numbering from 1).
+    `prefix` gives the ids ("<prefix>-art-N"); `first` is the number of the first article;
+    `stop_re` ends the last article at the first matching line (appendix, catalogue);
+    `block_titles` is for headings "Art. N" alone on a line with the title on the following
+    lines (up to the first numbered paragraph); an inline title that ends on a connective
+    ("... dei") continues on the next line."""
+    lines = list(_page_lines(text, furniture, furniture_re, drop_re))
     cands = [i for i, (_, l) in enumerate(lines)
-             if (m := ART_RE.match(l)) and int(m.group(1)) == 1]
+             if (m := art_re.match(l)) and int(m.group(1)) == first]
     if not cands:
         return []
-    # TOC and body both contain an `art. 1`; the body chain ends last.
-    chain = max((_chain(lines, c) for c in cands), key=lambda ch: ch[-1][0])
-    first = chain[0][0]
+    # TOC and body both contain the first article; the body chain ends last.
+    chain = max((_chain(lines, c, art_re, first) for c in cands), key=lambda ch: ch[-1][0])
+    start = chain[0][0]
+    stop_at = len(lines)
+    if stop_re:
+        for j in range(chain[-1][0] + 1, len(lines)):
+            if stop_re.match(lines[j][1]):
+                stop_at = j
+                break
 
-    # context headings directly above art. 1
-    start = first
-    for j in range(first - 1, max(first - 8, -1), -1):
+    # context headings directly above the first article
+    for j in range(start - 1, max(start - 8, -1), -1):
         if TITOLO_RE.match(lines[j][1]):
             start = j
             break
     head_idx = {i: n for i, n in chain}
     titolo = capo = None
     arts, cur = [], None
+    in_title = False
     i = start
-    while i < len(lines):
+    while i < stop_at:
         pno, l = lines[i]
         if i in head_idx:
             n = head_idx[i]
-            m = ART_RE.match(l)
-            cur = {"number": n, "title": m.group(2).strip(), "titolo": titolo,
+            m = art_re.match(l)
+            title = (m.group(2) if m.lastindex and m.lastindex >= 2 else "").strip()
+            cur = {"number": n, "title": title, "titolo": titolo,
                    "capo": capo, "pages": [pno, pno], "lines": []}
             arts.append(cur)
+            in_title = block_titles
+            if not block_titles:
+                while (title and _CONT_END.search(title) and i + 1 < stop_at and lines[i + 1][1]
+                       and (i + 1) not in head_idx):
+                    i += 1
+                    title += " " + lines[i][1]
+                cur["title"] = title
+        elif in_title and cur is not None:
+            if item_re.match(l) or not l:
+                in_title = False
+                if l:
+                    cur["lines"].append(l)
+            else:
+                cur["title"] = (cur["title"] + " " + l).strip()
         elif (m := TITOLO_RE.match(l)):
             titolo = f"TITOLO {m.group(2)} – {m.group(3).strip()}"
             capo = None
@@ -151,9 +209,9 @@ def split_articles(text):
 
     result = []
     for a in arts:
-        text_ = _paragraphs(a["lines"])
+        text_ = _paragraphs(a["lines"], item_re, dehyphen, prose)
         result.append({
-            "id": f"PR-art-{a['number']}", "number": a["number"], "title": a["title"],
+            "id": f"{prefix}-art-{a['number']}", "number": a["number"], "title": a["title"],
             "titolo": a["titolo"], "capo": a["capo"], "text": text_, "pages": a["pages"],
         })
     return result
