@@ -21,6 +21,10 @@ LIMITATION_EN = (
     "v1 limitation: the result refers to the clicked POINT, not to the whole parcel. A parcel "
     "crossing two zones may be misreported."
 )
+LIMITATION_IT = (
+    "Limite v1: il risultato si riferisce al PUNTO cliccato, non all'intero lotto. Un lotto "
+    "a cavallo di due zone puo essere riportato in modo errato."
+)
 
 SYSTEM_RULES = """\
 You help people understand which planning rules of the Comune di Milano apply at a map point.
