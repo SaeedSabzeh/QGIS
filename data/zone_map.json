@@ -17,7 +17,7 @@
     },
     {
       "doc": "PTC",
-      "title": "Parco Agricolo Sud Milano – PTC, NTA (DGR 7/818 of 2000, without later amendments)",
+      "title": "Parco Agricolo Sud Milano – PTC, NTA (DGR 7/818 of 2000; the later amendments of 2007 and 2009 are local, outside Milan)",
       "version_date": "2000-08-03"
     },
     {
@@ -115,6 +115,12 @@
       "why": "No article of the Piano delle Regole, Piano dei Servizi, Documento di Piano norms, PTC or geological norms disciplines the \"ambiti di trasformazione\" themselves (text searched). PR art. 1 c.3 \"Ambito di applicazione\" excludes areas under other provisions; PR art. 3 \"Rapporti con gli altri strumenti di pianificazione\" and PR art. 35 \"Definizione e disciplina\" (parks: the Parco Agricolo Sud Milano PTC prevails), like DP art. 1 c.5 b. \"Caratteri ed elaborati costitutivi del Documento di Piano\", matter where the area is inside a park; DP art. 2 \"Perequazione urbanistica – principi generali\" sets the perequation principles for the transformations regulated by the Documento di Piano; PR art. 52 \"Disciplina degli ambiti interessati da provvedimenti approvati e adottati\" and art. 53 \"Norme finali\" are the transitional rules.",
       "note": "The rules of the single trasformazione areas are in the Documento di Piano (schede degli ambiti di trasformazione, in the Relazione generale, which is not in the corpus). The listed articles are NOT the governing discipline of the area; only the two PCU values below have a verified governing text, in the park's PTC.",
       "verify": true,
+      "inside_parco_sud": {
+        "general_articles": [
+          "PTC-art-1"
+        ],
+        "note": "The point is inside the Parco Agricolo Sud Milano: PTC art. 1 c.5 makes the PTC provisions immediately binding and prevailing over conflicting municipal ones."
+      },
       "by_value": {
         "AMB_TRAS": {
           "26": {
@@ -123,7 +129,7 @@
               "PTC-all-A"
             ],
             "why": "NOME_AMB \"L'Idroscalo (PCU4)\": PCU = Piano di Cintura Urbana. PTC art. 26 \"Territori agricoli e verde di cintura urbana – ambito dei piani di cintura urbana\" governs the comparti perimetered for the piani di cintura urbana; PTC Allegato A \"Comparto 4: Parco est «Idroscalo»\" gives the orientamenti e indirizzi for it.",
-            "note": "The match PCU4 = PTC comparto 4 rests on the name (\"Idroscalo\") and the number; the transformation area is not described as such in the PTC. PTC text of 2000 without the later amendments. Inside the park the PTC prevails (PR art. 35 c.1, PS art. 12).",
+            "note": "The match PCU4 = PTC comparto 4 rests on the name (\"Idroscalo\") and the number; the transformation area is not described as such in the PTC. PTC text of 2000 (later amendments are outside Milan). Inside the park the PTC prevails (PR art. 35 c.1, PS art. 12).",
             "verify": true
           },
           "29": {
@@ -132,7 +138,7 @@
               "PTC-all-A"
             ],
             "why": "NOME_AMB \"Le Abbazie (PCU3)\": PCU = Piano di Cintura Urbana. PTC art. 26 governs the comparti of the piani di cintura urbana; PTC Allegato A \"Comparto 3: Parco delle Abbazie «L'agricoltura in città»\" (sub-comparti Selvanesco, Chiaravalle - Macconago) gives the orientamenti e indirizzi for it.",
-            "note": "The match PCU3 = PTC comparto 3 rests on the name (\"Abbazie\") and the number. PTC text of 2000 without the later amendments. Inside the park the PTC prevails (PR art. 35 c.1, PS art. 12).",
+            "note": "The match PCU3 = PTC comparto 3 rests on the name (\"Abbazie\") and the number. PTC text of 2000 (later amendments are outside Milan). Inside the park the PTC prevails (PR art. 35 c.1, PS art. 12).",
             "verify": true
           }
         }
@@ -213,7 +219,15 @@
         "PTC-art-26"
       ],
       "why": "Titolo II Capo VII \"Aree destinate all'agricoltura\": art. 24 \"Individuazione\", art. 25 \"Disciplina\". Art. 6 c.1 excludes agricultural areas from the IT unico; art. 34 \"Definizione e disciplina\" c.3 covers \"Ambiti agricoli di rilevanza paesaggistica\"; art. 35 applies inside Parco Agricolo Sud / Parco Nord. Inside the Parco Agricolo Sud Milano the PTC prevails (PR art. 35 c.1; PS art. 12; DP art. 1 c.5 b.): PTC art. 25 \"Territori agricoli di cintura metropolitana\" (c.1: destined to agricultural functions) and art. 15 \"Norme generali di tutela dell'attività agricola\" would then govern; PTC art. 26 \"Territori agricoli e verde di cintura urbana\" applies in the cintura urbana comparti.",
-      "note": "The agricole layer does not say whether the point is inside the Parco Agricolo Sud Milano, so the PTC articles are candidates: use them only where the park perimeter applies. Art. 25 refers to LR 12/2005 title III part II and the PTCP for the detailed agricultural rules. The PTC text is the one of DGR 7/818 of 2000, without the later NTA amendments."
+      "note": "The agricole layer does not say whether the point is inside the Parco Agricolo Sud Milano, so the PTC articles are candidates: use them only where the park perimeter applies. Art. 25 refers to LR 12/2005 title III part II and the PTCP for the detailed agricultural rules. The PTC text is the one of DGR 7/818 of 2000; the later NTA amendments (2007, 2009) are local changes outside Milan.",
+      "inside_parco_sud": {
+        "verify": true,
+        "general_articles": [
+          "PTC-art-15",
+          "PTC-art-1"
+        ],
+        "why": "The point is inside the Parco Agricolo Sud Milano (parchi_regionali layer): the PTC prevails (PR art. 35 c.1). PTC art. 15 \"Norme generali di tutela dell'attivita agricola\" applies park-wide. Which territory applies (art. 25 cintura metropolitana, art. 26 cintura urbana, ...) depends on the PTC zoning map, so art. 25 and 26 stay candidates."
+      }
     },
     "paesaggio": {
       "layer_id": 21,
@@ -237,7 +251,14 @@
         "PTC-art-34"
       ],
       "why": "Art. 2 c.2 e. says the Piano delle Regole \"individua e disciplina le aree di valore paesaggistico-ambientale ed ecologico\". The only article with landscape-area rules is art. 34 \"Definizione e disciplina\" (aree di valorizzazione ambientale, Allegato 1). Related: art. 24 \"Individuazione\" (agricultural areas with environmental function), art. 35 (parks), art. 36 \"Beni ed aree soggette a tutele sovraordinate e a piani di settori\". Inside the Parco Agricolo Sud Milano (PTC prevails, PR art. 35 c.1) the PTC has PTC art. 16 \"Norme generali di tutela ambientale-paesaggistica\" and PTC art. 34 \"Zona di tutela e valorizzazione paesistica\" (c.1: territori agricoli del parco not subject to a piano di cintura urbana).",
-      "note": "The layer's TIPO_AMB codes (e.g. 502 traditional agrarian landscape) are not listed in the NTA; the match to art. 34 and its Allegato 1 is by subject, not by code. The PTC articles are candidates: they apply only inside the park perimeter, which this layer does not give.",
+      "note": "The layer's TIPO_AMB codes (e.g. 502 traditional agrarian landscape) are not listed in the NTA; the match to art. 34 and its Allegato 1 is by subject, not by code. The PTC articles are candidates: they apply only inside the park perimeter, which this layer does not give (the parchi_regionali layer does).",
+      "inside_parco_sud": {
+        "general_articles": [
+          "PTC-art-16",
+          "PTC-art-1"
+        ],
+        "why": "The point is inside the Parco Agricolo Sud Milano: the PTC prevails (PR art. 35 c.1) and PTC art. 16 \"Norme generali di tutela ambientale-paesaggistica\" applies park-wide. PTC art. 34 \"Zona di tutela e valorizzazione paesistica\" applies only in that PTC zone, which is read on the PTC maps, so it stays a candidate."
+      },
       "verify": true
     },
     "sensibilita": {

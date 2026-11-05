@@ -62,7 +62,7 @@ def test_query_all_service_error_payload_is_an_error():
 def test_query_all_uses_lon_lat_order_and_registry():
     seen = []
     services.query_all(45.5, 9.2, fetch=lambda u, t: seen.append(u) or {"features": []})
-    assert len(seen) == len(services.SERVICES) == 27
+    assert len(seen) == len(services.SERVICES) == 28
     assert all("geometry=9.2%2C45.5" in u for u in seen)
 
 
@@ -162,7 +162,7 @@ def test_cite_label_and_sources_line():
     assert retrieval.ref_label(8) == "Piano delle Regole \u2013 art. 8"
     line = retrieval.sources_used(["PS-art-11", "PTC-art-26", "DPA1-sec-21", "PS-art-7"])
     assert line.count("Piano dei Servizi") == 1 and "2022-12-19" in line
-    assert "without later amendments" in line and "explanatory" in line
+    assert "outside Milan" in line and "explanatory" in line
 
 
 def test_provenance_dedups_and_orders():
@@ -711,3 +711,79 @@ def test_ask_no_key_shows_document_names_and_sources():
     assert code == 0
     assert "[PS-art-7] Piano dei Servizi \u2013 art. 7 - " in text
     assert "Documents used: Piano dei Servizi (2022-12-19); Piano delle Regole (2025-12-04)" in text
+
+
+# ---- regional parks (parchi_regionali) and the Parco Sud promotion -------------------------
+PASM = {"NOME_PA": "Parco Agricolo Sud Milano", "DTIPO_IDE": "Legge Regionale",
+        "NOME_ENTE": "Provincia di Milano", "DATTUA_PA": "Parco con P.T.C. approvato",
+        "OBJECTID_Area": 1.0}
+
+
+def test_parchi_regionali_registered():
+    url = services.SERVICES["parchi_regionali"]
+    assert url.endswith("/ambiente/AreeProtette/MapServer/9")
+    assert retrieval.LAYER_RULES["parchi_regionali"] == ("constraint", "parco_regionale")
+
+
+def test_park_finding_from_fake_hit():
+    f = by_layer(retrieval.lookup(hit({"parchi_regionali": [PASM]})))["parchi_regionali"]
+    assert f["category"] == "parco_regionale" and f["label"] == "Parco regionale"
+    assert f["articles"] == ["PR-art-35", "PTC-art-1"]
+    assert f["general_articles"] == ["PTC-art-24", "PTC-art-12"]
+    assert f["values"] == {"NOME_PA": "Parco Agricolo Sud Milano",
+                           "NOME_ENTE": "Provincia di Milano",
+                           "DATTUA_PA": "Parco con P.T.C. approvato"}
+    assert f["matched_values"] == {"NOME_PA": "Parco Agricolo Sud Milano"}
+    assert "outside Milan" in f["note"] and f["verify"] is True
+
+
+def test_unknown_park_cites_pr35_only_with_note():
+    f = by_layer(retrieval.lookup(hit({"parchi_regionali": [{"NOME_PA": "Parco del Ticino"}]})))
+    f = f["parchi_regionali"]
+    assert f["articles"] == ["PR-art-35"] and f["general_articles"] == []
+    assert "not in the corpus" in f["note"]
+
+
+def test_in_parco_sud_detection():
+    assert retrieval.in_parco_sud(hit({"parchi_regionali": [PASM]}))
+    assert not retrieval.in_parco_sud(hit({"parchi_regionali": [{"NOME_PA": "Parco Nord"}]}))
+    assert not retrieval.in_parco_sud(hit({"parchi_regionali": []}))
+
+
+AGR = {"COD_AGR": "1"}
+PAES = {"TIPO_AMB": 502}
+
+
+def test_promotion_inside_parco_sud_vs_outside():
+    base = {"pgt_agricole": [AGR], "pgt_paesaggio": [PAES], "pgt_at": [{"AMB_TRAS": "5"}]}
+    out = by_layer(retrieval.lookup(hit(base)))
+    assert out["pgt_agricole"]["candidate_articles"] == ["PTC-art-25", "PTC-art-15", "PTC-art-26"]
+    assert "PTC-art-15" not in out["pgt_agricole"]["general_articles"]
+    assert out["pgt_paesaggio"]["candidate_articles"] == ["PTC-art-16", "PTC-art-34"]
+    assert "PTC-art-1" not in out["pgt_at"]["general_articles"]
+
+    inside = by_layer(retrieval.lookup(hit(dict(base, parchi_regionali=[PASM]))))
+    agr = inside["pgt_agricole"]
+    assert "PTC-art-15" in agr["general_articles"] and "PTC-art-1" in agr["general_articles"]
+    assert agr["candidate_articles"] == ["PTC-art-25", "PTC-art-26"]   # zone-specific: stay
+    assert agr["verify"] is True and "inside the Parco Agricolo Sud Milano" in agr["why"]
+    pae = inside["pgt_paesaggio"]
+    assert "PTC-art-16" in pae["general_articles"] and pae["candidate_articles"] == ["PTC-art-34"]
+    assert "PTC-art-1" in inside["pgt_at"]["general_articles"]
+
+
+def test_other_park_does_not_promote():
+    f = by_layer(retrieval.lookup(hit({"pgt_agricole": [AGR],
+                                       "parchi_regionali": [{"NOME_PA": "Parco Nord"}]})))
+    assert "PTC-art-15" in f["pgt_agricole"]["candidate_articles"]
+
+
+def test_every_promoted_and_park_id_exists():
+    ids = set(retrieval.articles_by_id())
+    zone, cons = retrieval.load_maps()
+    for e in zone["layers"].values():
+        blk = e.get("inside_parco_sud") or {}
+        for role in ("articles", "general_articles", "explanatory_articles"):
+            assert set(retrieval._ids(blk.get(role))) <= ids
+    sub = cons["constraints"]["parco_regionale"]["by_value"]["NOME_PA"]["Parco Agricolo Sud Milano"]
+    assert set(retrieval._ids(sub["articles"] + sub["general_articles"])) <= ids

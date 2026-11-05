@@ -143,7 +143,7 @@ def test_corpus_records_are_well_formed(articles):
         else:
             assert a["normative"] is True
     assert all(a["version_date"] == "2025-12-04" for a in _by_doc(articles, "PR"))
-    assert "without later amendments" in docs["PTC"]["version_note"].replace("NOT included", "without later amendments")         or "NOT included" in docs["PTC"]["version_note"]
+    assert "outside Milan" in docs["PTC"]["version_note"] and "8/4516" in docs["PTC"]["version_note"]
 
 
 def test_pr_2025_text_is_the_source(articles):

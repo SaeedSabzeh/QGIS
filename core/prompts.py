@@ -13,7 +13,7 @@ DISCLAIMER_EN = (
     "Guidance only, not legal advice. Check the official texts and ask a qualified professional "
     "before acting. Sources: Milan PGT 2030 norms (Piano delle Regole, text of 04/12/2025; Piano "
     "dei Servizi; Documento di Piano; geological and seismic annexes) and the PTC of the Parco "
-    "Agricolo Sud Milano (2000 text, without later amendments)."
+    "Agricolo Sud Milano (2000 text; the later amendments are local changes outside Milan)."
 )
 DISCLAIMER_IT = (
     "Solo orientamento, non e un parere legale. Verificare i testi ufficiali e rivolgersi a un "
