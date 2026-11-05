@@ -1,4 +1,200 @@
-# PGT zone code -> NTA article ids. Filled in during Phase 1.
-# Example:
-# "TUC-ARU":
-#   articles: ["Art. 15", "Art. 16"]
+# PGT category (regional layer tav_previsioni_b) -> articles of THIS document that govern it.
+# Built by reading data/articles.json (Piano delle Regole - Norme di attuazione, PGT Milano 2030).
+#
+# Conventions
+#   articles            PR articles that directly govern the category (verified in the text)
+#   general_articles    PR articles that apply on top (general or transitional rules)
+#   candidate_articles  plausible but not confirmed by the NTA text alone (see verify)
+#   why                 short justification quoting the article titles
+#   note                what lives in another PGT document, or limits of the mapping
+#   verify: true        a human should confirm before the plugin states it as fact
+# Every number below must exist in data/articles.json (checked by tests/test_parse_nta.py).
+
+source: "Piano delle Regole – Norme di attuazione, PGT Milano 2030"
+source_file: "PR_Norme_Attuazione_20230308.pdf"
+version_date: "2022-12-19"   # text modified by DCC 100 of 19/12/2022
+layer_service: "tav_previsioni_b (Regione Lombardia, MapServer arcgis1/territorio)"
+
+layers:
+  naf:
+    layer_id: 12
+    field: COD_NUC
+    description: "Nuclei di antica formazione (NAF)"
+    articles: [18, 19]
+    general_articles: [6, 8, 13]
+    why: >-
+      Capo IV "Nuclei di antica formazione": art. 18 "Definizione", art. 19 "Disciplina".
+      NAF are part of the TUC (art. 2 c.2 a.i), so art. 6 "Indice di edificabilità
+      territoriale", art. 8 "Disciplina delle destinazioni d'uso e loro mutamenti" and
+      art. 13 "Attuazione del Piano" (c.3 b iii: NAF interventions need a convenzione) apply too.
+    note: "COD_NUC is a code only; the NTA does not list NAF codes, so any value in this layer maps to art. 18-19."
+
+  tuc:
+    layer_id: 20
+    fields: [AMB_URB, COD_DEST1]
+    description: "Ambiti del tessuto urbano consolidato (TUC)"
+    articles: [6, 8, 13]
+    general_articles: [5, 7, 9, 10, 12, 17]
+    candidate_articles: [18, 19, 20, 21, 22, 23]
+    why: >-
+      Rules for the whole TUC: art. 6 "Indice di edificabilità territoriale", art. 8
+      "Disciplina delle destinazioni d'uso e loro mutamenti", art. 13 "Attuazione del Piano".
+      Art. 5 c.15 defines the "Funzioni urbane" (the COD_DEST1 categories); art. 7
+      "Perequazione e compensazione urbanistica", art. 9 "Edilizia Residenziale Sociale",
+      art. 10 "Sostenibilità ambientale e resilienza urbana", art. 12 "Parcheggi privati",
+      art. 17 "Criteri di densità, accessibilità" complete the general regime.
+      Candidates: NAF art. 18-19, "Ambiti contraddistinti da un Disegno Urbano Riconoscibile"
+      art. 20-21, "Ambiti di Rinnovamento Urbano" art. 22-23.
+    note: >-
+      The AMB_URB value (e.g. 23, card AU_23) is a regional code that the NTA never mentions,
+      so the morphological sub-type (NAF / ADR / ARU) cannot be derived from it with certainty;
+      the finer zone is drawn in Tav. R.02/R.03 of the Piano delle Regole, which the layer does
+      not expose. The plugin should show the general articles and offer the candidates.
+    verify: true
+    by_value:
+      COD_DEST1:
+        "100":
+          label: "RESIDENZIALE"
+          articles: [5, 8]
+          why: 'Art. 5 c.15 a. "residenziale" is a "Funzione urbana"; art. 8 c.1 says urban functions are freely insertable in the TUC.'
+
+  at:
+    layer_id: 13
+    field: AMB_TRAS
+    description: "Ambiti di trasformazione"
+    general_articles: [1, 3, 35, 52, 53]
+    why: >-
+      No article of this NTA disciplines the "ambiti di trasformazione" themselves. Art. 1 c.3
+      "Ambito di applicazione" excludes areas under other provisions; art. 3 "Rapporti con gli
+      altri strumenti di pianificazione" and art. 35 "Definizione e disciplina" (parks: the
+      Parco Agricolo Sud Milano PTC prevails) matter where the area is inside a park; art. 52
+      "Disciplina degli ambiti interessati da provvedimenti approvati e adottati" and art. 53
+      "Norme finali" are the transitional rules.
+    note: >-
+      The rules of the trasformazione areas (e.g. PCU3 "Le Abbazie", PCU4 "L'Idroscalo") are in
+      the Documento di Piano (schede degli ambiti di trasformazione) and, where inside the
+      Parco Agricolo Sud, in the park's PTC. They are NOT in this document. Do not present the
+      listed articles as the governing discipline.
+    verify: true
+
+  rigenerazione:
+    layer_id: 14
+    fields: [CATEGORIA, NOME_AMB]
+    description: "Ambiti di rigenerazione urbana e territoriale"
+    articles: [14, 15]
+    general_articles: [16, 22, 23]
+    why: >-
+      Titolo II Capo I "Rigenerazione": art. 14 "Definizione", art. 15 "Disciplina"
+      (c.2 Ambiti di Rinnovamento Urbano, c.3 Rigenerazione Ambientale, c.4 Piazze, c.5 Nodi di
+      interscambio, c.6 Nuclei storici esterni e Spazi a vocazione pedonale). GFU areas follow
+      art. 16 "Grandi Funzioni Urbane"; ARU follow art. 22 "Definizione" and art. 23 "Disciplina".
+    note: >-
+      Art. 14 says criteria and objectives are specified by the Documento di Piano. The CATEGORIA
+      values were not seen at the Phase 0 test points, so the value-to-comma mapping
+      (which c. of art. 15) is unconfirmed.
+    verify: true
+
+  servizi:
+    layer_id: 18
+    fields: [TIPO_SERV, STATO, LIV_TER]
+    description: "Servizi e impianti"
+    articles: [1]
+    general_articles: [6, 7, 8, 53]
+    why: >-
+      Art. 1 c.3 a. "Ambito di applicazione" excludes "le aree e gli interventi disciplinati dal
+      Piano dei Servizi" from the Piano delle Regole. Only the interfaces are here: art. 6
+      "Indice di edificabilità territoriale" (IT unico on pertinenze indirette from Tav. S.02),
+      art. 7 "Perequazione e compensazione urbanistica", art. 8 (c.2-3 servizi requirement on
+      change of use, referring to art. 11 of the PdS rules) and art. 53 "Norme finali" (c.5
+      existing public-interest services).
+    note: >-
+      The rules for services live in the Piano dei Servizi (Norme di attuazione del PdS and its
+      Catalogo dei servizi), not in this document. Show the PdS as the governing source and
+      these articles only as related.
+
+  agricole:
+    layer_id: 19
+    fields: [COD_AGR, SPEC_AGR]
+    description: "Aree agricole"
+    articles: [24, 25]
+    general_articles: [6, 34, 35]
+    why: >-
+      Titolo II Capo VII "Aree destinate all'agricoltura": art. 24 "Individuazione", art. 25
+      "Disciplina". Art. 6 c.1 excludes agricultural areas from the IT unico; art. 34
+      "Definizione e disciplina" c.3 covers "Ambiti agricoli di rilevanza paesaggistica";
+      art. 35 applies inside Parco Agricolo Sud / Parco Nord.
+    note: >-
+      Inside the Parco Agricolo Sud Milano the park's PTC prevails (art. 35 c.1). Art. 25 refers
+      to LR 12/2005 title III part II and the PTCP for the detailed agricultural rules.
+
+  paesaggio:
+    layer_id: 21
+    fields: [COD_PAES, TIPO_AMB, DESCRIZION]
+    description: "Aree di valore paesaggistico-ambientale ed ecologico"
+    articles: [34]
+    general_articles: [2, 24, 35, 36]
+    why: >-
+      Art. 2 c.2 e. says the Piano delle Regole "individua e disciplina le aree di valore
+      paesaggistico-ambientale ed ecologico". The only article with landscape-area rules is
+      art. 34 "Definizione e disciplina" (aree di valorizzazione ambientale, Allegato 1).
+      Related: art. 24 "Individuazione" (agricultural areas with environmental function),
+      art. 35 (parks), art. 36 "Beni ed aree soggette a tutele sovraordinate e a piani di settori".
+    note: >-
+      The layer's TIPO_AMB codes (e.g. 502 traditional agrarian landscape) are not listed in the
+      NTA; the match to art. 34 and its Allegato 1 is by subject, not by code.
+    verify: true
+
+  sensibilita:
+    layer_id: 22
+    fields: [COD_SEN, CLASSE]
+    description: "Classi di sensibilità paesistica (CLASSE 1-5)"
+    articles: [34]
+    general_articles: [4, 13]
+    why: >-
+      Art. 34 c.2 (Aree di valorizzazione, "Definizione e disciplina"): the areas are divided
+      into sensitivity classes shown in Allegato 1 "ai fini della sottoposizione degli interventi
+      edilizi al parere della Commissione per il Paesaggio". Art. 4 c.2 a. lists "Allegato 1 -
+      Carta della sensibilità paesaggistica dei luoghi"; art. 13 "Attuazione del Piano" requires
+      the Commissione's opinion in some cases.
+    note: >-
+      The NTA does not say what each class 1-5 requires; that is in Allegato 1 (not part of this
+      PDF). Same articles for every class value.
+    by_value:
+      CLASSE:
+        "1": {articles: [34]}
+        "2": {articles: [34]}
+        "3": {articles: [34]}
+        "4": {articles: [34]}
+        "5": {articles: [34]}
+    verify: true
+
+  fattibilita_geologica:
+    layer_id: 3
+    field: CLASSE
+    description: "Fattibilità geologica (Componente geologica PGT)"
+    general_articles: [42, 43, 47, 48]
+    why: >-
+      Titolo IV Capo V "Componente geologica, idrogeologica e sismica": art. 42 "Definizione e
+      disciplina", art. 43 "Classi di fattibilità geologica", art. 47 "Pericolosità sismica e
+      microzonazione", art. 48 "Documento semplificato del rischio idraulico".
+    note: >-
+      Sub-classes (IIIa-IIIe, IVa-IVc) come from DESCR_FATTIBILITA / FATTORI_PERICOLO, e.g.
+      Chiaravalle "IIIc+IIId". Class 1 is not defined in the NTA. The NTA says maps are Tav. R.01
+      and Tav. G.17 (art. 43).
+    by_value:
+      CLASSE:
+        "2":
+          articles: [44]
+          general_articles: [43]
+          why: 'Art. 44 "Classe II - Fattibilità con modeste limitazioni".'
+        "3":
+          articles: [45]
+          general_articles: [43]
+          why: 'Art. 45 "Classe III - Fattibilità con consistenti limitazioni" (IIIa-IIIe).'
+        "4":
+          articles: [46]
+          general_articles: [43]
+          why: 'Art. 46 "Classe IV - Fattibilità con gravi limitazioni" (IVa-IVc).'
+        "1":
+          verify: true
+          note: "Class I is not described in this NTA."

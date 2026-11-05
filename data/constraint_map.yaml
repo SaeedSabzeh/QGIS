@@ -1,5 +1,95 @@
-# Constraint layer -> applicable rule and a short note. Filled in during Phase 1.
-# Example:
-# natura2000:
-#   rule: "DPR 357/1997, art. 5 (Valutazione di incidenza)"
-#   note: "Works inside or near the site need an appropriate assessment."
+# Constraint layer -> PR articles that mention/apply, the higher-level rule (EXTERNAL, not in
+# this NTA) and a plain one-line note. Built by reading data/articles.json
+# (Piano delle Regole - Norme di attuazione, PGT Milano 2030, text of 19/12/2022).
+#
+#   articles       PR articles that genuinely refer to the constraint (verified in the text)
+#   external_rule  rule that lives OUTSIDE this document; kept apart on purpose, never cite
+#                  it as an NTA article
+#   verify: true   uncertain, needs human confirmation
+
+source: "Piano delle Regole – Norme di attuazione, PGT Milano 2030"
+version_date: "2022-12-19"
+
+constraints:
+  natura2000_zsc_sic:
+    service: "Rete_Natura_2000 layer 0 (COD_SITO)"
+    articles: [3, 36]
+    why: >-
+      No article of this NTA mentions Natura 2000, ZSC, SIC, ZPS or valutazione di incidenza
+      (text searched). Only generic hooks: art. 3 c.1 a. "Rapporti con gli altri strumenti di
+      pianificazione e programmazione sovraordinata" (the PdR "recepisce le prescrizioni" of
+      superordinate plans) and art. 36 "Beni ed aree soggette a tutele sovraordinate e a piani
+      di settori".
+    external_rule:
+      text: "Valutazione di incidenza: DPR 357/1997 art. 5 (transposing Habitats Directive 92/43/EEC art. 6)."
+      external: true
+      verify: true
+    note: "A site hit means works inside or near it need a valutazione di incidenza; the Milan NTA adds no rule of its own."
+    verify: true
+
+  natura2000_zps:
+    service: "Rete_Natura_2000 layer 1 (COD_ZPS)"
+    articles: [3, 36]
+    why: "As for ZSC/SIC: the NTA has no Natura 2000 text; only art. 3 and art. 36 are generic hooks."
+    external_rule:
+      text: "Valutazione di incidenza: DPR 357/1997 art. 5; Birds Directive 2009/147/EC for ZPS."
+      external: true
+      verify: true
+    note: "ZPS (bird protection areas) trigger the same valutazione di incidenza procedure; no Milan-specific rule in the NTA."
+    verify: true
+
+  pgra_hazard:
+    service: "direttiva_alluvioni_2022 layers 17-27 (Codscenar H/M/L, Tritorno)"
+    articles: [43, 44, 45, 46]
+    why: >-
+      Art. 43 "Classi di fattibilità geologica" says the classes are integrated with the PAI and
+      PGRA hazard limits. The NTA names PGRA scenarios P1/P2/P3 (not H/M/L): P3 "frequente;
+      tempo di ritorno inferiore o uguale a 10 anni" (art. 45), P2 "poco frequente" (art. 45),
+      P1 "rara" (art. 44). P1 -> art. 44 (class II); P2/P3 -> art. 45 (classes IIIa/IIIb, c.3-4)
+      and art. 46 (class IVa, outside the built-up area).
+    hazard_mapping:
+      H: {nta_scenario: P3, articles: [45, 46]}
+      M: {nta_scenario: P2, articles: [44, 45, 46]}
+      L: {nta_scenario: P1, articles: [44]}
+    hazard_mapping_note: >-
+      H/M/L = P3/P2/P1 is the standard PGRA convention and matches the return periods in art.
+      45 and the Lambro features (Tritorno 10, 200, 500), but the NTA itself never writes H/M/L.
+      Which class applies at a point depends on the Milan fattibilità class, not on the PGRA
+      scenario alone.
+    external_rule:
+      text: "PAI / PGRA norms: Norme di Attuazione del PAI (Po basin authority), Title V, integrated with the PGRA (Directive 2007/60/EC, D.Lgs. 49/2010); Lombardy implementation in DGR X/6738 of 19/06/2017."
+      external: true
+      verify: true
+    note: "Flood hazard from the PGRA maps reinforces the geological feasibility class (III/IV) and may require a hydraulic compatibility study."
+    verify: true
+
+  pgra_risk:
+    service: "direttiva_alluvioni_2022 layers 12-15 (Ris R1-R4)"
+    articles: [43, 45, 46, 48]
+    why: >-
+      The NTA does not use the R1-R4 risk classes (text searched). It addresses flood risk
+      through the hazard-based classes (art. 45 "Classe III", art. 46 "Classe IV") and art. 48
+      "Documento semplificato del rischio idraulico" (DSRI, RR 7/2017).
+    external_rule:
+      text: "PGRA risk maps R1-R4 (Directive 2007/60/EC, D.Lgs. 49/2010); PAI/PGRA norms as above."
+      external: true
+      verify: true
+    note: "R1 (moderate) to R4 (very high) describe damage potential; the NTA reacts to hazard and the geological class, not to R-class."
+    verify: true
+
+  geologia:
+    service: "tav_previsioni_b layer 3 (CLASSE)"
+    articles: [42, 43, 44, 45, 46, 47, 48]
+    why: >-
+      Titolo IV Capo V "Componente geologica, idrogeologica e sismica": art. 42, 43 "Classi di
+      fattibilità geologica", 44 "Classe II", 45 "Classe III", 46 "Classe IV", 47 "Pericolosità
+      sismica e microzonazione", 48 "Documento semplificato del rischio idraulico".
+    classes:
+      II: {articles: [44], note: "Modest limitations (art. 44)."}
+      III: {articles: [45], note: "Considerable limitations, sub-classes IIIa-IIIe (art. 45)."}
+      IV: {articles: [46], note: "Serious limitations, sub-classes IVa-IVc; new building generally not allowed (art. 46 c.1)."}
+    external_rule:
+      text: "LR 12/2005 art. 57 (componente geologica del PGT); the NTA itself cites LR 12/2005 art. 8 c.1 c. and art. 10 c.1 d. in art. 42."
+      external: true
+      verify: true
+    note: "The class decides what building and basement works are allowed and which geological/hydraulic studies are needed."
