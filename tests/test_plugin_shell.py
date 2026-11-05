@@ -250,6 +250,47 @@ def test_dialog_and_dock_construct(env):
     assert any("External rule" in x and "unverified" in x for x in lines)
 
 
+def test_findings_rendered_as_wrapped_html(env):
+    from plugin import dock
+    d = dock.RulesDock(None)
+    long_note = "Capo IV " + "molto lungo " * 40 + "<b>fine</b>"
+    d.show_findings([{
+        "label": "Nuclei <NAF>", "values": {"COD_NUC": 15}, "verify": True,
+        "articles": [3], "general_articles": [4], "candidate_articles": [5],
+        "why": "Perche & motivo", "note": long_note,
+        "external_rule": {"text": "ext rule", "verify": True}}], {"layerX": "boom <err>"})
+    html = d.findings.toHtml()
+    assert "Nuclei &lt;NAF&gt;" in html and "COD_NUC=15" in html
+    assert "VERIFY" in html and "Art. 3" in html and "Art. 5" in html
+    assert "Perche &amp; motivo" in html
+    full = " ".join(long_note.split()).replace("<b>fine</b>", "&lt;b&gt;fine&lt;/b&gt;")
+    assert full in html  # untruncated and escaped
+    assert "<b>fine</b>" not in html
+    assert "External rule" in html and "unverified" in html
+    assert "layerX" in html and "boom &lt;err&gt;" in html
+    d.show_findings([])
+    assert "No planning constraint" in d.findings.toHtml()
+    for name in ("show_findings", "show_articles", "show_answer", "show_point_result",
+                 "set_querying", "set_ask_enabled", "set_asking", "show_error"):
+        assert callable(getattr(d, name))
+
+
+def test_articles_lazy_text_and_readable_title(env):
+    from plugin import dock
+    d = dock.RulesDock(None)
+    rows = [{"id": "PR-art-45", "number": "45", "title": "Classe III - Fattibilita",
+             "roles": ["governing"], "text": "FULL TEXT"}]
+    d.show_articles(rows, cited=["PR-art-45"])
+    item = d.articles.items[0]
+    label = item.text(0)
+    assert label.startswith("Art. 45") and "Fattibilita" in label
+    assert "governing" in label and "cited" in label and "<" not in label
+    assert item.widget is None and d._articles_loaded == {}
+    d.articles.itemExpanded.emit(item)
+    assert d._articles_loaded == {"PR-art-45": True}
+    assert item.child(0).widget.text == "FULL TEXT"
+
+
 # ----------------------------------------------------------------------------- end to end
 def test_click_then_ask_end_to_end(env):
     from qgis.core import QgsSettings

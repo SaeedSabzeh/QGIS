@@ -278,6 +278,78 @@ class QgsProject:
         return Stub()
 
 
+class FakeTextBrowser:
+    def __init__(self, *a, **k):
+        self.html = ""
+
+    def setHtml(self, html):  # noqa: N802
+        self.html = html
+
+    def toHtml(self):  # noqa: N802
+        return self.html
+
+    def clear(self):
+        self.html = ""
+
+    def __getattr__(self, name):
+        if name.startswith("__"):
+            raise AttributeError(name)
+        return Stub()
+
+
+class FakePlainTextEdit(FakeTextBrowser):
+    def __init__(self, text="", *a, **k):
+        super().__init__()
+        self.text = text
+
+
+class FakeTreeItem:
+    def __init__(self, texts=None):
+        self.texts = list(texts or [""])
+        self.children, self.data_ = [], {}
+        self.widget = None
+
+    def addChild(self, c):  # noqa: N802
+        self.children.append(c)
+
+    def child(self, i):
+        return self.children[i]
+
+    def setData(self, col, role, value):  # noqa: N802
+        self.data_[col] = value
+
+    def data(self, col, role=None):
+        return self.data_.get(col)
+
+    def text(self, col=0):
+        return self.texts[col]
+
+    def __getattr__(self, name):
+        if name.startswith("__"):
+            raise AttributeError(name)
+        return Stub()
+
+
+class FakeTree:
+    def __init__(self, *a, **k):
+        self.items = []
+        self.itemExpanded = _BoundSignal()
+
+    def clear(self):
+        self.items = []
+
+    def addTopLevelItem(self, item):  # noqa: N802
+        self.items.append(item)
+
+    def setItemWidget(self, item, col, w):  # noqa: N802
+        item.widget = w
+
+    def __getattr__(self, name):
+        if name.startswith("__"):
+            raise AttributeError(name)
+        return Stub()
+
+
 class _AutoModule(types.ModuleType):
     def __getattr__(self, name):
         if name.startswith("__"):
@@ -305,6 +377,11 @@ def install():
     mods["qgis.PyQt.QtCore"].pyqtSignal = pyqtSignal
     mods["qgis.PyQt.QtCore"].QByteArray = QByteArray
     mods["qgis.PyQt.QtCore"].QUrl = QUrl
+    widgets = mods["qgis.PyQt.QtWidgets"]
+    widgets.QTextBrowser = FakeTextBrowser
+    widgets.QPlainTextEdit = FakePlainTextEdit
+    widgets.QTreeWidget = FakeTree
+    widgets.QTreeWidgetItem = FakeTreeItem
     mods["qgis.PyQt.QtNetwork"].QNetworkRequest = QNetworkRequest
     mods["qgis.PyQt.QtNetwork"].QNetworkReply = QNetworkReply
     sys.modules.update(mods)

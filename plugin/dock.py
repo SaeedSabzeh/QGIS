@@ -11,6 +11,7 @@ from qgis.PyQt.QtWidgets import (
 from ._compat import enum, prompts
 
 MAX_VALUE_CHARS = 80
+MIN_WIDTH = 320
 
 
 def _wrap(text):
@@ -45,6 +46,39 @@ def finding_summary(f):
     return head, lines
 
 
+def finding_html(f):
+    """Rich-text block for one finding (all text escaped, long text wraps)."""
+    values = ", ".join("%s=%s" % (k, v) for k, v in f.get("values", {}).items()
+                       if k != "SCHEDA_NEW")
+    head = f.get("label") or f.get("category") or f.get("layer", "")
+    para = "<p style='margin-top:0; margin-bottom:2px'>"
+    out = ["<p style='margin-top:8px; margin-bottom:2px'><b>%s</b>" % escape(str(head))]
+    if values:
+        out.append(" (%s)" % escape(values[:MAX_VALUE_CHARS * 3]))
+    if f.get("verify"):
+        out.append(" <span style='background-color:#ffe08a; color:#5a3b00'>"
+                   "&nbsp;<b>VERIFY</b>&nbsp;</span>")
+    out.append("</p>")
+    for key, title in (("articles", "Governing articles / Articoli"),
+                       ("general_articles", "General articles"),
+                       ("candidate_articles", "Candidate articles (uncertain)")):
+        if f.get(key):
+            out.append("%s<i>%s:</i> %s</p>" % (
+                para, escape(title), escape(", ".join("Art. %s" % n for n in f[key]))))
+    if f.get("why"):
+        out.append("%s<b>Why:</b> %s</p>" % (para, escape(_wrap(f["why"]))))
+    if f.get("note"):
+        out.append("%s<b>Note:</b> %s</p>" % (para, escape(_wrap(f["note"]))))
+    if f.get("verify"):
+        out.append(para + "<b>VERIFY:</b> this link is uncertain, not confirmed by a human.</p>")
+    ext = f.get("external_rule")
+    if ext:
+        out.append("%s<b>External rule (outside the NTA%s):</b> %s</p>" % (
+            para, ", unverified" if ext.get("verify") else "",
+            escape(_wrap(ext.get("text", "")))))
+    return "".join(out) + "<hr>"
+
+
 class RulesDock(QDockWidget):
     askRequested = pyqtSignal(str)
     settingsRequested = pyqtSignal()
@@ -56,6 +90,7 @@ class RulesDock(QDockWidget):
         self._rows = {}
         self._ask_allowed = False
         body = QWidget()
+        body.setMinimumWidth(MIN_WIDTH)
         root = QVBoxLayout(body)
 
         self.status = QLabel("Click a point on the map / Fare clic su un punto della mappa.")
@@ -68,9 +103,8 @@ class RulesDock(QDockWidget):
         # 1. findings
         box1 = QGroupBox("Vincoli / Constraints found")
         l1 = QVBoxLayout(box1)
-        self.findings = QTreeWidget()
-        self.findings.setHeaderHidden(True)
-        self.findings.setWordWrap(True)
+        self.findings = QTextBrowser()
+        self.findings.setOpenExternalLinks(False)
         l1.addWidget(self.findings)
         split.addWidget(box1)
 
@@ -79,6 +113,9 @@ class RulesDock(QDockWidget):
         l2 = QVBoxLayout(box2)
         self.articles = QTreeWidget()
         self.articles.setHeaderHidden(True)
+        self.articles.setWordWrap(True)
+        self.articles.setUniformRowHeights(False)
+        self.articles.setTextElideMode(enum(Qt, "TextElideMode", "ElideNone"))
         self.articles.itemExpanded.connect(self._load_article_text)
         l2.addWidget(self.articles)
         split.addWidget(box2)
@@ -161,25 +198,18 @@ class RulesDock(QDockWidget):
         self.show_articles(res["articles"])
 
     def show_findings(self, findings, errors=None):
-        self.findings.clear()
+        parts = []
         if not findings:
-            self.findings.addTopLevelItem(QTreeWidgetItem(
-                ["No planning constraint or zone found at this point."]))
+            parts.append("<p>No planning constraint or zone found at this point.</p>")
         for f in findings:
-            head, lines = finding_summary(f)
-            item = QTreeWidgetItem([head])
-            item.setToolTip(0, head)
-            for line in lines:
-                child = QTreeWidgetItem([line])
-                child.setToolTip(0, line)
-                item.addChild(child)
-            self.findings.addTopLevelItem(item)
-        for name, err in sorted((errors or {}).items()):
-            item = QTreeWidgetItem(["Layer error: %s" % name])
-            item.setToolTip(0, str(err))
-            item.addChild(QTreeWidgetItem([str(err)]))
-            self.findings.addTopLevelItem(item)
-        self.findings.expandAll()
+            parts.append(finding_html(f))
+        if errors:
+            parts.append("<p><small><span style='color:#777'>Layer errors:</span></small></p><ul>")
+            for name, err in sorted(errors.items()):
+                parts.append("<li><small><span style='color:#777'>%s: %s</span></small></li>"
+                             % (escape(str(name)), escape(_wrap(err))))
+            parts.append("</ul>")
+        self.findings.setHtml("".join(parts))
 
     def show_articles(self, rows, cited=()):
         self.articles.clear()
@@ -191,9 +221,10 @@ class RulesDock(QDockWidget):
         cited = set(cited)
         for r in rows:
             roles = ", ".join(r["roles"])
-            label = "Art. %s - %s  <%s>%s" % (
-                r["number"], r["title"], roles, "  [cited]" if r["id"] in cited else "")
+            tags = roles + ("; cited" if r["id"] in cited else "")
+            label = "Art. %s \u2013 %s\n[%s]" % (r["number"], r["title"], tags)
             item = QTreeWidgetItem([label])
+            item.setToolTip(0, label)
             item.setData(0, enum(Qt, "ItemDataRole", "UserRole"), r["id"])
             child = QTreeWidgetItem([""])  # placeholder, text widget is built on first expand
             item.addChild(child)
