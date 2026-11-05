@@ -67,19 +67,31 @@ The set has 40 questions written from the article texts ([eval/questions.yaml](e
 - by language: 22 Italian and 18 English;
 - 9 are tied to a point.
 
-**Retrieval** (`python eval/run_eval.py --mode retrieval`; question text as keywords, no LLM rewrite; 38 questions scored):
+**Retrieval** (`python eval/run_eval.py --mode retrieval`; 38 questions scored; 2 "not in the corpus" questions left out):
+
+| Metric | Question text as keywords | Gemini's Italian keywords |
+|---|---|---|
+| recall@5 | 72% | **80%** |
+| recall@10 | 83% | **89%** |
+| MRR | 0.623 | **0.716** |
+| Gold article included in the prompt sent to the model | 86% | **93%** (100% for questions with a point) |
+
+The Italian keyword rewrite closes most of the gap on English questions: without it, English recall@5 is 65%, against 79% for Italian. A point maps about 30 articles, and these rank ahead of the search results. That guarantees the gold article reaches the prompt, but it lowers top-5 ranking, so trimming the mapped list is the next improvement.
+
+**LLM answers** (`--mode llm`; run 05/11/2026). Gemini 3.8 and 3.5 Flash were overloaded, so 37 of the 40 answers came from the smallest fallback model, `gemini-3.1-flash-lite`, and 3 from `gemini-3.5-flash`:
 
 | Metric | Value |
 |---|---|
-| recall@5 | 72% |
-| recall@10 | 83% |
-| MRR | 0.623 |
-| Gold article included in the prompt sent to the model | 86% (100% for questions with a point) |
-| recall@5, Italian / English | 79% / 65% |
+| Citation precision (cited articles that are gold or acceptable) | **96%** |
+| Citation recall (gold articles cited) | **92%** |
+| Invented citations (rejected ids) | **0%** |
+| Replies that were not valid JSON | 0 |
+| "Not in the corpus" questions declined, with nothing cited | 2 / 2 |
+| Latency, median (with retries and fallbacks) | 27 s |
 
-A point maps about 30 articles, and these rank ahead of the search results. That guarantees the gold article reaches the prompt, but it lowers top-5 ranking. Full tables are in [eval/results/summary_retrieval.md](eval/results/summary_retrieval.md).
+Of the 4 questions with a missed gold article, 3 had the article missing from the prompt (a retrieval miss, not the model's fault). In the other, q38, the model cited one of the two gold articles. Per-question results are in `eval/results/llm_gemini-3.8-flash_2026-11-05.jsonl`, and the summary in [eval/results/summary_llm.md](eval/results/summary_llm.md).
 
-**LLM answers** (`--mode llm`): citation precision and recall, rejected citations, and handling of the "not in the corpus" questions. *Results pending; the run is in progress.*
+**Answer correctness** (LLM-as-judge against each question's answer key, using [eval/rubric.md](eval/rubric.md)): *in progress.*
 
 **Constraint correctness**: 20 points were queried live with no layer errors. [eval/constraint_checklist.md](eval/constraint_checklist.md) still needs to be checked by hand against the official map viewers.
 
