@@ -10,7 +10,11 @@ Click a point in Milan and the plugin shows which planning rules apply there:
 
 ## Status
 
-The plugin works in **QGIS 3.44.15 LTR** (Qt 5.15, Python 3.12). Clicks at the Duomo, Lambro and Chiaravalle return the expected findings and articles. It is written to also support QGIS 4 (Qt6), but that has not been tested yet. Phases 0–4 of the [implementation plan](docs/implementation-plan.md) are done (the constraint checklist still needs a manual check), and version 0.1.3 is ready to publish as experimental.
+The plugin works in **QGIS 3.44.15 LTR** (Qt 5.15, Python 3.12). Clicks at the Duomo, Lambro and Chiaravalle return the expected findings and articles. It is written to also support QGIS 4 (Qt6), but that has not been tested yet. Phases 0–4 of the [implementation plan](docs/implementation-plan.md) are done (the constraint checklist still needs a manual check).
+
+**Published:** version 0.1.3 is on [plugins.qgis.org](https://plugins.qgis.org/plugins/norme_milano/) as an **experimental** plugin. It passed the repository's security scan, the contact email is confirmed, and it is waiting for approval by the volunteer staff. Once approved, enable **Show also experimental plugins** in the Plugin Manager settings and search for *Norme Milano*.
+
+0.1.3 was checked in QGIS 3.44 with a real Gemini key while Google was overloaded: the key saved to the profile settings without a master password, and the Duomo question was answered in about 28 seconds by the fallback model.
 
 ## Sources
 
@@ -37,7 +41,8 @@ See also [docs/missing-data-findings.md](docs/missing-data-findings.md).
 
 1. **Lookup.** The clicked point is sent to 28 map layers at once. The categories they return are mapped to articles by [`data/zone_map.yaml`](data/zone_map.yaml) and [`data/constraint_map.yaml`](data/constraint_map.yaml).
 2. **Search.** The question is rewritten into Italian keywords by the LLM, and a BM25 search over all 172 records adds up to 5 more articles. Binding documents rank before explanatory ones.
-3. **Answer.** The governing articles are sent in full. Other articles are trimmed to the paragraphs that best match the question. The model must return Italian and English answers with `cited_articles`, and any citation outside the supplied set is rejected.
+3. **Answer.** The governing articles are sent in full. Other articles are trimmed to the paragraphs that best match the question. The model must return Italian and English answers with `cited_articles`, and any citation outside the supplied set is rejected. Answers may use light markdown (bold, lists), which the dock renders after escaping any HTML.
+4. **Fallback.** Gemini models are tried in order (`gemini-3.8-flash`, `gemini-3.5-flash`, `gemini-3.1-flash-lite`). A busy or unresponsive model gets at most one quick retry before the next one is tried, with a 20 s timeout per request (45 s for the last model) and a 65 s total budget, so a question waits about 75 s at most. The dock shows which model is being tried.
 
 Without an LLM provider, the plugin still shows the findings and the full article texts.
 
@@ -138,11 +143,11 @@ The source PDFs go in `data/raw/`, which is git-ignored.
 
 ## Release / publishing (manual steps for the owner)
 
-1. Run `python -m pytest -q`, `python -m ruff check core scripts tests plugin` and `python scripts/build_plugin.py`. Check that `version=` in `plugin/metadata.txt` and [CHANGELOG.md](CHANGELOG.md) say what you want to release.
-2. Make the GitHub repository **public**: `metadata.txt` links to it (repository, tracker, homepage).
-3. Optionally tag the release: `git tag v0.1.0 && git push origin v0.1.0`. The `release.yml` workflow builds the zip and attaches it to a GitHub pre-release.
-4. Create an account or log in with an **OSGeo ID** at https://www.osgeo.org/community/getting-started-osgeo/.
-5. Upload `dist/norme_milano-0.1.3.zip` at https://plugins.qgis.org/plugins/add/ . It is published as **experimental** (`experimental=True`), so users must enable "Show also experimental plugins" to see it. A new plugin may wait for approval by the staff.
+1. Run `python -m pytest -q`, `python -m ruff check core scripts tests plugin`, `bandit -r plugin core -q` and `python scripts/build_plugin.py`. Check that `version=` in `plugin/metadata.txt` and [CHANGELOG.md](CHANGELOG.md) say what you want to release.
+2. The GitHub repository is **public** (done): `metadata.txt` links to it (repository, tracker, homepage).
+3. Optionally tag the release: `git tag v0.1.3 && git push origin v0.1.3`. The `release.yml` workflow builds the zip and attaches it to a GitHub pre-release.
+4. Log in with your **OSGeo ID** (done).
+5. For a new version, open https://plugins.qgis.org/plugins/norme_milano/ → **Add version**, upload `dist/norme_milano-<version>.zip` and tick the checklist. The plugin is **experimental** (`experimental=True`), so users must enable "Show also experimental plugins" to see it. The first version waits for approval by the staff. If the site answers with a Cloudflare 502 after Save, check the Versions tab before uploading again: the version is usually saved anyway.
 6. Courtesy email to Regione Lombardia (sit_rl@regione.lombardia.it, sitpianificazione@regione.lombardia.it) about reuse terms and attribution wording: the Italian draft is in [docs/email-regione-lombardia.md](docs/email-regione-lombardia.md). Nothing has been sent.
 
 ## Licence
