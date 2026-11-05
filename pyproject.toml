@@ -4,3 +4,7 @@ target-version = "py39"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501", "E741"]  # long lines in data-heavy strings; short loop names like l

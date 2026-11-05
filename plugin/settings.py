@@ -7,8 +7,16 @@ is the key); QgsSettings keeps just the auth config id.
 
 from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsSettings
 from qgis.PyQt.QtWidgets import (
-    QComboBox, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout, QLabel, QLineEdit,
-    QMessageBox, QPushButton, QVBoxLayout,
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
 )
 
 from . import net, tasks

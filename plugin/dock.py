@@ -4,8 +4,18 @@ from html import escape
 
 from qgis.PyQt.QtCore import QSize, Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import (
-    QDockWidget, QGroupBox, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QSplitter,
-    QTextBrowser, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
+    QDockWidget,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QPlainTextEdit,
+    QPushButton,
+    QSplitter,
+    QTextBrowser,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
 from ._compat import enum, prompts, retrieval

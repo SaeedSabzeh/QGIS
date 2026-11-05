@@ -4,7 +4,7 @@ The unit tests use a fake `qgis` package, so everything below has to be checked 
 
 ## Install
 
-1. `python scripts/build_plugin.py` builds `dist/norme_milano.zip` (plugin code, `core/`, and `data/articles.json`, `zone_map.json`, `constraint_map.json`).
+1. `python scripts/build_plugin.py` builds `dist/norme_milano-<version>.zip` (and a copy `dist/norme_milano.zip`) (plugin code, `core/`, and `data/articles.json`, `zone_map.json`, `constraint_map.json`).
 2. QGIS: Plugins > Manage and Install Plugins > Install from ZIP > pick the zip > Install Plugin. Tick "Norme Milano" in the Installed tab (it is experimental: enable "Show also experimental plugins" in Settings if it does not appear).
 3. A "Norme Milano" button appears in the plugins toolbar and a "Norme Milano" menu under Plugins. On first start the settings dialog opens once.
 

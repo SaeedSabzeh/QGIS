@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest ruff
+      - run: ruff check core scripts tests plugin
+      - run: pytest -q
+      - name: Check the tag matches metadata.txt
+        run: |
+          version=$(grep '^version=' plugin/metadata.txt | cut -d= -f2 | tr -d '\r')
+          if [ "v$version" != "${GITHUB_REF_NAME}" ]; then
+            echo "tag ${GITHUB_REF_NAME} does not match metadata version v$version"
+            exit 1
+          fi
+      - run: python scripts/build_plugin.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: norme_milano-zip
+          path: dist/norme_milano-*.zip
+          if-no-files-found: error
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/norme_milano-*.zip
+          prerelease: true
+          generate_release_notes: true
