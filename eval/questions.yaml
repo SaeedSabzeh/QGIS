@@ -1,4 +1,465 @@
-# 40 questions written from the NTA, each tagged with its correct article(s). Phase 4.
-# - id: q01
-#   question: "..."
-#   articles: ["Art. 15"]
+# Phase 4 evaluation set: 40 questions written by reading the article texts in data/articles.json
+# (not by looking at what the retrieval returns). Schema:
+#   id, question, lang (it|en), point ([lat, lon] or null), gold_articles (ids a correct answer must
+#   rely on; 1-3; [] for "not in the corpus"), acceptable_articles (optional, also fine to cite),
+#   answer_key (2-4 short facts the answer must state, in English), type.
+# type: definition | parameter | rule | procedure | paraphrase | point | cross | not_in_corpus
+#
+# Test points (Phase 0): Duomo 45.4642,9.1900; Citta Studi 45.4781,9.2269; Parco Nord 45.5281,9.2050;
+# Darsena 45.4520,9.1760; Chiaravalle 45.4170,9.2350; Lambro 45.4650,9.2560.
+
+# ---------------------------------------------------------------- Piano delle Regole (23)
+- id: q01
+  question: "How is the urban planning volume (VU) calculated and what conventional height does the PGT use for it?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-5"]
+  answer_key:
+    - "VU (volume urbanistico) is the gross floor area (SL) multiplied by the urban planning height (AU)"
+    - "the urban planning height AU is a conventional 3.00 m"
+  type: definition
+
+- id: q02
+  question: "Quali sporti e aggetti di un edificio non vengono contati nella superficie coperta?"
+  lang: it
+  point: null
+  gold_articles: ["PR-art-5"]
+  answer_key:
+    - "the superficie coperta (SCOP) is the horizontal projection of the above-ground perimeter of the building"
+    - "projections (aggetti e sporti) smaller than 1.50 m are excluded"
+    - "projections larger than 1.50 m count in their entirety"
+  type: paraphrase
+
+- id: q03
+  question: "What is the basic floor-area index in the consolidated urban fabric and what is the maximum that can be reached?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-6"]
+  acceptable_articles: ["PR-art-5", "PR-art-7", "PR-art-17"]
+  answer_key:
+    - "a single territorial index (IT unico) of 0.35 sqm/sqm applies in the TUC"
+    - "up to 0.70 sqm/sqm can be reached using edification rights, bonuses and social housing quotas"
+    - "in areas with high public-transport accessibility the maximum rises to 1 sqm/sqm"
+  type: parameter
+
+- id: q04
+  question: "In quali ambiti l'indice di edificabilita territoriale massimo sale a 1 mq/mq?"
+  lang: it
+  point: null
+  gold_articles: ["PR-art-6", "PR-art-17"]
+  answer_key:
+    - "in the areas with high accessibility to public transport shown on Tav. R.02 the maximum IT is raised to 1 sqm/sqm"
+    - "those areas are the ones even only partly inside the catchments of existing or planned stations and stops"
+    - "the raise does not apply to the cases of art. 16 comma 2 and art. 21 comma 5, and requires positive verification of the morphological indications"
+  type: rule
+
+- id: q05
+  question: "Posso trasformare un locale in un altro uso senza fare lavori? Cosa cambia per i servizi?"
+  lang: it
+  point: null
+  gold_articles: ["PR-art-8"]
+  acceptable_articles: ["PS-art-11"]
+  answer_key:
+    - "a change of use without building works is always allowed"
+    - "it may increase or change the requirement of areas for services (referring to art. 11 of the Piano dei Servizi rules)"
+    - "a change of use with building works that increases the requirement requires finding the service areas"
+  type: paraphrase
+
+- id: q06
+  question: "What are the rules for private parking in new buildings, and how much must be reserved for bicycles?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-12"]
+  acceptable_articles: ["PR-art-31"]
+  answer_key:
+    - "in new construction and total demolition-and-reconstruction the legally required parking must be underground or inside the building envelope, not at ground level, unless impossible is shown"
+    - "a surface car park must be planted with two trees per parking space (the tree planting can be monetised)"
+    - "10% of the private parking provision must be spaces for bicycles and non-fossil-fuel vehicles"
+  type: rule
+
+- id: q07
+  question: "Per un edificio nel centro storico che e' classificato come immobile con valore estetico-culturale-ambientale, quali interventi sono ammessi?"
+  lang: it
+  point: [45.4642, 9.1900]
+  gold_articles: ["PR-art-19"]
+  acceptable_articles: ["PR-art-18"]
+  answer_key:
+    - "for buildings with aesthetic-cultural-environmental value (art. 18 comma 2 lett. d) the allowed works are extraordinary maintenance, restoration, conservative renovation and building renovation"
+    - "building renovation must keep the building outline (sagoma), footprint (sedime) and the facade facing the public space"
+    - "the classification is on Tav. R.03 / R.04 of the Piano delle Regole"
+  type: point
+
+- id: q08
+  question: "What does the Piano delle Regole identify inside the historic cores (NAF) on the map Tav. R.04?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-18"]
+  answer_key:
+    - "buildings complexes with intrinsic historic-architectural value"
+    - "architectural and vegetal compositions with historic-artistic character, and buildings with intrinsic architectural value or aesthetic-cultural-environmental value"
+    - "buildings not falling in the previous categories"
+  type: definition
+
+- id: q09
+  question: "Nei tessuti compatti a cortina, quale altezza interna e' consentita per i nuovi spazi sottotetto?"
+  lang: it
+  point: null
+  gold_articles: ["PR-art-21"]
+  answer_key:
+    - "in compact courtyard-line tissues (tessuti urbani compatti a cortina) within the TUC, creating or changing attic spaces is allowed only with internal heights below 1.80 m at every point"
+    - "applies to all building interventions in the TUC"
+  type: parameter
+
+- id: q10
+  question: "What setback and alignment rules apply to new buildings in Ambiti di Rinnovamento Urbano (ARU), and what is the maximum covered area?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-23"]
+  acceptable_articles: ["PR-art-22"]
+  answer_key:
+    - "alignment of at least 50% of the height line on the boundary with public space, within the Inviluppo Limite"
+    - "setback of at least 3 m of the height line from the property boundary toward public space, the setback area mainly green and planted"
+    - "covered area (SCOP) at most 60% of the plot (superficie fondiaria) for new construction and urban restructuring"
+  type: rule
+
+- id: q11
+  question: "Quali attivita possono svolgersi nelle aree destinate all'agricoltura e cosa si puo' fare sugli edifici esistenti?"
+  lang: it
+  point: null
+  gold_articles: ["PR-art-25"]
+  acceptable_articles: ["PR-art-24"]
+  answer_key:
+    - "main use is agricultural: farming, forestry, livestock, horticulture and nursery activities"
+    - "connected processing, storage and sale of the farm's products, agritourism, and the residence of the farmer and collaborators"
+    - "existing buildings: extraordinary maintenance, restoration, conservative renovation and building renovation respecting original type characteristics"
+  type: rule
+
+- id: q12
+  question: "Quanto si puo' costruire nella parte del Parco Nord classificata come 'Zona edificata'?"
+  lang: it
+  point: [45.5281, 9.2050]
+  gold_articles: ["PR-art-35"]
+  answer_key:
+    - "inside Parco Nord Milano the zoning and rules of the park's PTC apply and prevail over conflicting PGT provisions"
+    - "in the PTC 'Zona edificata' the existing SL is kept or an IT of at most 0.15 sqm/sqm can be reached, also with perequated edification rights"
+    - "the same applies in the 'Zona di riorganizzazione funzionale' only with an implementation plan or a convenzionato permit"
+  type: point
+
+- id: q13
+  question: "What must be preserved in the agricultural areas of landscape importance, and which interventions go to the Landscape Commission?"
+  lang: en
+  point: [45.4170, 9.2350]
+  gold_articles: ["PR-art-34"]
+  acceptable_articles: ["PR-art-35"]
+  answer_key:
+    - "in the agricultural areas of landscape relevance (Allegato 1) agricultural activity and the agricultural infrastructure network must be preserved, together with historic irrigation watercourses"
+    - "transforming built areas not linked to agriculture is allowed only without reducing soil permeability"
+    - "the areas are divided in prevailing sensitivity classes, which submit building interventions to the opinion of the Commissione per il Paesaggio"
+  type: point
+
+- id: q14
+  question: "Which activities are forbidden in the Linate airport risk zones A, B and C?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-38"]
+  answer_key:
+    - "in Zones A, B and C all activities that involve the continuous presence of people are forbidden"
+    - "exceptions: airport operations and road use in Zone A; limited-attendance uses compatible with the Parco Sud belt plans in B and C"
+    - "generally forbidden in all zones: high-crowding facilities (shopping centres, congress, large sports facilities) and activities with fire or explosion hazard"
+  type: rule
+
+- id: q15
+  question: "Quali sono i limiti di rumore aeroportuale (indice LVA) nelle zone di rispetto A e B dell'aeroporto di Linate?"
+  lang: it
+  point: null
+  gold_articles: ["PR-art-39"]
+  answer_key:
+    - "zone A: the LVA index cannot exceed 60 dB(A)"
+    - "zone B: the LVA index cannot exceed 65 dB(A)"
+    - "zone C does not fall within the limits of the Comune di Milano; outside zones A, B, C the LVA cannot exceed 60 dB(A)"
+  type: parameter
+
+- id: q16
+  question: "C'e' un limite di altezza vicino alle antenne radar di Linate? Quanto vale in prossimita' del radar Lambro?"
+  lang: it
+  point: null
+  gold_articles: ["PR-art-40"]
+  answer_key:
+    - "the existing vertical obstruction heights relative to the radar antennas must be kept up to 3,000 m from the radar sites (Lambro and Peschiera)"
+    - "from 3,000 m to 2,000 m of the Lambro radar the maximum is 150 m above sea level (Settore 6)"
+    - "within 500 m of the Lambro radar the limit is 133 m above sea level (Settore 3); the limits are on Tav. R.07"
+  type: parameter
+
+- id: q17
+  question: "What is the maximum building elevation allowed under the outer horizontal surface limiting obstacles for air navigation around Linate?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-41"]
+  acceptable_articles: ["PR-art-37"]
+  answer_key:
+    - "the Superficie Orizzontale Esterna (SOE) allows a maximum building elevation of 247.85 m above sea level"
+    - "the inner horizontal surface (SOI) allows 147.85 m above sea level"
+    - "the obstacle areas are shown on Tav. R.08"
+  type: parameter
+
+- id: q18
+  question: "Come e' definita la classe di fattibilita geologica II e quali caratteristiche hanno le aree che ne fanno parte?"
+  lang: it
+  point: [45.4781, 9.2269]
+  gold_articles: ["PR-art-44"]
+  acceptable_articles: ["PR-art-43", "CG-art-44"]
+  answer_key:
+    - "class II is feasibility with modest limitations"
+    - "the areas are flat, with sandy-gravelly deposits; the water table depth (soggiacenza) is greater than 5 m"
+    - "they are not flooded or are only potentially floodable by exceptional events with very low probability"
+  type: point
+
+- id: q19
+  question: "What are the three groundwater depth ranges used to classify the shallow aquifer in the geological feasibility classes?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-43"]
+  acceptable_articles: ["CG-art-43"]
+  answer_key:
+    - "the shallow water table is divided into three areas by depth: less than 5 m, between 5 m and 10 m, and more than 10 m"
+    - "the zoning is shown on the Carta Idrogeologica (Tav. G.03)"
+  type: definition
+
+- id: q20
+  question: "In classe III (area inondabile del Lambro) posso realizzare un piano interrato o seminterrato?"
+  lang: it
+  point: [45.4650, 9.2560]
+  gold_articles: ["PR-art-45"]
+  acceptable_articles: ["CG-art-45"]
+  answer_key:
+    - "building or modifying basements and semi-basements is conditioned on equipping them with self-protection systems"
+    - "functions and uses with continuous presence of people must be excluded in them"
+    - "only in the floodable areas of the Seveso, Garbogera, Pudiga and Guisa streams an alternative exists: continuous presence allowed if adequate safety measures are guaranteed"
+  type: point
+
+- id: q21
+  question: "What does geological feasibility class IV mean for new construction and for basements?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-46"]
+  acceptable_articles: ["CG-art-46"]
+  answer_key:
+    - "class IV is feasibility with serious limitations"
+    - "the high risk does not allow new buildings or changes to land morphology and use, except works for consolidation or hydraulic/hydrogeological safety"
+    - "in the class IVa flooding areas, the building and recovery of basements and semi-basements is forbidden"
+  type: rule
+
+- id: q22
+  question: "Quale fascia di rispetto vale per la roggia Vettabbia alta, anche se si trova nel tessuto urbano consolidato?"
+  lang: it
+  point: null
+  gold_articles: ["PR-art-50"]
+  answer_key:
+    - "a respect strip of 10 metres applies to the roggia Vettabbia alta"
+    - "it applies even though the roggia is inside the TUC"
+    - "on the main river network new building works are forbidden in the respect strips, except public infrastructure that cannot be located elsewhere, with a hydraulic compatibility check"
+  type: parameter
+
+- id: q23
+  question: "What happens to approved implementation plans and agreements that were already in force when the new PGT was adopted?"
+  lang: en
+  point: null
+  gold_articles: ["PR-art-52"]
+  acceptable_articles: ["PR-art-53"]
+  answer_key:
+    - "the provisions of approved implementation plans, negotiated planning acts and signed conventions remain valid until their expiry"
+    - "after expiry the provisions of the current PGT apply"
+    - "until expiry the PGT maps are only ricognitive, without conforming effect; Accordi di Programma already in force follow their own provisions until completion"
+  type: rule
+
+# ---------------------------------------------------------------- Piano dei Servizi (7)
+- id: q24
+  question: "Do I have to provide public service areas when I build new floor area using only the basic 0.35 index?"
+  lang: en
+  point: null
+  gold_articles: ["PS-art-11"]
+  acceptable_articles: ["PR-art-33"]
+  answer_key:
+    - "no territorial service provision is required for new construction that uses the single IT of 0.35 sqm/sqm"
+    - "for floor area beyond that, residential, office, tourist-accommodation, private services and rural uses owe 100% of the SL as service areas"
+    - "the productive category owes 20% of the SL"
+  type: parameter
+
+- id: q25
+  question: "Quanta dotazione di servizi si deve reperire per l'edilizia residenziale sociale?"
+  lang: it
+  point: null
+  gold_articles: ["PS-art-11"]
+  acceptable_articles: ["PR-art-9"]
+  answer_key:
+    - "social housing interventions owe 36% of the SL in service provision"
+    - "that provision can be replaced by building public housing services elsewhere in public ownership"
+    - "social housing under art. 9 comma 3 of the Piano delle Regole requires no service provision"
+  type: rule
+
+- id: q26
+  question: "I nuovi servizi privati di uso pubblico contano nella superficie lorda edificabile? E cosa succede se l'indice fondiario supera 7 mc/mq?"
+  lang: it
+  point: null
+  gold_articles: ["PS-art-6"]
+  answer_key:
+    - "new services (public interest, subject to evaluation and convention or accreditation) do not count toward the maximum buildable SL under the urban indices"
+    - "if the IF including private urban functions exceeds 7 mc/mq, the route is direct convenzionato mode as in art. 13 of the Piano delle Regole"
+  type: paraphrase
+
+- id: q27
+  question: "Which private facilities can count as public-interest services under the Piano dei Servizi?"
+  lang: en
+  point: null
+  gold_articles: ["PS-art-4"]
+  answer_key:
+    - "private services and facilities of public use or general interest can qualify, per art. 9 comma 10 of L.R. 12/2005"
+    - "they must be evaluated and tied by easement (asservimento), agreement (convenzionamento), accreditation or a use regulation"
+    - "they must improve individual and collective life and respond to the demand of resident functions and of the catchment area"
+  type: definition
+
+- id: q28
+  question: "Cosa sono le infrastrutture verdi e blu e su quale tavola sono rappresentate?"
+  lang: it
+  point: null
+  gold_articles: ["PS-art-10"]
+  acceptable_articles: ["DPA1-sec-25"]
+  answer_key:
+    - "the PGT identifies Infrastrutture verdi e blu to improve environmental and ecological quality and mitigate climate change and pollution; they also serve as the Rete Ecologica Comunale"
+    - "they are shown with a specific symbol on Tav. S.03"
+    - "types include green infrastructure (e.g. raggi verdi), linear green connections (tree rows along streets) and blue infrastructure (open watercourses)"
+  type: definition
+
+- id: q29
+  question: "Can kiosks be placed in urban green areas, and do they count as floor area?"
+  lang: en
+  point: [45.4781, 9.2269]
+  gold_articles: ["PS-art-8"]
+  answer_key:
+    - "kiosks and similar structures, even prefabricated, are allowed in the urban green and infrastructure areas for the duration of the concession contract"
+    - "their location, concession duration and activities (including public-service catering) are regulated by an agreement of the competent Area"
+    - "such structures do not constitute SL"
+  type: point
+
+- id: q30
+  question: "Nel Parco Agricolo Sud Milano quali norme prevalgono sui servizi?"
+  lang: it
+  point: [45.4170, 9.2350]
+  gold_articles: ["PS-art-12"]
+  acceptable_articles: ["PR-art-35", "PTC-art-1"]
+  answer_key:
+    - "inside the Parco Agricolo Sud Milano the normative and cartographic contents of its PTC prevail"
+  type: point
+
+# ---------------------------------------------------------------- Documento di Piano (3)
+- id: q31
+  question: "What is the purpose of urban equalisation (perequazione) in the Documento di Piano and how do landowners share in it?"
+  lang: en
+  point: null
+  gold_articles: ["DP-art-2"]
+  acceptable_articles: ["PR-art-7"]
+  answer_key:
+    - "it is a tool of fairness among the parties in distributing the benefits, opportunities and burdens of urban transformation"
+    - "it serves the free acquisition by the Comune of areas for public facilities foreseen by the Piano dei Servizi"
+    - "owners take part proportionally to the properties they hold, regardless of the specific use assigned to their areas"
+  type: definition
+
+- id: q32
+  question: "A quali interventi si applicano i principi di invarianza idraulica e idrologica?"
+  lang: it
+  point: null
+  gold_articles: ["DP-art-6"]
+  answer_key:
+    - "the principle of hydraulic and hydrological invariance must be respected in planning choices"
+    - "it applies to building interventions in art. 3 comma 1 letters d), e), f) of D.P.R. 380/2001 (renovation, new construction, urban restructuring)"
+    - "and to all interventions that reduce soil permeability compared with the condition before urbanisation"
+  type: rule
+
+- id: q33
+  question: "Come devono essere trascritti i contratti di cessione dei diritti edificatori e dove vengono annotati?"
+  lang: it
+  point: null
+  gold_articles: ["DP-art-7"]
+  acceptable_articles: ["PR-art-7"]
+  answer_key:
+    - "contracts must be in the form of a public deed or a private writing with authenticated signatures"
+    - "they must be recorded in the Real Estate Registers under art. 2643 comma 2-bis of the Civil Code"
+    - "they are annotated in the public Registro delle Cessioni dei Diritti Edificatori (art. 11 L.R. 12/2005)"
+  type: procedure
+
+# ---------------------------------------------------------------- PTC Parco Sud (3)
+- id: q34
+  question: "Within what distance from the banks of a Naviglio is building forbidden in the Parco Agricolo Sud?"
+  lang: en
+  point: null
+  gold_articles: ["PTC-art-42"]
+  answer_key:
+    - "building is forbidden in a strip of 100 m from the banks of Navigli and canals"
+    - "this holds pending a sector plan for navigli and canals under art. 7 that defines their area of relevance in more detail"
+  type: parameter
+
+- id: q35
+  question: "Posso eliminare una marcita nel Parco Agricolo Sud? Come funziona la tutela?"
+  lang: it
+  point: [45.4170, 9.2350]
+  gold_articles: ["PTC-art-44"]
+  answer_key:
+    - "all the marcite and prati marcitori of the park are protected for their historical, landscape and naturalistic value"
+    - "marcite can be removed only with prior authorisation of the park managing body"
+    - "the authorisation is given after hearing the technical-agronomic opinion of the competent service of the Province of Milan"
+  type: point
+
+- id: q36
+  question: "Cosa e' vietato nelle superfici boscate del Parco Agricolo Sud?"
+  lang: it
+  point: null
+  gold_articles: ["PTC-art-21"]
+  answer_key:
+    - "any new construction is forbidden inside wooded areas"
+    - "for existing buildings only protection and conservation works are allowed, with no increase in volume or covered area"
+    - "the rules cover woodland, patches, tree belts and rows, and areas of spontaneous regeneration, which owners must keep in the best state of conservation"
+  type: rule
+
+# ---------------------------------------------------------------- Cross-document (2)
+- id: q37
+  question: "I want to build a new farm building near Chiaravalle, inside the Parco Agricolo Sud. Which text prevails, the Piano delle Regole or the park's PTC?"
+  lang: en
+  point: [45.4170, 9.2350]
+  gold_articles: ["PR-art-35", "PTC-art-25"]
+  acceptable_articles: ["PS-art-12", "PTC-art-1", "PR-art-25"]
+  answer_key:
+    - "inside the Parco Agricolo Sud Milano the PTC contents are incorporated in the PGT and prevail over conflicting provisions"
+    - "agricultural belt territories (cintura metropolitana) are destined to agricultural-productive functions and must be kept intact and compact"
+    - "the PTC text in the corpus is the 2000 version without later amendments"
+  type: cross
+
+- id: q38
+  question: "Dentro il Parco Agricolo Sud, posso costruire a 50 metri da un Naviglio? Cosa dicono il PTC e il Piano delle Regole?"
+  lang: it
+  point: null
+  gold_articles: ["PTC-art-42", "PR-art-50"]
+  acceptable_articles: ["PR-art-35", "PTC-art-1"]
+  answer_key:
+    - "no: the PTC forbids building within 100 m of the banks of Navigli pending the sector plan"
+    - "the Piano delle Regole subjects the water network to specific hydraulic and environmental protection, with respect strips where new building is forbidden on the main network"
+    - "inside the park the PTC prevails over PGT provisions that conflict"
+  type: cross
+
+# ---------------------------------------------------------------- Not in the corpus (2)
+- id: q39
+  question: "What are the detailed steps and timelines of the 'valutazione di incidenza' (Natura 2000 appropriate assessment) procedure for a project near a SIC?"
+  lang: en
+  point: null
+  gold_articles: []
+  answer_key:
+    - "says the supplied texts do not cover it"
+  type: not_in_corpus
+
+- id: q40
+  question: "Qual e' l'altezza minima dei parapetti e la larghezza minima delle scale secondo il Regolamento Edilizio Tipo (RET) del Comune?"
+  lang: it
+  point: null
+  gold_articles: []
+  answer_key:
+    - "says the supplied texts do not cover it"
+  type: not_in_corpus

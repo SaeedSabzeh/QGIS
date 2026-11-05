@@ -1,0 +1,3483 @@
+[
+ {
+  "id": "p01",
+  "name": "Duomo",
+  "lat": 45.4642,
+  "lon": 9.19,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_naf",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_naf",
+    "category": "naf",
+    "label": "Nuclei di antica formazione (NAF)",
+    "values": {
+     "COD_NUC": 15
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-18",
+     "PR-art-19"
+    ],
+    "general": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13"
+    ],
+    "verify": false
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 5,
+     "DESCRIZION": "SENSIBILITA' MOLTO ELEVATA"
+    },
+    "matched": {
+     "CLASSE": "5"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-44",
+   "PR-art-7",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p02",
+  "name": "Citta Studi",
+  "lat": 45.4781,
+  "lon": 9.2269,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita",
+   "pgt_servizi"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_servizi",
+    "category": "servizi",
+    "label": "Servizi e impianti",
+    "values": {
+     "TIPO_SERV": 52,
+     "DTIPO_SERV": "AREE A VERDE",
+     "STATO": 1,
+     "DSTATO": "ESISTENTE",
+     "LIV_TER": 30,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/ "
+    },
+    "matched": {},
+    "articles": [
+     "PS-art-7",
+     "PS-art-8"
+    ],
+    "general": [
+     "PS-art-4",
+     "PS-art-5",
+     "PS-art-6",
+     "PS-art-11",
+     "PS-art-12",
+     "PR-art-1",
+     "PR-art-6",
+     "PR-art-7",
+     "PR-art-8",
+     "PR-art-53"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 4,
+     "DESCRIZION": "SENSIBILITA' ELEVATA"
+    },
+    "matched": {
+     "CLASSE": "4"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PS-art-7",
+   "PS-art-8",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-44",
+   "PS-art-4",
+   "PS-art-5",
+   "PS-art-6",
+   "PS-art-12",
+   "PR-art-1",
+   "PR-art-7",
+   "PR-art-53",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PS-art-9",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p03",
+  "name": "Parco Nord",
+  "lat": 45.5281,
+  "lon": 9.205,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-44",
+   "PR-art-7",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p04",
+  "name": "Darsena (Navigli)",
+  "lat": 45.452,
+  "lon": 9.176,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_naf",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_naf",
+    "category": "naf",
+    "label": "Nuclei di antica formazione (NAF)",
+    "values": {
+     "COD_NUC": 15
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-18",
+     "PR-art-19"
+    ],
+    "general": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13"
+    ],
+    "verify": false
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 5,
+     "DESCRIZION": "SENSIBILITA' MOLTO ELEVATA"
+    },
+    "matched": {
+     "CLASSE": "5"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-44",
+   "PR-art-7",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p05",
+  "name": "Chiaravalle (Parco Agricolo Sud)",
+  "lat": 45.417,
+  "lon": 9.235,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_at",
+   "pgt_fattibilita_geo",
+   "pgt_paesaggio",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_at",
+    "category": "at",
+    "label": "Ambiti di trasformazione",
+    "values": {
+     "AMB_TRAS": 29,
+     "NOME_AMB": "Le Abbazie (PCU3)",
+     "DFUN_PREV1": "RESIDENZIALE",
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20171115_AT_1.pdf"
+    },
+    "matched": {
+     "AMB_TRAS": "29"
+    },
+    "articles": [
+     "PTC-art-26",
+     "PTC-all-A"
+    ],
+    "general": [
+     "PR-art-1",
+     "PR-art-3",
+     "PR-art-35",
+     "PR-art-52",
+     "PR-art-53",
+     "DP-art-1",
+     "DP-art-2"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_paesaggio",
+    "category": "paesaggio",
+    "label": "Aree di valore paesaggistico-ambientale ed ecologico",
+    "values": {
+     "COD_PAES": 20,
+     "TIPO_AMB": 502,
+     "DESCRIZION": "AMBITI, ELEMENTI E SISTEMI DEL PAESAGGIO AGRARIO TRADIZIONALE"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-2",
+     "PR-art-24",
+     "PR-art-35",
+     "PR-art-36"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 4,
+     "DESCRIZION": "SENSIBILITA' ELEVATA"
+    },
+    "matched": {
+     "CLASSE": "4"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 3,
+     "DESCR_FATTIBILITA": "Fattibilità con consistenti limitazioni",
+     "FATTORI_PERICOLO": "III - Fattibilità con consistenti limitazioni - IIIc+IIId"
+    },
+    "matched": {
+     "CLASSE": "3"
+    },
+    "articles": [
+     "PR-art-45"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-45"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PTC-art-26",
+   "PTC-all-A",
+   "PR-art-34",
+   "PR-art-45",
+   "PR-art-1",
+   "PR-art-3",
+   "PR-art-35",
+   "PR-art-52",
+   "PR-art-53",
+   "DP-art-1",
+   "DP-art-2",
+   "PR-art-2",
+   "PR-art-24",
+   "PR-art-36",
+   "PR-art-4",
+   "PR-art-13",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-45",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PTC-art-16",
+   "PTC-art-34"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p06",
+  "name": "Lambro (flood positive control)",
+  "lat": 45.465,
+  "lon": 9.256,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgra_APSFR",
+   "pgra_H_RP",
+   "pgra_L_RP",
+   "pgra_M_RP",
+   "pgra_R3",
+   "pgt_at",
+   "pgt_fattibilita_geo",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_at",
+    "category": "at",
+    "label": "Ambiti di trasformazione",
+    "values": {
+     "AMB_TRAS": 26,
+     "NOME_AMB": "L'Idroscalo (PCU4)",
+     "DFUN_PREV1": "RESIDENZIALE",
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20171115_AT_1.pdf"
+    },
+    "matched": {
+     "AMB_TRAS": "26"
+    },
+    "articles": [
+     "PTC-art-26",
+     "PTC-all-A"
+    ],
+    "general": [
+     "PR-art-1",
+     "PR-art-3",
+     "PR-art-35",
+     "PR-art-52",
+     "PR-art-53",
+     "DP-art-1",
+     "DP-art-2"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 3,
+     "DESCRIZION": "SENSIBILITA' MEDIA"
+    },
+    "matched": {
+     "CLASSE": "3"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 3,
+     "DESCR_FATTIBILITA": "Fattibilità con consistenti limitazioni",
+     "FATTORI_PERICOLO": "III - Fattibilità con consistenti limitazioni - IIIa+IIIc"
+    },
+    "matched": {
+     "CLASSE": "3"
+    },
+    "articles": [
+     "PR-art-45"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-45"
+    ],
+    "verify": false
+   },
+   {
+    "layer": "pgra_APSFR",
+    "category": "pgra_apsfr",
+    "label": "Area a potenziale rischio significativo di alluvione (APSFR)",
+    "values": {
+     "nameAPSFR": "Città di Milano - Reticolo Nord Milano",
+     "relZoneId": "ITN008",
+     "specHazTyp": "A11 - Fluvial"
+    },
+    "matched": {},
+    "articles": [],
+    "general": [],
+    "verify": false
+   },
+   {
+    "layer": "pgra_R3",
+    "category": "pgra_risk",
+    "label": "Rischio alluvioni (PGRA)",
+    "values": {
+     "Ris": "R3",
+     "Danno": "D2",
+     "CatUE": "Beni paesaggistici e culturali",
+     "Nomeelidr": "Lambro"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-43",
+     "PR-art-45",
+     "PR-art-46",
+     "PR-art-48"
+    ],
+    "general": [],
+    "verify": true
+   },
+   {
+    "layer": "pgra_H_RP",
+    "category": "pgra_hazard",
+    "label": "Pericolosita alluvioni (PGRA)",
+    "values": {
+     "Codscenar": "H",
+     "Tritorno": 10,
+     "Nomeelidr": "Lambro",
+     "Ambitoter": "RP",
+     "nta_scenario": "P3"
+    },
+    "matched": {
+     "Codscenar": "H"
+    },
+    "articles": [
+     "PR-art-45",
+     "PR-art-46",
+     "CG-art-45",
+     "CG-art-46"
+    ],
+    "general": [
+     "PR-art-43",
+     "PR-art-44",
+     "CG-art-43",
+     "CG-art-44"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgra_M_RP",
+    "category": "pgra_hazard",
+    "label": "Pericolosita alluvioni (PGRA)",
+    "values": {
+     "Codscenar": "M",
+     "Tritorno": 200,
+     "Nomeelidr": "Lambro",
+     "Ambitoter": "RP",
+     "nta_scenario": "P2"
+    },
+    "matched": {
+     "Codscenar": "M"
+    },
+    "articles": [
+     "PR-art-44",
+     "PR-art-45",
+     "PR-art-46",
+     "CG-art-44",
+     "CG-art-45",
+     "CG-art-46"
+    ],
+    "general": [
+     "PR-art-43",
+     "CG-art-43"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgra_L_RP",
+    "category": "pgra_hazard",
+    "label": "Pericolosita alluvioni (PGRA)",
+    "values": {
+     "Codscenar": "L",
+     "Tritorno": 500,
+     "Nomeelidr": "Lambro",
+     "Ambitoter": "RP",
+     "nta_scenario": "P1"
+    },
+    "matched": {
+     "Codscenar": "L"
+    },
+    "articles": [
+     "PR-art-44",
+     "CG-art-44"
+    ],
+    "general": [
+     "PR-art-43",
+     "PR-art-45",
+     "PR-art-46",
+     "CG-art-43",
+     "CG-art-45",
+     "CG-art-46"
+    ],
+    "verify": true
+   }
+  ],
+  "articles": [
+   "PTC-art-26",
+   "PTC-all-A",
+   "PR-art-34",
+   "PR-art-45",
+   "PR-art-43",
+   "PR-art-46",
+   "PR-art-48",
+   "CG-art-45",
+   "CG-art-46",
+   "PR-art-44",
+   "CG-art-44",
+   "PR-art-1",
+   "PR-art-3",
+   "PR-art-35",
+   "PR-art-52",
+   "PR-art-53",
+   "DP-art-1",
+   "DP-art-2",
+   "PR-art-4",
+   "PR-art-13",
+   "PR-art-42",
+   "PR-art-47",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-43",
+   "DPA1-sec-21",
+   "DPA1-sec-22"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p07",
+  "name": "Stazione Centrale",
+  "lat": 45.4862,
+  "lon": 9.2046,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgra_H_RP",
+   "pgra_L_RP",
+   "pgra_M_RP",
+   "pgra_R4",
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_rigenerazione",
+   "pgt_sensibilita",
+   "pgt_servizi"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_servizi",
+    "category": "servizi",
+    "label": "Servizi e impianti",
+    "values": {
+     "TIPO_SERV": 34,
+     "DTIPO_SERV": "ATTREZZATURE DI DEPOSITO E SERVIZIO TRASPORTI PUBBLICI",
+     "STATO": 1,
+     "DSTATO": "ESISTENTE",
+     "LIV_TER": 31,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/ "
+    },
+    "matched": {},
+    "articles": [
+     "PS-art-7",
+     "PS-art-8"
+    ],
+    "general": [
+     "PS-art-4",
+     "PS-art-5",
+     "PS-art-6",
+     "PS-art-11",
+     "PS-art-12",
+     "PR-art-1",
+     "PR-art-6",
+     "PR-art-7",
+     "PR-art-8",
+     "PR-art-53"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 4,
+     "DESCRIZION": "SENSIBILITA' ELEVATA"
+    },
+    "matched": {
+     "CLASSE": "4"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_rigenerazione",
+    "category": "rigenerazione",
+    "label": "Ambiti di rigenerazione urbana e territoriale",
+    "values": {
+     "CATEGORIA": 2,
+     "NOME_AMB": "Ambito di rigenerazione",
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20250702_AR_79.pdf"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-14",
+     "PR-art-15",
+     "DP-art-3"
+    ],
+    "general": [
+     "PR-art-16",
+     "PR-art-22",
+     "PR-art-23",
+     "DP-art-4"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 3,
+     "DESCR_FATTIBILITA": "Fattibilità con consistenti limitazioni",
+     "FATTORI_PERICOLO": "III - Fattibilità con consistenti limitazioni - IIIa"
+    },
+    "matched": {
+     "CLASSE": "3"
+    },
+    "articles": [
+     "PR-art-45"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-45"
+    ],
+    "verify": false
+   },
+   {
+    "layer": "pgra_R4",
+    "category": "pgra_risk",
+    "label": "Rischio alluvioni (PGRA)",
+    "values": {
+     "Ris": "R4",
+     "Danno": "D4",
+     "CatUE": "Attività economiche e sociali",
+     "Nomeelidr": "Seveso"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-43",
+     "PR-art-45",
+     "PR-art-46",
+     "PR-art-48"
+    ],
+    "general": [],
+    "verify": true
+   },
+   {
+    "layer": "pgra_H_RP",
+    "category": "pgra_hazard",
+    "label": "Pericolosita alluvioni (PGRA)",
+    "values": {
+     "Codscenar": "H",
+     "Tritorno": 10,
+     "Nomeelidr": "Seveso",
+     "Ambitoter": "RP",
+     "nta_scenario": "P3"
+    },
+    "matched": {
+     "Codscenar": "H"
+    },
+    "articles": [
+     "PR-art-45",
+     "PR-art-46",
+     "CG-art-45",
+     "CG-art-46"
+    ],
+    "general": [
+     "PR-art-43",
+     "PR-art-44",
+     "CG-art-43",
+     "CG-art-44"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgra_M_RP",
+    "category": "pgra_hazard",
+    "label": "Pericolosita alluvioni (PGRA)",
+    "values": {
+     "Codscenar": "M",
+     "Tritorno": 100,
+     "Nomeelidr": "Seveso",
+     "Ambitoter": "RP",
+     "nta_scenario": "P2"
+    },
+    "matched": {
+     "Codscenar": "M"
+    },
+    "articles": [
+     "PR-art-44",
+     "PR-art-45",
+     "PR-art-46",
+     "CG-art-44",
+     "CG-art-45",
+     "CG-art-46"
+    ],
+    "general": [
+     "PR-art-43",
+     "CG-art-43"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgra_L_RP",
+    "category": "pgra_hazard",
+    "label": "Pericolosita alluvioni (PGRA)",
+    "values": {
+     "Codscenar": "L",
+     "Tritorno": 500,
+     "Nomeelidr": "Seveso",
+     "Ambitoter": "RP",
+     "nta_scenario": "P1"
+    },
+    "matched": {
+     "Codscenar": "L"
+    },
+    "articles": [
+     "PR-art-44",
+     "CG-art-44"
+    ],
+    "general": [
+     "PR-art-43",
+     "PR-art-45",
+     "PR-art-46",
+     "CG-art-43",
+     "CG-art-45",
+     "CG-art-46"
+    ],
+    "verify": true
+   }
+  ],
+  "articles": [
+   "PS-art-7",
+   "PS-art-8",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-14",
+   "PR-art-15",
+   "DP-art-3",
+   "PR-art-45",
+   "PR-art-43",
+   "PR-art-46",
+   "PR-art-48",
+   "CG-art-45",
+   "CG-art-46",
+   "PR-art-44",
+   "CG-art-44",
+   "PS-art-4",
+   "PS-art-5",
+   "PS-art-6",
+   "PS-art-12",
+   "PR-art-1",
+   "PR-art-7",
+   "PR-art-53",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-16",
+   "PR-art-22",
+   "PR-art-23",
+   "DP-art-4",
+   "PR-art-42",
+   "PR-art-47",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-43",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PS-art-9",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p08",
+  "name": "San Siro stadium",
+  "lat": 45.4781,
+  "lon": 9.124,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_rigenerazione",
+   "pgt_sensibilita",
+   "pgt_servizi"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_servizi",
+    "category": "servizi",
+    "label": "Servizi e impianti",
+    "values": {
+     "TIPO_SERV": 33,
+     "DTIPO_SERV": "GRANDI IMPIANTI PER L'AGONISMO E LO SPETTACOLO",
+     "STATO": 1,
+     "DSTATO": "ESISTENTE",
+     "LIV_TER": 31,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/ "
+    },
+    "matched": {},
+    "articles": [
+     "PS-art-7",
+     "PS-art-8"
+    ],
+    "general": [
+     "PS-art-4",
+     "PS-art-5",
+     "PS-art-6",
+     "PS-art-11",
+     "PS-art-12",
+     "PR-art-1",
+     "PR-art-6",
+     "PR-art-7",
+     "PR-art-8",
+     "PR-art-53"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_rigenerazione",
+    "category": "rigenerazione",
+    "label": "Ambiti di rigenerazione urbana e territoriale",
+    "values": {
+     "CATEGORIA": 2,
+     "NOME_AMB": "Ambito di rigenerazione",
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20250702_AR_658.pdf"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-14",
+     "PR-art-15",
+     "DP-art-3"
+    ],
+    "general": [
+     "PR-art-16",
+     "PR-art-22",
+     "PR-art-23",
+     "DP-art-4"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PS-art-7",
+   "PS-art-8",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-14",
+   "PR-art-15",
+   "DP-art-3",
+   "PR-art-44",
+   "PS-art-4",
+   "PS-art-5",
+   "PS-art-6",
+   "PS-art-12",
+   "PR-art-1",
+   "PR-art-7",
+   "PR-art-53",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-16",
+   "PR-art-22",
+   "PR-art-23",
+   "DP-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PS-art-9",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p09",
+  "name": "Isola / Porta Garibaldi",
+  "lat": 45.485,
+  "lon": 9.188,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_rigenerazione",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 4,
+     "DESCRIZION": "SENSIBILITA' ELEVATA"
+    },
+    "matched": {
+     "CLASSE": "4"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_rigenerazione",
+    "category": "rigenerazione",
+    "label": "Ambiti di rigenerazione urbana e territoriale",
+    "values": {
+     "CATEGORIA": 2,
+     "NOME_AMB": "Ambito di rigenerazione",
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20250702_AR_1319.pdf"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-14",
+     "PR-art-15",
+     "DP-art-3"
+    ],
+    "general": [
+     "PR-art-16",
+     "PR-art-22",
+     "PR-art-23",
+     "DP-art-4"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-14",
+   "PR-art-15",
+   "DP-art-3",
+   "PR-art-44",
+   "PR-art-7",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-16",
+   "PR-art-22",
+   "PR-art-23",
+   "DP-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p10",
+  "name": "Linate airport",
+  "lat": 45.445,
+  "lon": 9.276,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgra_APSFR",
+   "pgra_L_RP",
+   "pgra_R2",
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita",
+   "pgt_servizi"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_servizi",
+    "category": "servizi",
+    "label": "Servizi e impianti",
+    "values": {
+     "TIPO_SERV": 32,
+     "DTIPO_SERV": "AREE DI INTERSCAMBIO PASSEGGERI",
+     "STATO": 1,
+     "DSTATO": "ESISTENTE",
+     "LIV_TER": 31,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015171/015171_20170712_SS_1.pdf"
+    },
+    "matched": {},
+    "articles": [
+     "PS-art-7",
+     "PS-art-8"
+    ],
+    "general": [
+     "PS-art-4",
+     "PS-art-5",
+     "PS-art-6",
+     "PS-art-11",
+     "PS-art-12",
+     "PR-art-1",
+     "PR-art-6",
+     "PR-art-7",
+     "PR-art-8",
+     "PR-art-53"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 7,
+     "COD_DEST1": 0,
+     "SPEC_DEST": 0,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015171/015171_20170712_AU_1.pdf"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11"
+    ],
+    "general": [
+     "PR-art-5",
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 3,
+     "DESCR_FATTIBILITA": "Fattibilità con consistenti limitazioni",
+     "FATTORI_PERICOLO": "Aree vulnerabili dal punto di vista idraulico -  aree con tirante inferiore a 90cm  inserite in fascia C delimitata  da un limite di progetto tra la fascia B e C PAI del fiume Lambro (3.1B/C)"
+    },
+    "matched": {
+     "CLASSE": "3"
+    },
+    "articles": [
+     "PR-art-45"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-45"
+    ],
+    "verify": false
+   },
+   {
+    "layer": "pgra_APSFR",
+    "category": "pgra_apsfr",
+    "label": "Area a potenziale rischio significativo di alluvione (APSFR)",
+    "values": {
+     "nameAPSFR": "Città di Milano - Reticolo Nord Milano",
+     "relZoneId": "ITN008",
+     "specHazTyp": "A11 - Fluvial"
+    },
+    "matched": {},
+    "articles": [],
+    "general": [],
+    "verify": false
+   },
+   {
+    "layer": "pgra_R2",
+    "category": "pgra_risk",
+    "label": "Rischio alluvioni (PGRA)",
+    "values": {
+     "Ris": "R2",
+     "Danno": "D4",
+     "CatUE": "Attività economiche e sociali",
+     "Nomeelidr": "Lambro"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-43",
+     "PR-art-45",
+     "PR-art-46",
+     "PR-art-48"
+    ],
+    "general": [],
+    "verify": true
+   },
+   {
+    "layer": "pgra_L_RP",
+    "category": "pgra_hazard",
+    "label": "Pericolosita alluvioni (PGRA)",
+    "values": {
+     "Codscenar": "L",
+     "Tritorno": 500,
+     "Nomeelidr": "Lambro",
+     "Ambitoter": "RP",
+     "nta_scenario": "P1"
+    },
+    "matched": {
+     "Codscenar": "L"
+    },
+    "articles": [
+     "PR-art-44",
+     "CG-art-44"
+    ],
+    "general": [
+     "PR-art-43",
+     "PR-art-45",
+     "PR-art-46",
+     "CG-art-43",
+     "CG-art-45",
+     "CG-art-46"
+    ],
+    "verify": true
+   }
+  ],
+  "articles": [
+   "PS-art-7",
+   "PS-art-8",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-34",
+   "PR-art-45",
+   "PR-art-43",
+   "PR-art-46",
+   "PR-art-48",
+   "PR-art-44",
+   "CG-art-44",
+   "PS-art-4",
+   "PS-art-5",
+   "PS-art-6",
+   "PS-art-12",
+   "PR-art-1",
+   "PR-art-7",
+   "PR-art-53",
+   "PR-art-5",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-47",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-45",
+   "CG-art-43",
+   "CG-art-46",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PS-art-9",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p11",
+  "name": "Bicocca",
+  "lat": 45.518,
+  "lon": 9.211,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita",
+   "pgt_servizi"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_servizi",
+    "category": "servizi",
+    "label": "Servizi e impianti",
+    "values": {
+     "TIPO_SERV": 52,
+     "DTIPO_SERV": "AREE A VERDE",
+     "STATO": 1,
+     "DSTATO": "ESISTENTE",
+     "LIV_TER": 30,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/ "
+    },
+    "matched": {},
+    "articles": [
+     "PS-art-7",
+     "PS-art-8"
+    ],
+    "general": [
+     "PS-art-4",
+     "PS-art-5",
+     "PS-art-6",
+     "PS-art-11",
+     "PS-art-12",
+     "PR-art-1",
+     "PR-art-6",
+     "PR-art-7",
+     "PR-art-8",
+     "PR-art-53"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PS-art-7",
+   "PS-art-8",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-44",
+   "PS-art-4",
+   "PS-art-5",
+   "PS-art-6",
+   "PS-art-12",
+   "PR-art-1",
+   "PR-art-7",
+   "PR-art-53",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PS-art-9",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p12",
+  "name": "Quarto Oggiaro",
+  "lat": 45.506,
+  "lon": 9.139,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-44",
+   "PR-art-7",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p13",
+  "name": "Giambellino / Lorenteggio",
+  "lat": 45.443,
+  "lon": 9.142,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita",
+   "pgt_servizi"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_servizi",
+    "category": "servizi",
+    "label": "Servizi e impianti",
+    "values": {
+     "TIPO_SERV": 52,
+     "DTIPO_SERV": "AREE A VERDE",
+     "STATO": 1,
+     "DSTATO": "ESISTENTE",
+     "LIV_TER": 30,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/ "
+    },
+    "matched": {},
+    "articles": [
+     "PS-art-7",
+     "PS-art-8"
+    ],
+    "general": [
+     "PS-art-4",
+     "PS-art-5",
+     "PS-art-6",
+     "PS-art-11",
+     "PS-art-12",
+     "PR-art-1",
+     "PR-art-6",
+     "PR-art-7",
+     "PR-art-8",
+     "PR-art-53"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 4,
+     "DESCRIZION": "SENSIBILITA' ELEVATA"
+    },
+    "matched": {
+     "CLASSE": "4"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 3,
+     "DESCR_FATTIBILITA": "Fattibilità con consistenti limitazioni",
+     "FATTORI_PERICOLO": "III - Fattibilità con consistenti limitazioni - IIIc"
+    },
+    "matched": {
+     "CLASSE": "3"
+    },
+    "articles": [
+     "PR-art-45"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-45"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PS-art-7",
+   "PS-art-8",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-45",
+   "PS-art-4",
+   "PS-art-5",
+   "PS-art-6",
+   "PS-art-12",
+   "PR-art-1",
+   "PR-art-7",
+   "PR-art-53",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-45",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PS-art-9",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p14",
+  "name": "Rogoredo",
+  "lat": 45.4325,
+  "lon": 9.239,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_rigenerazione",
+   "pgt_sensibilita",
+   "pgt_servizi"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_servizi",
+    "category": "servizi",
+    "label": "Servizi e impianti",
+    "values": {
+     "TIPO_SERV": 49,
+     "DTIPO_SERV": "PARCHEGGI E AUTORIMESSE",
+     "STATO": 2,
+     "DSTATO": "IN PROGETTO",
+     "LIV_TER": 31,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/ "
+    },
+    "matched": {},
+    "articles": [
+     "PS-art-7",
+     "PS-art-8"
+    ],
+    "general": [
+     "PS-art-4",
+     "PS-art-5",
+     "PS-art-6",
+     "PS-art-11",
+     "PS-art-12",
+     "PR-art-1",
+     "PR-art-6",
+     "PR-art-7",
+     "PR-art-8",
+     "PR-art-53"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_rigenerazione",
+    "category": "rigenerazione",
+    "label": "Ambiti di rigenerazione urbana e territoriale",
+    "values": {
+     "CATEGORIA": 2,
+     "NOME_AMB": "Ambito di rigenerazione",
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20250702_AR_84.pdf"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-14",
+     "PR-art-15",
+     "DP-art-3"
+    ],
+    "general": [
+     "PR-art-16",
+     "PR-art-22",
+     "PR-art-23",
+     "DP-art-4"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 3,
+     "DESCR_FATTIBILITA": "Fattibilità con consistenti limitazioni",
+     "FATTORI_PERICOLO": "III - Fattibilità con consistenti limitazioni - IIIc"
+    },
+    "matched": {
+     "CLASSE": "3"
+    },
+    "articles": [
+     "PR-art-45"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-45"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PS-art-7",
+   "PS-art-8",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-14",
+   "PR-art-15",
+   "DP-art-3",
+   "PR-art-45",
+   "PS-art-4",
+   "PS-art-5",
+   "PS-art-6",
+   "PS-art-12",
+   "PR-art-1",
+   "PR-art-7",
+   "PR-art-53",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-16",
+   "PR-art-22",
+   "PR-art-23",
+   "DP-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-45",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PS-art-9",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p15",
+  "name": "Gratosoglio",
+  "lat": 45.41,
+  "lon": 9.178,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 3,
+     "DESCR_FATTIBILITA": "Fattibilità con consistenti limitazioni",
+     "FATTORI_PERICOLO": "III - Fattibilità con consistenti limitazioni - IIIc"
+    },
+    "matched": {
+     "CLASSE": "3"
+    },
+    "articles": [
+     "PR-art-45"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-45"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-45",
+   "PR-art-7",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-45",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p16",
+  "name": "Baggio (west edge)",
+  "lat": 45.465,
+  "lon": 9.092,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 3,
+     "DESCR_FATTIBILITA": "Fattibilità con consistenti limitazioni",
+     "FATTORI_PERICOLO": "III - Fattibilità con consistenti limitazioni - IIIc"
+    },
+    "matched": {
+     "CLASSE": "3"
+    },
+    "articles": [
+     "PR-art-45"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-45"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-45",
+   "PR-art-7",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-45",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p17",
+  "name": "Barona / Naviglio Pavese",
+  "lat": 45.433,
+  "lon": 9.16,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_rigenerazione",
+   "pgt_sensibilita",
+   "pgt_servizi"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_servizi",
+    "category": "servizi",
+    "label": "Servizi e impianti",
+    "values": {
+     "TIPO_SERV": 39,
+     "DTIPO_SERV": "ATTREZZATURE OSPEDALIERE, SANITARIE E ASSISTENZIALI",
+     "STATO": 1,
+     "DSTATO": "ESISTENTE",
+     "LIV_TER": 31,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/ "
+    },
+    "matched": {},
+    "articles": [
+     "PS-art-7",
+     "PS-art-8"
+    ],
+    "general": [
+     "PS-art-4",
+     "PS-art-5",
+     "PS-art-6",
+     "PS-art-11",
+     "PS-art-12",
+     "PR-art-1",
+     "PR-art-6",
+     "PR-art-7",
+     "PR-art-8",
+     "PR-art-53"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_rigenerazione",
+    "category": "rigenerazione",
+    "label": "Ambiti di rigenerazione urbana e territoriale",
+    "values": {
+     "CATEGORIA": 2,
+     "NOME_AMB": "Ambito di rigenerazione",
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20250702_AR_949.pdf"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-14",
+     "PR-art-15",
+     "DP-art-3"
+    ],
+    "general": [
+     "PR-art-16",
+     "PR-art-22",
+     "PR-art-23",
+     "DP-art-4"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PS-art-7",
+   "PS-art-8",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-14",
+   "PR-art-15",
+   "DP-art-3",
+   "PR-art-44",
+   "PS-art-4",
+   "PS-art-5",
+   "PS-art-6",
+   "PS-art-12",
+   "PR-art-1",
+   "PR-art-7",
+   "PR-art-53",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-16",
+   "PR-art-22",
+   "PR-art-23",
+   "DP-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PS-art-9",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p18",
+  "name": "Bovisa",
+  "lat": 45.507,
+  "lon": 9.158,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-44",
+   "PR-art-7",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p19",
+  "name": "Niguarda",
+  "lat": 45.52,
+  "lon": 9.185,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgra_APSFR",
+   "pgra_L_RP",
+   "pgra_M_RP",
+   "pgra_R4",
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_rigenerazione",
+   "pgt_sensibilita",
+   "pgt_servizi"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_servizi",
+    "category": "servizi",
+    "label": "Servizi e impianti",
+    "values": {
+     "TIPO_SERV": 50,
+     "DTIPO_SERV": "SCUOLA DELL'OBBLIGO E DELL'INFANZIA",
+     "STATO": 1,
+     "DSTATO": "ESISTENTE",
+     "LIV_TER": 30,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/ "
+    },
+    "matched": {},
+    "articles": [
+     "PS-art-7",
+     "PS-art-8"
+    ],
+    "general": [
+     "PS-art-4",
+     "PS-art-5",
+     "PS-art-6",
+     "PS-art-11",
+     "PS-art-12",
+     "PR-art-1",
+     "PR-art-6",
+     "PR-art-7",
+     "PR-art-8",
+     "PR-art-53"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 2,
+     "DESCRIZION": "SENSIBILITA' BASSA"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_rigenerazione",
+    "category": "rigenerazione",
+    "label": "Ambiti di rigenerazione urbana e territoriale",
+    "values": {
+     "CATEGORIA": 2,
+     "NOME_AMB": "Ambito di rigenerazione",
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20250702_AR_923.pdf"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-14",
+     "PR-art-15",
+     "DP-art-3"
+    ],
+    "general": [
+     "PR-art-16",
+     "PR-art-22",
+     "PR-art-23",
+     "DP-art-4"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   },
+   {
+    "layer": "pgra_APSFR",
+    "category": "pgra_apsfr",
+    "label": "Area a potenziale rischio significativo di alluvione (APSFR)",
+    "values": {
+     "nameAPSFR": "Città di Milano - Reticolo Nord Milano",
+     "relZoneId": "ITN008",
+     "specHazTyp": "A11 - Fluvial"
+    },
+    "matched": {},
+    "articles": [],
+    "general": [],
+    "verify": false
+   },
+   {
+    "layer": "pgra_R4",
+    "category": "pgra_risk",
+    "label": "Rischio alluvioni (PGRA)",
+    "values": {
+     "Ris": "R4",
+     "Danno": "D4",
+     "CatUE": "Attività economiche e sociali",
+     "Nomeelidr": "Seveso"
+    },
+    "matched": {},
+    "articles": [
+     "PR-art-43",
+     "PR-art-45",
+     "PR-art-46",
+     "PR-art-48"
+    ],
+    "general": [],
+    "verify": true
+   },
+   {
+    "layer": "pgra_M_RP",
+    "category": "pgra_hazard",
+    "label": "Pericolosita alluvioni (PGRA)",
+    "values": {
+     "Codscenar": "M",
+     "Tritorno": 100,
+     "Nomeelidr": "Seveso",
+     "Ambitoter": "RP",
+     "nta_scenario": "P2"
+    },
+    "matched": {
+     "Codscenar": "M"
+    },
+    "articles": [
+     "PR-art-44",
+     "PR-art-45",
+     "PR-art-46",
+     "CG-art-44",
+     "CG-art-45",
+     "CG-art-46"
+    ],
+    "general": [
+     "PR-art-43",
+     "CG-art-43"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgra_L_RP",
+    "category": "pgra_hazard",
+    "label": "Pericolosita alluvioni (PGRA)",
+    "values": {
+     "Codscenar": "L",
+     "Tritorno": 500,
+     "Nomeelidr": "Seveso",
+     "Ambitoter": "RP",
+     "nta_scenario": "P1"
+    },
+    "matched": {
+     "Codscenar": "L"
+    },
+    "articles": [
+     "PR-art-44",
+     "CG-art-44"
+    ],
+    "general": [
+     "PR-art-43",
+     "PR-art-45",
+     "PR-art-46",
+     "CG-art-43",
+     "CG-art-45",
+     "CG-art-46"
+    ],
+    "verify": true
+   }
+  ],
+  "articles": [
+   "PS-art-7",
+   "PS-art-8",
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-14",
+   "PR-art-15",
+   "DP-art-3",
+   "PR-art-44",
+   "PR-art-43",
+   "PR-art-45",
+   "PR-art-46",
+   "PR-art-48",
+   "CG-art-44",
+   "CG-art-45",
+   "CG-art-46",
+   "PS-art-4",
+   "PS-art-5",
+   "PS-art-6",
+   "PS-art-12",
+   "PR-art-1",
+   "PR-art-7",
+   "PR-art-53",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-16",
+   "PR-art-22",
+   "PR-art-23",
+   "DP-art-4",
+   "PR-art-42",
+   "PR-art-47",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-43",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PS-art-9",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21"
+  ],
+  "date": "2026-11-05"
+ },
+ {
+  "id": "p20",
+  "name": "Lambrate",
+  "lat": 45.484,
+  "lon": 9.233,
+  "errors": {},
+  "layers_total": 27,
+  "layers_with_hits": [
+   "pgt_fattibilita_geo",
+   "pgt_previsioni_tuc",
+   "pgt_sensibilita"
+  ],
+  "findings": [
+   {
+    "layer": "pgt_previsioni_tuc",
+    "category": "tuc",
+    "label": "Ambiti del tessuto urbano consolidato (TUC)",
+    "values": {
+     "AMB_URB": 23,
+     "COD_DEST1": 100,
+     "DCOD_DEST1": "RESIDENZIALE",
+     "SPEC_DEST": 1,
+     "SCHEDA_NEW": "https://www.cartografia.servizirl.it/schede_pgt/015146/015146_20200205_AU_23.pdf"
+    },
+    "matched": {
+     "COD_DEST1": "100"
+    },
+    "articles": [
+     "PR-art-6",
+     "PR-art-8",
+     "PR-art-13",
+     "PS-art-11",
+     "PR-art-5"
+    ],
+    "general": [
+     "PR-art-7",
+     "PR-art-9",
+     "PR-art-10",
+     "PR-art-12",
+     "PR-art-17"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_sensibilita",
+    "category": "sensibilita",
+    "label": "Classi di sensibilità paesistica (CLASSE 1-5)",
+    "values": {
+     "CLASSE": 4,
+     "DESCRIZION": "SENSIBILITA' ELEVATA"
+    },
+    "matched": {
+     "CLASSE": "4"
+    },
+    "articles": [
+     "PR-art-34"
+    ],
+    "general": [
+     "PR-art-4",
+     "PR-art-13"
+    ],
+    "verify": true
+   },
+   {
+    "layer": "pgt_fattibilita_geo",
+    "category": "fattibilita_geologica",
+    "label": "Fattibilità geologica (Componente geologica PGT)",
+    "values": {
+     "CLASSE": 2,
+     "DESCR_FATTIBILITA": "Fattibilità con modeste limitazioni",
+     "FATTORI_PERICOLO": "II - Fattibilità con modeste limitazioni - II"
+    },
+    "matched": {
+     "CLASSE": "2"
+    },
+    "articles": [
+     "PR-art-44"
+    ],
+    "general": [
+     "PR-art-42",
+     "PR-art-43",
+     "PR-art-47",
+     "PR-art-48",
+     "CG-art-47",
+     "CGS-sec-1",
+     "CGS-sec-2",
+     "CG-art-44"
+    ],
+    "verify": false
+   }
+  ],
+  "articles": [
+   "PR-art-6",
+   "PR-art-8",
+   "PR-art-13",
+   "PS-art-11",
+   "PR-art-5",
+   "PR-art-34",
+   "PR-art-44",
+   "PR-art-7",
+   "PR-art-9",
+   "PR-art-10",
+   "PR-art-12",
+   "PR-art-17",
+   "PR-art-4",
+   "PR-art-42",
+   "PR-art-43",
+   "PR-art-47",
+   "PR-art-48",
+   "CG-art-47",
+   "CGS-sec-1",
+   "CGS-sec-2",
+   "CG-art-44",
+   "DPA1-sec-21",
+   "DPA1-sec-22",
+   "PR-art-18",
+   "PR-art-19",
+   "PR-art-20",
+   "PR-art-21",
+   "PR-art-22",
+   "PR-art-23"
+  ],
+  "date": "2026-11-05"
+ }
+]
