@@ -11,7 +11,9 @@ from . import retrieval
 
 DISCLAIMER_EN = (
     "Guidance only, not legal advice. Check the official texts and ask a qualified professional "
-    "before acting. Source: Milan PGT 2030, Piano delle Regole - Norme di attuazione."
+    "before acting. Sources: Milan PGT 2030 norms (Piano delle Regole, text of 04/12/2025; Piano "
+    "dei Servizi; Documento di Piano; geological and seismic annexes) and the PTC of the Parco "
+    "Agricolo Sud Milano (2000 text, without later amendments)."
 )
 DISCLAIMER_IT = (
     "Solo orientamento, non e un parere legale. Verificare i testi ufficiali e rivolgersi a un "
@@ -31,27 +33,38 @@ You help people understand which planning rules of the Comune di Milano apply at
 Follow these rules strictly:
 1. Answer ONLY from the ARTICLES and FINDINGS supplied below. Do not use outside knowledge about
    Italian planning law.
-2. Cite ONLY article ids that appear in the supplied ARTICLES (format "PR-art-N"). Never invent ids.
+2. Cite ONLY ids that appear in the supplied ARTICLES (format "<DOC>-art-N" or "<DOC>-sec-N",
+   e.g. "PR-art-45", "PS-art-11", "DPA1-sec-21"). Never invent ids. Each article header names its
+   document (e.g. "Piano dei Servizi - art. 11"): when you refer to an article in the answer,
+   always name the document as well as the number.
 3. If the supplied material does not contain the answer, say so plainly (in answer_it and answer_en)
    and leave cited_articles empty or limited to what is relevant. Do not guess.
 4. This is guidance, not legal advice. Say that the user should check the official text.
 5. A finding marked VERIFY or "uncertain link" has an article mapping a human has not confirmed:
    mention that the link is uncertain. Articles listed as "candidate" are only possible matches.
-6. Findings marked EXTERNAL RULE come from laws or plans outside the Milan NTA (Piano delle
-   Regole). Say that they are outside the NTA and are not among the supplied articles; do not
-   cite them as articles.
+6. Findings marked EXTERNAL RULE come from laws or plans outside the supplied PGT documents. Say
+   that they are outside the supplied texts and are not among the supplied articles; do not cite
+   them as articles.
 7. The result concerns the clicked point only, not the whole parcel.
 8. An article header marked "(estratto)" is an excerpt: passages left out are shown as "[...]".
    If the answer may depend on omitted text, say so honestly instead of guessing.
+9. A header marked "(NON-NORMATIVE: explanatory)" is a descriptive report, not a rule: use it only
+   to explain, say that it is explanatory, and never present it as an obligation.
+10. The PTC of the Parco Agricolo Sud Milano is the text of DGR 7/818 of 2000 without the later
+   amendments of its NTA: say so when you rely on it. Inside the park the PTC prevails over the
+   Piano delle Regole and the Piano dei Servizi.
+11. The geological norms annex ("Componente geologica") reproduces art. 42-51 of the Piano delle
+   Regole as of 2020: if it differs from the Piano delle Regole text, the Piano delle Regole wins.
 Reply with a single JSON object and nothing else:
 {"answer_it": "<answer in Italian>", "answer_en": "<same answer in English>",
- "cited_articles": ["PR-art-N", ...]}"""
+ "cited_articles": ["PR-art-N", "PS-art-N", ...]}"""
 
 KEYWORDS_SYSTEM = """\
 You turn a question about urban planning rules into Italian search keywords for a keyword
-search (BM25) over the Norme di attuazione of the Piano delle Regole of Milan. Use the Italian
-terms the regulation would use (e.g. "distanze", "destinazioni d'uso", "fattibilita geologica",
-"nuclei di antica formazione", "parcheggi privati"). 3 to 10 keywords, no explanation.
+search (BM25) over the planning norms of Milan (Piano delle Regole, Piano dei Servizi, Documento
+di Piano, geological and seismic norms, Parco Agricolo Sud Milano PTC). Use the Italian terms the
+regulation would use (e.g. "distanze", "destinazioni d'uso", "fattibilita geologica", "nuclei di
+antica formazione", "parcheggi privati", "dotazione di servizi"). 3 to 10 keywords, no explanation.
 Reply with JSON only: {"keywords_it": "<space separated keywords>"}"""
 
 
@@ -75,9 +88,10 @@ def format_finding(f):
     lines = ["- %s%s" % (f.get("label") or f.get("category"), " (%s)" % vals if vals else "")]
     for key, title in (("articles", "governing articles"),
                        ("general_articles", "related general articles"),
+                       ("explanatory_articles", "explanatory (non-normative) sections"),
                        ("candidate_articles", "candidate articles (uncertain)")):
         if f.get(key):
-            lines.append("    %s: %s" % (title, ", ".join("PR-art-%s" % n for n in f[key])))
+            lines.append("    %s: %s" % (title, ", ".join(retrieval.article_id(n) for n in f[key])))
     if f.get("why"):
         lines.append("    why: %s" % " ".join(f["why"].split()))
     if f.get("note"):
@@ -86,7 +100,7 @@ def format_finding(f):
         lines.append("    VERIFY: this link is uncertain, not confirmed by a human.")
     ext = f.get("external_rule")
     if ext:
-        lines.append("    EXTERNAL RULE (outside the NTA%s): %s" % (
+        lines.append("    EXTERNAL RULE (outside the supplied PGT texts%s): %s" % (
             ", unverified" if ext.get("verify") else "", ext.get("text", "")))
     return "\n".join(lines)
 
@@ -98,15 +112,24 @@ OMIT_MARK = "[...]"
 EXCERPT_TAG = "(estratto)"
 
 # Priority classes: lower is included first.
-P_GOVERNING, P_EXTRA, P_GENERAL, P_CANDIDATE = 0, 1, 2, 3
+P_GOVERNING, P_EXTRA, P_GENERAL, P_EXPLAIN, P_CANDIDATE = 0, 1, 2, 3, 4
 _ROLE_PRIORITY = {"articles": P_GOVERNING, "bm25": P_EXTRA,
-                  "general_articles": P_GENERAL, "candidate_articles": P_CANDIDATE}
+                  "general_articles": P_GENERAL, "explanatory_articles": P_EXPLAIN,
+                  "candidate_articles": P_CANDIDATE}
 
 
 def article_header(a, excerpt=False):
-    head = "[%s] Art. %s - %s" % (a["id"], a.get("number", ""), a.get("title", ""))
+    """"[PS-art-11] Piano dei Servizi \u2013 art. 11 - Title  (capo)"; records without a document
+    name (old data, tests) fall back to "Art. N"."""
+    if a.get("doc_name") or a.get("label"):
+        label = retrieval.cite_label(a)
+    else:
+        label = "Art. %s" % a.get("number", "")
+    head = "[%s] %s - %s" % (a["id"], label, a.get("title", ""))
     if a.get("capo"):
         head += "  (%s)" % a["capo"]
+    if a.get("normative") is False:
+        head += "  (NON-NORMATIVE: explanatory)"
     if excerpt:
         head += "  " + EXCERPT_TAG
     return head

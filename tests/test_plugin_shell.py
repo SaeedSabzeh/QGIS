@@ -261,7 +261,8 @@ def test_findings_rendered_as_wrapped_html(env):
         "external_rule": {"text": "ext rule", "verify": True}}], {"layerX": "boom <err>"})
     html = d.findings.toHtml()
     assert "Nuclei &lt;NAF&gt;" in html and "COD_NUC=15" in html
-    assert "VERIFY" in html and "Art. 3" in html and "Art. 5" in html
+    assert "VERIFY" in html and "Piano delle Regole \u2013 art. 3" in html
+    assert "Piano delle Regole \u2013 art. 5" in html
     assert "Perche &amp; motivo" in html
     full = " ".join(long_note.split()).replace("<b>fine</b>", "&lt;b&gt;fine&lt;/b&gt;")
     assert full in html  # untruncated and escaped
@@ -376,7 +377,7 @@ def test_build_zip_and_packaged_import(tmp_path, monkeypatch):
     folder, archive = build_plugin.build()
     names = zipfile.ZipFile(archive).namelist()
     assert "norme_milano/metadata.txt" in names and "norme_milano/__init__.py" in names
-    for needed in ("articles.json", "zone_map.json", "constraint_map.json"):
+    for needed in ("articles.json", "documents.json", "zone_map.json", "constraint_map.json"):
         assert "norme_milano/data/" + needed in names
     assert not any("raw" in n.split("/") or n.endswith((".yaml", ".pyc")) for n in names)
     assert "norme_milano/core/llm.py" in names and "norme_milano/core/pipeline.py" in names

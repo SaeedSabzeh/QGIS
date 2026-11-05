@@ -236,6 +236,12 @@ def make_client(provider, model=None, api_key=None, base_url=None, transport=Non
 # ---------------------------------------------------------------------------------------------
 _FENCE = re.compile(r"^\s*```[a-zA-Z0-9]*\s*|\s*```\s*$")
 _ART_NUM = re.compile(r"^\s*(?:art(?:icolo)?\.?\s*)?(\d+)\s*$", re.IGNORECASE)
+# "PS art. 11", "PS-art-11", "PS art 11", "DPA1 sez. 21", "DPA1-sec-21", "PTC all. A", "PTC-all-A"
+_DOC_ART = re.compile(
+    r"^\s*([A-Za-z][A-Za-z0-9]*)[\s\-_]*(art(?:icolo)?|sec|sez(?:ione)?|all(?:egato)?)"
+    r"[\s.\-_]*([0-9]+|[A-Za-z])\s*$", re.IGNORECASE)
+_KIND = {"art": "art", "articolo": "art", "sec": "sec", "sez": "sec", "sezione": "sec",
+         "all": "all", "allegato": "all"}
 
 
 def _extract_json(text):
@@ -251,12 +257,22 @@ def _extract_json(text):
 
 
 def normalize_citation(c):
-    """Map 45, "45", "art. 45", "PR-art-45" to "PR-art-45"; leave anything else as a string."""
+    """Map a citation to a record id. A bare number is a Piano delle Regole article: 45, "45",
+    "art. 45" -> "PR-art-45". With a document code: "PS art. 11", "ps-art-11" -> "PS-art-11",
+    "DPA1 sez. 21" -> "DPA1-sec-21", "PTC all. A" -> "PTC-all-A". Anything else is returned
+    as a string."""
     if isinstance(c, int):
         return "PR-art-%d" % c
     s = str(c).strip()
     m = _ART_NUM.match(s)
-    return "PR-art-%s" % m.group(1) if m else s
+    if m:
+        return "PR-art-%s" % m.group(1)
+    m = _DOC_ART.match(s)
+    if m:
+        kind = _KIND[m.group(2).lower()]
+        num = m.group(3)
+        return "%s-%s-%s" % (m.group(1).upper(), kind, num.upper() if kind == "all" else num)
+    return s
 
 
 def parse_answer(text, allowed_ids):

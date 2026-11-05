@@ -43,13 +43,17 @@ def _print_articles(ids, provenance, by_id, out, full_text=False):
         if not a:
             continue
         roles = sorted({x["role"] for x in provenance.get(aid, [])})
-        p("  [%s] Art. %s - %s  <%s>" % (aid, a.get("number"), a.get("title"), ", ".join(roles)))
+        p("  [%s] %s - %s  <%s>" % (aid, retrieval.cite_label(a), a.get("title"),
+                                       ", ".join(roles)))
         if full_text:
             p("      " + a.get("text", "").replace("\n", "\n      "))
     p()
 
 
-def _footer(out):
+def _footer(out, ids=(), data_dir=None):
+    used = retrieval.sources_used(ids, data_dir) if ids else ""
+    if used:
+        print("Documents used: %s." % used, file=out)
     print(prompts.DISCLAIMER_EN, file=out)
     print(prompts.DISCLAIMER_IT, file=out)
     print(prompts.LIMITATION_EN, file=out)
@@ -99,9 +103,10 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
         if args.question:
             p("Free-text questions need an LLM: set GEMINI_API_KEY or use --provider ollama.")
             p("(No-key mode shows only the constraints and the mapped articles.)")
-        _footer(out)
+        _footer(out, ret["ids"], data_dir)
         return 0
 
+    used_ids = []
     try:
         client = llm.make_client(
             args.provider, args.model, key, args.base_url, transport,
@@ -118,6 +123,7 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
         p("Italian keywords: %s" % keywords)
         ret = retrieval.retrieve(result, keywords, k=args.k, findings=findings,
                                  data_dir=data_dir)
+        used_ids = ret["ids"]
         articles = [by_id[i] for i in ret["ids"] if i in by_id]
         _print_articles(ret["ids"], ret["provenance"], by_id, out, args.full_text)
         prompt = prompts.build_answer_prompt(
@@ -127,7 +133,7 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
     except llm.LLMError as exc:
         print("LLM request failed: %s" % exc, file=sys.stderr)
         p("The findings and articles above are still valid.")
-        _footer(out)
+        _footer(out, used_ids, data_dir)
         return 1
 
     p("Risposta (IT): %s" % ans["answer_it"])
@@ -141,7 +147,7 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
     if ans["parse_error"]:
         p("WARNING: the model reply was not valid JSON; shown as raw text, citations dropped.")
     p()
-    _footer(out)
+    _footer(out, prompt["article_ids"], data_dir)
     return 0
 
 

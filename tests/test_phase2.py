@@ -88,29 +88,36 @@ def by_layer(findings):
 
 def test_lookup_duomo():
     f = by_layer(retrieval.lookup(DUOMO))
-    assert f["pgt_naf"]["articles"] == [18, 19] and f["pgt_naf"]["general_articles"] == [6, 8, 13]
+    pr = lambda *ns: ["PR-art-%d" % n for n in ns]  # noqa: E731
+    assert f["pgt_naf"]["articles"] == pr(18, 19)
+    assert f["pgt_naf"]["general_articles"] == pr(6, 8, 13)
     tuc = f["pgt_previsioni_tuc"]
-    assert tuc["articles"] == [6, 8, 13, 5]  # COD_DEST1=100 adds art. 5
-    assert 18 in tuc["candidate_articles"] and tuc["verify"] is True
-    assert f["pgt_sensibilita"]["articles"] == [34]
-    assert f["pgt_fattibilita_geo"]["articles"] == [44]
+    # COD_DEST1=100 adds PR art. 5; the Piano dei Servizi art. 11 governs the service provision
+    assert tuc["articles"] == pr(6, 8, 13) + ["PS-art-11"] + pr(5)
+    assert "PR-art-18" in tuc["candidate_articles"] and tuc["verify"] is True
+    assert f["pgt_sensibilita"]["articles"] == ["PR-art-34"]
+    assert f["pgt_sensibilita"]["explanatory_articles"] == ["DPA1-sec-21", "DPA1-sec-22"]
+    assert "molto alta" in f["pgt_sensibilita"]["note"]            # class 5, from DPA1 sez. 9.1
+    assert f["pgt_fattibilita_geo"]["articles"] == ["PR-art-44"]
+    assert "CG-art-44" in f["pgt_fattibilita_geo"]["general_articles"]
     assert f["pgt_fattibilita_geo"]["external_rule"]["external"] is True
     assert f["pgt_naf"]["values"] == {"COD_NUC": 15}
 
 
 def test_lookup_lambro_and_hazard_mapping():
     f = by_layer(retrieval.lookup(LAMBRO))
-    assert f["pgt_at"]["articles"] == [] and f["pgt_at"]["verify"] is True
-    assert 53 in f["pgt_at"]["general_articles"]
-    assert f["pgt_fattibilita_geo"]["articles"] == [45]
-    assert f["pgra_H_RP"]["articles"] == [45, 46]
+    # AT 26 = PCU4 "Idroscalo": no PR/DP article governs it, the PTC (art. 26 + Allegato A) does
+    assert f["pgt_at"]["articles"] == ["PTC-art-26", "PTC-all-A"] and f["pgt_at"]["verify"] is True
+    assert "PR-art-53" in f["pgt_at"]["general_articles"] and "DP-art-2" in f["pgt_at"]["general_articles"]
+    assert f["pgt_fattibilita_geo"]["articles"] == ["PR-art-45"]
+    assert f["pgra_H_RP"]["articles"][:2] == ["PR-art-45", "PR-art-46"]
     assert f["pgra_H_RP"]["values"]["nta_scenario"] == "P3"
-    assert f["pgra_M_RP"]["articles"] == [44, 45, 46]
-    assert f["pgra_L_RP"]["articles"] == [44]
-    assert f["pgra_R3"]["articles"] == [43, 45, 46, 48]
+    assert f["pgra_M_RP"]["articles"][:3] == ["PR-art-44", "PR-art-45", "PR-art-46"]
+    assert f["pgra_L_RP"]["articles"] == ["PR-art-44", "CG-art-44"]
+    assert f["pgra_R3"]["articles"] == ["PR-art-43", "PR-art-45", "PR-art-46", "PR-art-48"]
     assert f["pgra_R3"]["external_rule"]["external"] is True
     n2k = f["natura2000_zsc"]
-    assert n2k["articles"] == [3, 36] and n2k["values"]["COD_SITO"] == "IT2050006"
+    assert n2k["articles"] == ["PR-art-3", "PR-art-36"] and n2k["values"]["COD_SITO"] == "IT2050006"
 
 
 def test_lookup_ignores_empty_and_unknown_layers():
@@ -120,6 +127,42 @@ def test_lookup_ignores_empty_and_unknown_layers():
 def test_lookup_geology_class_without_mapping_is_verify():
     f = retrieval.lookup(hit({"pgt_fattibilita_geo": [{"CLASSE": 1}]}))[0]
     assert f["articles"] == [] and f["verify"] is True
+
+
+def test_bare_numbers_in_the_maps_mean_pr():
+    assert retrieval.article_id(45) == retrieval.article_id("45") == "PR-art-45"
+    assert retrieval.article_id("PS-art-11") == "PS-art-11"
+    entry = {"articles": [18, "PS-art-11"], "general_articles": [6], "layer_id": 1}
+    f = retrieval._zone_finding("pgt_naf", "naf", entry, {})
+    assert f["articles"] == ["PR-art-18", "PS-art-11"] and f["general_articles"] == ["PR-art-6"]
+
+
+def test_servizi_hit_maps_to_piano_dei_servizi_first():
+    res = retrieval.retrieve(hit({"pgt_servizi": [{"TIPO_SERV": 52, "STATO": "E"}]}))
+    ids = res["ids"]
+    assert ids[:2] == ["PS-art-7", "PS-art-8"]                      # governing
+    assert ids.index("PS-art-11") < ids.index("PR-art-1") or "PS-art-11" in ids
+    assert {p["role"] for p in res["provenance"]["PS-art-7"]} == {"articles"}
+    assert {p["role"] for p in res["provenance"]["PS-art-9"]} == {"candidate_articles"}
+    assert all(i.startswith(("PS-", "PR-")) for i in ids)
+
+
+def test_at_26_and_29_map_to_the_park_ptc():
+    for code in (26, 29):
+        f = retrieval.lookup(hit({"pgt_at": [{"AMB_TRAS": code}]}))[0]
+        assert f["articles"] == ["PTC-art-26", "PTC-all-A"] and f["verify"] is True
+    other = retrieval.lookup(hit({"pgt_at": [{"AMB_TRAS": 1}]}))[0]
+    assert other["articles"] == []                                  # unverified AT: nothing governs
+
+
+def test_cite_label_and_sources_line():
+    by_id = retrieval.articles_by_id()
+    assert retrieval.cite_label(by_id["PS-art-11"]) == "Piano dei Servizi \u2013 art. 11"
+    assert retrieval.ref_label("PR-art-45") == "Piano delle Regole \u2013 art. 45"
+    assert retrieval.ref_label(8) == "Piano delle Regole \u2013 art. 8"
+    line = retrieval.sources_used(["PS-art-11", "PTC-art-26", "DPA1-sec-21", "PS-art-7"])
+    assert line.count("Piano dei Servizi") == 1 and "2022-12-19" in line
+    assert "without later amendments" in line and "explanatory" in line
 
 
 def test_provenance_dedups_and_orders():
@@ -138,11 +181,34 @@ def test_tokenize_italian():
 
 
 def test_bm25_obvious_hits():
-    assert retrieval.search("classe di fattibilità geologica III", k=1)[0][0] == "PR-art-45"
+    # multi-document corpus: the short art. 43 "Classi di fattibilita" can edge out the long art. 45
+    assert "PR-art-45" in [i for i, _ in retrieval.search("classe di fattibilità geologica III", k=2)]
+    assert "CG-art-45" not in [i for i, _ in retrieval.search("classe III consistenti limitazioni", k=20)]
     assert retrieval.search("classe IV fattibilità gravi limitazioni", k=1)[0][0] == "PR-art-46"
     assert retrieval.search("nuclei di antica formazione", k=1)[0][0] in ("PR-art-18", "PR-art-19")
     assert retrieval.search("parcheggi privati", k=1)[0][0] == "PR-art-12"
     assert retrieval.search("zzzz qqqq") == []
+
+
+def test_bm25_over_all_documents():
+    top = [i for i, _ in retrieval.search("dotazione di servizi", k=3)]
+    assert "PS-art-11" in top                                        # Dotazione di servizi nel TUC
+    assert retrieval.search("piani di cintura urbana", k=1)[0][0] == "PTC-art-26"
+    assert retrieval.search("classi di sensibilità paesistica molto alta", k=1)[0][0] == "DPA1-sec-21"
+    assert retrieval.search("invarianza idraulica e idrologica", k=3)[0][0] in (
+        "DP-art-6", "PR-art-10")
+    assert retrieval.search("liquefazione zone Z2b", k=1)[0][0] in ("CGS-sec-2", "PR-art-47")
+
+
+def test_retrieve_ranks_normative_extras_before_explanatory():
+    q = "nuclei di antica formazione paesaggio urbano"
+    plain = [i for i, _ in retrieval.search(q, k=40)]
+    assert any(i.startswith("DPA1") for i in plain[:5])             # explanatory text scores well
+    res = retrieval.retrieve(hit({}), q, k=8)
+    by_id = retrieval.articles_by_id()
+    flags = [by_id[i]["normative"] for i in res["extras"]]
+    assert flags == sorted(flags, reverse=True)                      # all True before any False
+    assert res["extras"][0].startswith(("PR-", "PS-", "DP-", "PTC-"))
 
 
 def test_retrieve_orders_mapped_first_and_dedups():
@@ -185,7 +251,7 @@ def test_prompt_contains_rules_findings_and_truncates():
     assert "ONLY" in p["system"] and "answer_it" in p["system"] and "PR-art-1" in p["user"]
     assert "troncato" in p["user"] and "(estratto)" in p["user"] and "VERIFY" in p["user"]
     assert "EXTERNAL RULE" in p["user"]
-    assert p["article_ids"] == ["PR-art-1"] and len(p["user"]) < 6000
+    assert p["article_ids"] == ["PR-art-1"] and len(p["user"]) < 9000
 
 
 def test_governing_article_in_full_under_default_budget():
@@ -587,3 +653,61 @@ def test_ask_reports_fallback_model_and_no_fallback_flag(capsys):
                    transport=make({primary}), env={"GEMINI_API_KEY": "k"}, out=out,
                    sleep=lambda s: None)
     assert code == 1 and "LLM request failed" in capsys.readouterr().err
+
+
+# ---- multi-document additions ---------------------------------------------------------------
+@pytest.mark.parametrize("raw, expected", [
+    ("PS art. 11", "PS-art-11"), ("PS-art-11", "PS-art-11"), ("ps art 11", "PS-art-11"),
+    ("PS Art. 11", "PS-art-11"), ("PR art. 45", "PR-art-45"), ("PR-art-45", "PR-art-45"),
+    ("45", "PR-art-45"), (45, "PR-art-45"), ("art. 45", "PR-art-45"), ("Articolo 45", "PR-art-45"),
+    ("DPA1-sec-21", "DPA1-sec-21"), ("DPA1 sez. 21", "DPA1-sec-21"), ("PTC all. A", "PTC-all-A"),
+    ("PTC-all-A", "PTC-all-A"), ("CG-art-45", "CG-art-45"), ("DP art. 2", "DP-art-2"),
+    ("Piano dei Servizi art. 11", "Piano dei Servizi art. 11"), ("", ""),
+])
+def test_normalize_citation_forms(raw, expected):
+    assert llm.normalize_citation(raw) == expected
+
+
+def test_parse_answer_accepts_document_citations():
+    text = json.dumps({"answer_it": "a", "answer_en": "b",
+                       "cited_articles": ["PS art. 11", "45", "DPA1 sez. 21", "PS-art-99"]})
+    r = llm.parse_answer(text, ["PS-art-11", "PR-art-45", "DPA1-sec-21"])
+    assert r["cited_articles"] == ["PS-art-11", "PR-art-45", "DPA1-sec-21"]
+    assert r["rejected_citations"] == ["PS-art-99"]
+
+
+def test_article_header_names_the_document_and_marks_explanatory():
+    by_id = retrieval.articles_by_id()
+    h = prompts.article_header(by_id["PS-art-11"])
+    assert h.startswith("[PS-art-11] Piano dei Servizi \u2013 art. 11 - Dotazione di servizi")
+    h = prompts.article_header(by_id["DPA1-sec-21"], excerpt=True)
+    assert "sez. 9.1" in h and "NON-NORMATIVE" in h and "(estratto)" in h
+    assert "NON-NORMATIVE" not in prompts.article_header(by_id["PR-art-45"])
+    assert prompts.article_header({"id": "PR-art-1", "number": 1, "title": "T"}) == \
+        "[PR-art-1] Art. 1 - T"                                       # records without a document
+    assert "explanatory" in prompts.SYSTEM_RULES and "NON-NORMATIVE" in prompts.SYSTEM_RULES
+    assert "<DOC>-art-N" in prompts.SYSTEM_RULES
+
+
+def test_prompt_lists_ids_of_all_roles_and_the_documents():
+    findings = retrieval.lookup(DUOMO)
+    res = retrieval.retrieve(DUOMO, None, findings=findings)
+    by_id = retrieval.articles_by_id()
+    arts = [by_id[i] for i in res["ids"]]
+    p = prompts.build_answer_prompt("q", findings, arts, provenance=res["provenance"])
+    assert "explanatory (non-normative) sections: DPA1-sec-21, DPA1-sec-22" in p["user"]
+    assert "[PS-art-11] Piano dei Servizi \u2013 art. 11" in p["user"]
+    assert "DPA1-sec-21" in p["article_ids"]
+    # explanatory sections come after the governing and general ones
+    ids = p["article_ids"]
+    assert ids.index("PR-art-34") < ids.index("DPA1-sec-21")
+
+
+def test_ask_no_key_shows_document_names_and_sources():
+    out = io.StringIO()
+    servizi = hit({"pgt_servizi": [{"TIPO_SERV": 52}]})
+    code = ask.run(["45.4", "9.2"], query_fn=lambda lat, lon: servizi, env={}, out=out)
+    text = out.getvalue()
+    assert code == 0
+    assert "[PS-art-7] Piano dei Servizi \u2013 art. 7 - " in text
+    assert "Documents used: Piano dei Servizi (2022-12-19); Piano delle Regole (2025-12-04)" in text
