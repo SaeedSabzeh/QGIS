@@ -7,18 +7,45 @@ and never logged or included in error messages.
 """
 
 import json
+import random
 import re
+import time
 import urllib.error
 import urllib.request
 
-DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"  # change here; also settable per call / --model
+DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"  # change here; also settable per call / --model
+# Tried in order when the primary model keeps failing (overloaded / unavailable). Easy to edit.
+DEFAULT_GEMINI_FALLBACKS = ("gemini-3.5-flash", "gemini-3.1-flash-lite")
 DEFAULT_OLLAMA_MODEL = "llama3.1"
 DEFAULT_OLLAMA_URL = "http://localhost:11434"
 GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
+TRANSIENT_STATUSES = frozenset({429, 500, 502, 503, 504})
+DEFAULT_MAX_ATTEMPTS = 3   # per model
+DEFAULT_BASE_DELAY = 2.0   # seconds; doubles each retry
+DEFAULT_MAX_DELAY = 20.0   # cap for backoff and for a Retry-After header
+
 
 class LLMError(Exception):
-    """Network, HTTP or response-format failure from an LLM provider."""
+    """Network, HTTP or response-format failure from an LLM provider.
+
+    status: HTTP status code when known; retry_after: seconds from a Retry-After header;
+    transient: True when retrying (or trying another model) may help.
+    """
+
+    def __init__(self, message="", status=None, retry_after=None, transient=False):
+        super().__init__(message)
+        self.status = status
+        self.retry_after = retry_after
+        self.transient = transient
+
+
+def _parse_retry_after(value):
+    try:
+        secs = float(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+    return secs if secs >= 0 else None
 
 
 def post_json(url, headers, payload, timeout=60):
@@ -34,27 +61,92 @@ def post_json(url, headers, payload, timeout=60):
             body = exc.read().decode("utf-8", "replace")[:500]
         except Exception:
             pass
-        raise LLMError("HTTP %s from %s: %s" % (exc.code, url.split("?")[0], body)) from None
-    except (urllib.error.URLError, OSError, ValueError) as exc:
+        retry_after = None
+        try:
+            retry_after = _parse_retry_after(exc.headers.get("Retry-After"))
+        except Exception:
+            pass
+        raise LLMError("HTTP %s from %s: %s" % (exc.code, url.split("?")[0], body),
+                       status=exc.code, retry_after=retry_after,
+                       transient=exc.code in TRANSIENT_STATUSES) from None
+    except (urllib.error.URLError, OSError) as exc:  # includes timeouts / connection errors
+        raise LLMError("request to %s failed: %s" % (url.split("?")[0], exc),
+                       transient=True) from None
+    except ValueError as exc:  # unreadable JSON reply
         raise LLMError("request to %s failed: %s" % (url.split("?")[0], exc)) from None
 
 
-class GeminiClient:
+class _Retrying:
+    """Shared retry-with-backoff logic for the clients."""
+
+    def _init_retry(self, max_attempts, base_delay, max_delay, sleep, rng):
+        self.max_attempts = max(1, int(max_attempts))
+        self.base_delay = base_delay
+        self.max_delay = max_delay
+        self._sleep = sleep or time.sleep
+        self._rng = rng or random.random
+
+    def _delay(self, attempt, exc):
+        """Seconds to wait after failed attempt number `attempt` (1-based)."""
+        if getattr(exc, "retry_after", None) is not None:
+            return min(float(exc.retry_after), self.max_delay)
+        backoff = min(self.max_delay, self.base_delay * (2 ** (attempt - 1)))
+        return backoff * (0.5 + 0.5 * self._rng())  # jitter: 50-100% of the backoff
+
+    def _send(self, url, headers, payload, scrub=None):
+        """Call the transport, retrying transient errors. Raises LLMError when attempts are
+        used up or the error is not transient."""
+        last = None
+        for attempt in range(1, self.max_attempts + 1):
+            try:
+                return self.transport(url, headers, payload, self.timeout)
+            except LLMError as exc:
+                err = exc
+            except OSError as exc:  # raw timeout / connection error from a custom transport
+                err = LLMError("request failed: %s" % exc, transient=True)
+            if scrub:
+                err = LLMError(str(err).replace(scrub, "***"), status=err.status,
+                               retry_after=err.retry_after, transient=err.transient)
+            last = err
+            if not err.transient or attempt >= self.max_attempts:
+                break
+            self._sleep(self._delay(attempt, err))
+        raise last from None
+
+
+class GeminiClient(_Retrying):
     def __init__(self, api_key, model=DEFAULT_GEMINI_MODEL, transport=None, timeout=60,
-                 temperature=0.2):
+                 temperature=0.2, fallbacks=DEFAULT_GEMINI_FALLBACKS,
+                 max_attempts=DEFAULT_MAX_ATTEMPTS, base_delay=DEFAULT_BASE_DELAY,
+                 max_delay=DEFAULT_MAX_DELAY, sleep=None, rng=None):
         if not api_key:
             raise LLMError("Gemini needs an API key")
         self._key = api_key
         self.model = model
+        self.fallbacks = tuple(fallbacks or ())
         self.transport = transport or post_json
         self.timeout = timeout
         self.temperature = temperature
+        self.last_model = None  # model that actually produced the last answer
+        self._init_retry(max_attempts, base_delay, max_delay, sleep, rng)
+
+    @property
+    def models(self):
+        """Primary model followed by the fallbacks, without duplicates."""
+        chain = []
+        for m in (self.model,) + self.fallbacks:
+            if m and m not in chain:
+                chain.append(m)
+        return chain
+
+    def _url(self, model):
+        return "%s/models/%s:generateContent" % (GEMINI_BASE, model)
 
     @property
     def url(self):
-        return "%s/models/%s:generateContent" % (GEMINI_BASE, self.model)
+        return self._url(self.model)
 
-    def build_request(self, prompt_parts):
+    def build_request(self, prompt_parts, model=None):
         headers = {"Content-Type": "application/json", "x-goog-api-key": self._key}
         payload = {
             "systemInstruction": {"parts": [{"text": prompt_parts.get("system", "")}]},
@@ -62,14 +154,24 @@ class GeminiClient:
             "generationConfig": {"responseMimeType": "application/json",
                                  "temperature": self.temperature},
         }
-        return self.url, headers, payload
+        return self._url(model or self.model), headers, payload
 
     def complete(self, prompt_parts):
-        url, headers, payload = self.build_request(prompt_parts)
-        try:
-            data = self.transport(url, headers, payload, self.timeout)
-        except LLMError as exc:
-            raise LLMError(str(exc).replace(self._key, "***")) from None
+        data = None
+        last = None
+        for model in self.models:
+            url, headers, payload = self.build_request(prompt_parts, model)
+            try:
+                data = self._send(url, headers, payload, scrub=self._key)
+            except LLMError as exc:
+                last = exc
+                if exc.transient or exc.status == 404:
+                    continue  # overloaded or unavailable: try the next model
+                raise
+            self.last_model = model
+            break
+        else:
+            raise last
         try:
             cands = data.get("candidates") or []
             if not cands:
@@ -84,13 +186,16 @@ class GeminiClient:
         return text
 
 
-class OllamaClient:
+class OllamaClient(_Retrying):
     def __init__(self, model=DEFAULT_OLLAMA_MODEL, base_url=DEFAULT_OLLAMA_URL, transport=None,
-                 timeout=300):
+                 timeout=300, max_attempts=DEFAULT_MAX_ATTEMPTS, base_delay=DEFAULT_BASE_DELAY,
+                 max_delay=DEFAULT_MAX_DELAY, sleep=None, rng=None):
         self.model = model
         self.base_url = (base_url or DEFAULT_OLLAMA_URL).rstrip("/")
         self.transport = transport or post_json
         self.timeout = timeout
+        self.last_model = None
+        self._init_retry(max_attempts, base_delay, max_delay, sleep, rng)
 
     def build_request(self, prompt_parts):
         messages = []
@@ -102,7 +207,8 @@ class OllamaClient:
 
     def complete(self, prompt_parts):
         url, headers, payload = self.build_request(prompt_parts)
-        data = self.transport(url, headers, payload, self.timeout)
+        data = self._send(url, headers, payload)  # retries only; no model fallback
+        self.last_model = self.model
         try:
             text = data["message"]["content"]
         except (KeyError, TypeError):
@@ -112,13 +218,16 @@ class OllamaClient:
         return text
 
 
-def make_client(provider, model=None, api_key=None, base_url=None, transport=None):
+def make_client(provider, model=None, api_key=None, base_url=None, transport=None,
+                fallbacks=DEFAULT_GEMINI_FALLBACKS, sleep=None):
+    """`fallbacks=()` disables the Gemini model chain. `sleep` is injectable for tests."""
     provider = (provider or "gemini").lower()
     if provider == "gemini":
-        return GeminiClient(api_key, model or DEFAULT_GEMINI_MODEL, transport=transport)
+        return GeminiClient(api_key, model or DEFAULT_GEMINI_MODEL, transport=transport,
+                            fallbacks=fallbacks, sleep=sleep)
     if provider == "ollama":
         return OllamaClient(model or DEFAULT_OLLAMA_MODEL, base_url or DEFAULT_OLLAMA_URL,
-                            transport=transport)
+                            transport=transport, sleep=sleep)
     raise LLMError("unknown provider: %s" % provider)
 
 

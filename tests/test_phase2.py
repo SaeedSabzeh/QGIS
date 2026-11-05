@@ -292,3 +292,211 @@ def test_ask_network_errors_exit_cleanly(capsys):
 
     dead = {"point": {}, "layers": {"a": []}, "errors": {"a": "OSError: down"}}
     assert ask.run(["1", "2"], query_fn=lambda a, b: dead, env={}, out=io.StringIO()) == 1
+
+
+# ---- retry / fallback ----------------------------------------------------------------------
+OK = {"candidates": [{"content": {"parts": [{"text": '{"answer_it": "x"}'}]}}]}
+
+
+def scripted(*steps):
+    """Fake transport: each step is a dict reply or an exception to raise; records model names."""
+    steps = list(steps)
+    models = []
+
+    def transport(url, headers, payload, timeout):
+        models.append(url.split("/models/")[1].split(":")[0])
+        step = steps.pop(0)
+        if isinstance(step, Exception):
+            raise step
+        return step
+
+    transport.models = models
+    return transport
+
+
+def http_err(status, retry_after=None):
+    return llm.LLMError("HTTP %s" % status, status=status, retry_after=retry_after,
+                        transient=status in llm.TRANSIENT_STATUSES)
+
+
+def gem(transport, **kw):
+    sleeps = []
+    c = llm.GeminiClient("k", model="p", fallbacks=("f1", "f2"), transport=transport,
+                         sleep=sleeps.append, rng=lambda: 1.0, **kw)
+    return c, sleeps
+
+
+def test_retry_same_model_on_503_then_success():
+    t = scripted(http_err(503), OK)
+    c, sleeps = gem(t)
+    assert c.complete({"user": "U"}) == '{"answer_it": "x"}'
+    assert t.models == ["p", "p"] and c.last_model == "p" and sleeps == [2.0]
+
+
+def test_fallback_after_three_503s():
+    t = scripted(http_err(503), http_err(503), http_err(503), OK)
+    c, sleeps = gem(t)
+    c.complete({"user": "U"})
+    assert t.models == ["p", "p", "p", "f1"] and c.last_model == "f1"
+    assert sleeps == [2.0, 4.0]  # no sleep between models
+
+
+def test_404_falls_back_immediately():
+    t = scripted(http_err(404), OK)
+    c, sleeps = gem(t)
+    c.complete({"user": "U"})
+    assert t.models == ["p", "f1"] and c.last_model == "f1" and sleeps == []
+
+
+def test_401_and_400_stop_immediately():
+    for status in (400, 401, 403):
+        t = scripted(http_err(status), OK)
+        c, sleeps = gem(t)
+        with pytest.raises(llm.LLMError) as e:
+            c.complete({"user": "U"})
+        assert e.value.status == status and t.models == ["p"] and sleeps == []
+
+
+def test_all_models_exhausted_raises_last_error():
+    t = scripted(*[http_err(503)] * 9)
+    c, _ = gem(t)
+    with pytest.raises(llm.LLMError) as e:
+        c.complete({"user": "U"})
+    assert e.value.status == 503 and len(t.models) == 9 and c.last_model is None
+
+
+def test_no_fallback_and_dedup_chain():
+    c = llm.GeminiClient("k", model="a", fallbacks=("a", "b", "b"))
+    assert c.models == ["a", "b"]
+    t = scripted(http_err(503), http_err(503), http_err(503))
+    c, _ = gem(t)
+    c.fallbacks = ()
+    with pytest.raises(llm.LLMError):
+        c.complete({"user": "U"})
+    assert t.models == ["p", "p", "p"]
+
+
+def test_retry_after_honoured_and_capped():
+    t = scripted(http_err(429, retry_after=7), http_err(429, retry_after=500), OK)
+    c, sleeps = gem(t)
+    c.complete({"user": "U"})
+    assert sleeps == [7.0, llm.DEFAULT_MAX_DELAY]
+
+
+def test_backoff_has_jitter_and_cap():
+    t = scripted(http_err(500), http_err(500), http_err(500), OK)
+    sleeps = []
+    c = llm.GeminiClient("k", model="p", fallbacks=("f",), transport=t, sleep=sleeps.append,
+                         rng=lambda: 0.0, base_delay=2, max_delay=3)
+    c.complete({"user": "U"})
+    assert sleeps == [1.0, 1.5]  # 50% of min(cap, 2) and of min(cap, 4)
+
+
+def test_timeout_is_transient(monkeypatch):
+    import socket
+
+    def boom(*a, **k):
+        raise socket.timeout("timed out")
+
+    monkeypatch.setattr(llm.urllib.request, "urlopen", boom)
+    with pytest.raises(llm.LLMError) as e:
+        llm.post_json("https://x.test/y?key=1", {}, {}, 1)
+    assert e.value.transient is True and e.value.status is None
+    # a raw OSError from a custom transport is retried as well
+    t = scripted(TimeoutError("read timed out"), OK)
+    c, sleeps = gem(t)
+    c.complete({"user": "U"})
+    assert t.models == ["p", "p"] and len(sleeps) == 1
+
+
+def test_post_json_http_error_carries_status_and_retry_after(monkeypatch):
+    import email.message
+    import urllib.error
+    hdrs = email.message.Message()
+    hdrs["Retry-After"] = "9"
+
+    def boom(*a, **k):
+        raise urllib.error.HTTPError("https://x.test/y", 503, "busy", hdrs, io.BytesIO(b"hi"))
+
+    monkeypatch.setattr(llm.urllib.request, "urlopen", boom)
+    with pytest.raises(llm.LLMError) as e:
+        llm.post_json("https://x.test/y", {}, {}, 1)
+    assert (e.value.status, e.value.retry_after, e.value.transient) == (503, 9.0, True)
+
+
+def test_error_scrubbing_keeps_status():
+    t = scripted(llm.LLMError("bad key SECRET123", status=403))
+    c = llm.GeminiClient("SECRET123", transport=t, sleep=lambda s: None)
+    with pytest.raises(llm.LLMError) as e:
+        c.complete({"user": "U"})
+    assert "SECRET123" not in str(e.value) and e.value.status == 403
+
+
+def test_ollama_retries_timeout_without_fallback():
+    reply = {"message": {"content": "{}"}}
+    calls, sleeps = [], []
+
+    def transport(url, headers, payload, timeout):
+        calls.append(1)
+        if len(calls) < 3:
+            raise llm.LLMError("timed out", transient=True)
+        return reply
+
+    c = llm.make_client("ollama", model="m", transport=transport, sleep=sleeps.append)
+    assert c.complete({"user": "U"}) == "{}" and len(calls) == 3 and len(sleeps) == 2
+    assert c.last_model == "m"
+
+    def dead(url, headers, payload, timeout):
+        raise llm.LLMError("down", transient=True)
+
+    c = llm.make_client("ollama", transport=dead, sleep=lambda s: None)
+    with pytest.raises(llm.LLMError):
+        c.complete({"user": "U"})
+
+
+def test_default_model_constants():
+    assert llm.DEFAULT_GEMINI_MODEL == "gemini-3.8-flash"
+    assert isinstance(llm.DEFAULT_GEMINI_FALLBACKS, tuple) and llm.DEFAULT_GEMINI_FALLBACKS
+
+
+def test_ask_warns_when_keyword_rewrite_fails(capsys):
+    replies = iter([llm.LLMError("HTTP 400 bad"), '{"answer_it": "R", "answer_en": "A", '
+                    '"cited_articles": []}'])
+
+    def transport(url, headers, payload, timeout):
+        r = next(replies)
+        if isinstance(r, Exception):
+            raise r
+        return {"candidates": [{"content": {"parts": [{"text": r}]}}]}
+
+    out = io.StringIO()
+    code = ask.run(["1", "2", "geological class?"], query_fn=lambda a, b: DUOMO,
+                   transport=transport, env={"GEMINI_API_KEY": "k"}, out=out,
+                   sleep=lambda s: None)
+    err = capsys.readouterr().err
+    assert code == 0
+    assert "WARNING: keyword rewrite failed" in err and "searching with the original question" in err
+    assert "Italian keywords: geological class?" in out.getvalue()
+    assert "Model: %s" % llm.DEFAULT_GEMINI_MODEL in out.getvalue()
+
+
+def test_ask_reports_fallback_model_and_no_fallback_flag(capsys):
+    def make(fail_models):
+        def transport(url, headers, payload, timeout):
+            model = url.split("/models/")[1].split(":")[0]
+            if model in fail_models:
+                raise llm.LLMError("HTTP 503", status=503, transient=True)
+            return {"candidates": [{"content": {"parts": [{"text": '{"keywords_it": "k"}'}]}}]}
+        return transport
+
+    primary = llm.DEFAULT_GEMINI_MODEL
+    out = io.StringIO()
+    code = ask.run(["1", "2", "q"], query_fn=lambda a, b: DUOMO, transport=make({primary}),
+                   env={"GEMINI_API_KEY": "k"}, out=out, sleep=lambda s: None)
+    assert code == 0 and "Model: %s" % llm.DEFAULT_GEMINI_FALLBACKS[0] in out.getvalue()
+
+    out = io.StringIO()
+    code = ask.run(["1", "2", "q", "--no-fallback"], query_fn=lambda a, b: DUOMO,
+                   transport=make({primary}), env={"GEMINI_API_KEY": "k"}, out=out,
+                   sleep=lambda s: None)
+    assert code == 1 and "LLM request failed" in capsys.readouterr().err
