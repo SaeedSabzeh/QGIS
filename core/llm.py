@@ -24,9 +24,18 @@ DEFAULT_OLLAMA_URL = "http://localhost:11434"
 GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
 TRANSIENT_STATUSES = frozenset({429, 500, 502, 503, 504})
-DEFAULT_MAX_ATTEMPTS = 3   # per model
-DEFAULT_BASE_DELAY = 2.0   # seconds; doubles each retry
-DEFAULT_MAX_DELAY = 20.0   # cap for backoff and for a Retry-After header
+# Retry / fallback policy. A model that is down must not hold the user for minutes: one quick
+# retry (short backoff), then the next model. A request that failed slowly (a timeout) is not
+# retried on the same model at all. The whole chain is capped by DEFAULT_BUDGET.
+DEFAULT_MAX_ATTEMPTS = 2   # per model: first try + one quick retry
+DEFAULT_BASE_DELAY = 2.0   # seconds; with 50-100% jitter the wait is 1-2 s
+DEFAULT_MAX_DELAY = 5.0    # cap for the backoff; a longer Retry-After means "use another model"
+SLOW_FAILURE = 5.0         # a failed attempt that took this long (a timeout) is not retried
+DEFAULT_TIMEOUT = 20.0     # per request, for every model except the last one in the chain
+DEFAULT_LAST_TIMEOUT = 45.0  # per request, for the last model (nothing left to fall back to)
+DEFAULT_BUDGET = 65.0      # seconds for one complete() call, all models and waits included
+KEYWORDS_BUDGET = 10.0     # the optional keyword-rewrite call gets a smaller budget
+MIN_REQUEST_TIME = 3.0     # do not start a request with less time than this left
 
 
 class LLMError(Exception):
@@ -82,27 +91,39 @@ def post_json(url, headers, payload, timeout=60):
 class _Retrying:
     """Shared retry-with-backoff logic for the clients."""
 
-    def _init_retry(self, max_attempts, base_delay, max_delay, sleep, rng):
+    def _init_retry(self, max_attempts, base_delay, max_delay, sleep, rng, clock=None):
         self.max_attempts = max(1, int(max_attempts))
         self.base_delay = base_delay
         self.max_delay = max_delay
         self._sleep = sleep or time.sleep
         self._rng = rng or random.random
+        self._clock = clock or time.monotonic
 
     def _delay(self, attempt, exc):
-        """Seconds to wait after failed attempt number `attempt` (1-based)."""
+        """Seconds to wait after failed attempt number `attempt` (1-based), or None when the
+        server asked for a wait longer than `max_delay` (then stop retrying this model)."""
         if getattr(exc, "retry_after", None) is not None:
-            return min(float(exc.retry_after), self.max_delay)
+            wait = float(exc.retry_after)
+            return wait if wait <= self.max_delay else None
         backoff = min(self.max_delay, self.base_delay * (2 ** (attempt - 1)))
         return backoff * (0.5 + 0.5 * self._rng())  # jitter: 50-100% of the backoff
 
-    def _send(self, url, headers, payload, scrub=None):
-        """Call the transport, retrying transient errors. Raises LLMError when attempts are
-        used up or the error is not transient."""
+    def _send(self, url, headers, payload, scrub=None, timeout=None, deadline=None):
+        """Call the transport, retrying transient errors quickly. Raises LLMError when attempts
+        are used up, the error is not transient, the attempt failed slowly (timeout), the
+        server's Retry-After is too long, or `deadline` (a clock() value) would be exceeded."""
+        timeout = timeout or self.timeout
         last = None
         for attempt in range(1, self.max_attempts + 1):
+            this_timeout = timeout
+            if deadline is not None:
+                remaining = deadline - self._clock()
+                if remaining < MIN_REQUEST_TIME:
+                    break
+                this_timeout = min(timeout, remaining)
+            started = self._clock()
             try:
-                return self.transport(url, headers, payload, self.timeout)
+                return self.transport(url, headers, payload, this_timeout)
             except LLMError as exc:
                 err = exc
             except OSError as exc:  # raw timeout / connection error from a custom transport
@@ -113,25 +134,36 @@ class _Retrying:
             last = err
             if not err.transient or attempt >= self.max_attempts:
                 break
-            self._sleep(self._delay(attempt, err))
+            if self._clock() - started >= SLOW_FAILURE:
+                break  # it hung: do not spend another timeout on the same model
+            delay = self._delay(attempt, err)
+            if delay is None or (deadline is not None
+                                 and self._clock() + delay >= deadline - MIN_REQUEST_TIME):
+                break
+            self._sleep(delay)
+        if last is None:
+            last = LLMError("time budget used up", transient=True)
         raise last from None
 
 
 class GeminiClient(_Retrying):
-    def __init__(self, api_key, model=DEFAULT_GEMINI_MODEL, transport=None, timeout=60,
-                 temperature=0.2, fallbacks=DEFAULT_GEMINI_FALLBACKS,
+    def __init__(self, api_key, model=DEFAULT_GEMINI_MODEL, transport=None,
+                 timeout=DEFAULT_TIMEOUT, temperature=0.2, fallbacks=DEFAULT_GEMINI_FALLBACKS,
                  max_attempts=DEFAULT_MAX_ATTEMPTS, base_delay=DEFAULT_BASE_DELAY,
-                 max_delay=DEFAULT_MAX_DELAY, sleep=None, rng=None):
+                 max_delay=DEFAULT_MAX_DELAY, sleep=None, rng=None, clock=None,
+                 last_timeout=DEFAULT_LAST_TIMEOUT, budget=DEFAULT_BUDGET):
         if not api_key:
             raise LLMError("Gemini needs an API key")
         self._key = api_key
         self.model = model
         self.fallbacks = tuple(fallbacks or ())
         self.transport = transport or post_json
-        self.timeout = timeout
+        self.timeout = timeout            # per request, models before the last one
+        self.last_timeout = last_timeout  # per request, the last model of the chain
+        self.budget = budget              # seconds for one complete() call (None = unlimited)
         self.temperature = temperature
         self.last_model = None  # model that actually produced the last answer
-        self._init_retry(max_attempts, base_delay, max_delay, sleep, rng)
+        self._init_retry(max_attempts, base_delay, max_delay, sleep, rng, clock)
 
     @property
     def models(self):
@@ -159,13 +191,33 @@ class GeminiClient(_Retrying):
         }
         return self._url(model or self.model), headers, payload
 
-    def complete(self, prompt_parts):
+    @staticmethod
+    def _why(exc):
+        """Short reason for a progress message."""
+        if exc.status is None:
+            return "not responding"
+        return "unavailable" if exc.status == 404 else "busy"
+
+    def complete(self, prompt_parts, on_progress=None, budget=None):
+        """Ask the model chain. `on_progress(message)` is called before each model is tried
+        (from the calling thread); `budget` overrides the total time allowed in seconds."""
+        notify = on_progress or (lambda message: None)
+        budget = self.budget if budget is None else budget
+        deadline = self._clock() + budget if budget else None
+        models = self.models
         data = None
         last = None
-        for model in self.models:
+        for i, model in enumerate(models):
+            if last is not None and deadline is not None \
+                    and deadline - self._clock() < MIN_REQUEST_TIME:
+                break  # out of time: report the last real error
+            notify("Trying %s..." % model if last is None else "%s %s, trying %s..." % (
+                models[i - 1], self._why(last), model))
             url, headers, payload = self.build_request(prompt_parts, model)
+            timeout = self.last_timeout if i == len(models) - 1 else self.timeout
             try:
-                data = self._send(url, headers, payload, scrub=self._key)
+                data = self._send(url, headers, payload, scrub=self._key, timeout=timeout,
+                                  deadline=deadline)
             except LLMError as exc:
                 last = exc
                 if exc.transient or exc.status == 404:
@@ -173,7 +225,7 @@ class GeminiClient(_Retrying):
                 raise
             self.last_model = model
             break
-        else:
+        if data is None:  # every model failed, or the time budget ran out
             raise last
         try:
             cands = data.get("candidates") or []
@@ -192,13 +244,13 @@ class GeminiClient(_Retrying):
 class OllamaClient(_Retrying):
     def __init__(self, model=DEFAULT_OLLAMA_MODEL, base_url=DEFAULT_OLLAMA_URL, transport=None,
                  timeout=300, max_attempts=DEFAULT_MAX_ATTEMPTS, base_delay=DEFAULT_BASE_DELAY,
-                 max_delay=DEFAULT_MAX_DELAY, sleep=None, rng=None):
+                 max_delay=DEFAULT_MAX_DELAY, sleep=None, rng=None, clock=None):
         self.model = model
         self.base_url = (base_url or DEFAULT_OLLAMA_URL).rstrip("/")
         self.transport = transport or post_json
         self.timeout = timeout
         self.last_model = None
-        self._init_retry(max_attempts, base_delay, max_delay, sleep, rng)
+        self._init_retry(max_attempts, base_delay, max_delay, sleep, rng, clock)
 
     def build_request(self, prompt_parts):
         messages = []
@@ -208,7 +260,9 @@ class OllamaClient(_Retrying):
         payload = {"model": self.model, "messages": messages, "stream": False, "format": "json"}
         return self.base_url + "/api/chat", {"Content-Type": "application/json"}, payload
 
-    def complete(self, prompt_parts):
+    def complete(self, prompt_parts, on_progress=None, budget=None):
+        if on_progress:
+            on_progress("Trying %s..." % self.model)
         url, headers, payload = self.build_request(prompt_parts)
         data = self._send(url, headers, payload)  # retries only; no model fallback
         self.last_model = self.model

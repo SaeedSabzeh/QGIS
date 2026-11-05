@@ -34,7 +34,7 @@ class FakeClient:
     def __init__(self, fail_keywords=False):
         self.fail_keywords = fail_keywords
 
-    def complete(self, parts):
+    def complete(self, parts, **kw):
         if "keywords" in parts["system"]:
             if self.fail_keywords:
                 raise llm.LLMError("nope")

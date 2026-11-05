@@ -18,7 +18,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 
-from ._compat import enum, prompts, retrieval
+from ._compat import enum, mdlite, prompts, retrieval
 
 MAX_VALUE_CHARS = 80
 MIN_WIDTH = 320
@@ -105,6 +105,7 @@ class RulesDock(QDockWidget):
         self._articles_loaded = {}
         self._rows = {}
         self._ask_allowed = False
+        self._busy = False
         body = QWidget()
         body.setMinimumWidth(MIN_WIDTH)
         root = QVBoxLayout(body)
@@ -197,10 +198,19 @@ class RulesDock(QDockWidget):
             "Questions need a provider: open Settings and choose Gemini (with a key) or Ollama. "
             "/ Le domande richiedono un fornitore: aprire Impostazioni."))
 
+    ASKING = "Asking the model... / Interrogazione del modello in corso..."
+
     def set_asking(self, busy):
+        self._busy = bool(busy)
         self.ask_button.setEnabled(self._ask_allowed and not busy)
         if busy:
-            self.set_status("Asking the model... / Interrogazione del modello in corso...")
+            self.set_status(self.ASKING)
+
+    def set_progress(self, message):
+        """Model progress line ("Trying gemini-...", "... busy, trying ..."); GUI thread only
+        (the task delivers it through a queued signal). Ignored once the request is over."""
+        if self._busy and message:
+            self.set_status("%s\n%s" % (self.ASKING, message))
 
     def _on_ask(self):
         text = self.question.toPlainText().strip()
@@ -273,8 +283,8 @@ class RulesDock(QDockWidget):
 
     def show_answer(self, ans):
         parts = [
-            "<p><b>Risposta (IT)</b><br>%s</p>" % escape(ans["answer_it"]).replace("\n", "<br>"),
-            "<p><b>Answer (EN)</b><br>%s</p>" % escape(ans["answer_en"]).replace("\n", "<br>"),
+            "<p><b>Risposta (IT)</b></p>%s" % mdlite.to_html(ans["answer_it"]),
+            "<p><b>Answer (EN)</b></p>%s" % mdlite.to_html(ans["answer_en"]),
             "<p><b>Model:</b> %s<br><b>Cited articles:</b> %s</p>" % (
                 escape(str(ans.get("model", "?"))),
                 escape(", ".join(ans["cited_articles"]) or "none")),

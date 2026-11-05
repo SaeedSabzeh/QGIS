@@ -3,20 +3,24 @@
 `make_fetch()` -> fetch(url, timeout) for core.services.query_all.
 `make_transport()` -> transport(url, headers, payload, timeout) for core.llm clients.
 Both use blocking calls and are meant to run inside a QgsTask (a worker thread), never on the
-UI thread. HTTP failures become core's LLMError with status / retry_after / transient set, so
+UI thread. The `timeout` argument is enforced two ways, because blockingGet/blockingPost may
+ignore the request's transfer timeout: the request gets setTransferTimeout (when Qt has it), and
+a watchdog timer cancels a QgsFeedback passed to the blocking call, which aborts it. HTTP failures become core's LLMError with status / retry_after / transient set, so
 the retry and model-fallback logic keeps working. Secrets are only sent in headers and never
 appear in messages (URLs are logged without their query string).
 """
 
 import json
+import threading
 
-from qgis.core import QgsNetworkAccessManager
+from qgis.core import QgsFeedback, QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QByteArray, QUrl
 from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
 
 from ._compat import enum, llm, log
 
 MAX_BODY_IN_ERROR = 300
+WATCHDOG_GRACE = 1.0  # seconds added to the timeout before the watchdog aborts the request
 
 
 class Canceled(Exception):
@@ -88,12 +92,46 @@ def _check(is_canceled):
         raise Canceled("canceled")
 
 
+def _blocking(call, timeout):
+    """Run `call(feedback)` (a blockingGet/blockingPost) so that it cannot outlive `timeout`.
+
+    A daemon timer cancels the QgsFeedback after timeout + grace; the blocking call then
+    returns early. Returns (reply, timed_out)."""
+    feedback = QgsFeedback()
+    state = {"timed_out": False}
+
+    def expire():
+        state["timed_out"] = True
+        feedback.cancel()
+
+    timer = None
+    if timeout:
+        timer = threading.Timer(float(timeout) + WATCHDOG_GRACE, expire)
+        timer.daemon = True
+        timer.start()
+    try:
+        reply = call(feedback)
+    finally:
+        if timer is not None:
+            timer.cancel()
+    return reply, state["timed_out"]
+
+
+def _timeout_note(timeout):
+    return "timed out after %d s" % int(timeout)
+
+
 def make_fetch(is_canceled=None):
     def fetch(url, timeout=20):
         _check(is_canceled)
-        reply = QgsNetworkAccessManager.instance().blockingGet(_request(url, {}, timeout))
+        request = _request(url, {}, timeout)
+        reply, timed_out = _blocking(
+            lambda fb: QgsNetworkAccessManager.instance().blockingGet(request, feedback=fb),
+            timeout)
         status, body, net_error, retry = _read_reply(reply)
         _check(is_canceled)
+        if timed_out and not status:
+            net_error = _timeout_note(timeout)
         return interpret(url, status, body, net_error, retry)
     return fetch
 
@@ -102,9 +140,13 @@ def make_transport(is_canceled=None):
     def transport(url, headers, payload, timeout):
         _check(is_canceled)
         data = QByteArray(json.dumps(payload).encode("utf-8"))
-        reply = QgsNetworkAccessManager.instance().blockingPost(
-            _request(url, headers, timeout), data)
+        request = _request(url, headers, timeout)
+        reply, timed_out = _blocking(
+            lambda fb: QgsNetworkAccessManager.instance().blockingPost(
+                request, data, feedback=fb), timeout)
         status, body, net_error, retry = _read_reply(reply)
         _check(is_canceled)
+        if timed_out and not status:
+            net_error = _timeout_note(timeout)
         return interpret(url, status, body, net_error, retry)
     return transport

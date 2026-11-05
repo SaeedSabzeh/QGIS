@@ -45,17 +45,25 @@ def query_point(lat, lon, fetch=None, data_dir=None):
     }
 
 
-def ask(question, point_result, client, k=5, data_dir=None):
+def ask(question, point_result, client, k=5, data_dir=None, on_progress=None):
     """Answer `question` for a `query_point` result with an LLM client (llm.make_client).
 
     Raises llm.LLMError when the answer request fails. A failed keyword rewrite is not fatal
     (the question itself is searched) and is reported in "warnings".
+
+    `on_progress(message)` (optional) is called with short status lines such as "Trying
+    gemini-3.8-flash..." or "gemini-3.8-flash busy, trying gemini-3.5-flash...". It runs in the
+    calling thread: front ends that use a worker thread must hand the message to the GUI thread.
     """
+    say = on_progress or (lambda message: None)
     raw, findings = point_result["raw"], point_result["findings"]
     by_id = retrieval.articles_by_id(data_dir)
     warnings, keywords = [], question
+    say("Preparing the search...")
     try:
-        kw = prompts.keywords_from_text(client.complete(prompts.build_keywords_prompt(question)))
+        kw = prompts.keywords_from_text(client.complete(
+            prompts.build_keywords_prompt(question), on_progress=on_progress,
+            budget=llm.KEYWORDS_BUDGET))
         if kw:
             keywords = kw
     except llm.LLMError as exc:
@@ -64,7 +72,9 @@ def ask(question, point_result, client, k=5, data_dir=None):
     articles = [by_id[i] for i in ret["ids"] if i in by_id]
     prompt = prompts.build_answer_prompt(
         question, findings, articles, keywords=keywords, provenance=ret["provenance"])
-    ans = llm.parse_answer(client.complete(prompt), prompt["article_ids"])
+    say("Asking the model...")
+    ans = llm.parse_answer(client.complete(prompt, on_progress=on_progress),
+                           prompt["article_ids"])
     ans["model"] = client.last_model or client.model
     ans["keywords"] = keywords
     ans["warnings"] = warnings

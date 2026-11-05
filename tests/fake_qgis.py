@@ -141,6 +141,17 @@ class QgsNetworkAccessManager:
         return FakeNAM()
 
 
+class QgsFeedback:
+    def __init__(self):
+        self.canceled = False
+
+    def cancel(self):
+        self.canceled = True
+
+    def isCanceled(self):  # noqa: N802
+        return self.canceled
+
+
 class QgsSettings:
     store = {}
 
@@ -371,7 +382,7 @@ def install():
         if "." in name:
             setattr(mods[name.rsplit(".", 1)[0]], name.rsplit(".", 1)[1], mod)
     core = mods["qgis.core"]
-    for obj in (QgsNetworkAccessManager, QgsSettings, QgsAuthMethodConfig, QgsApplication,
+    for obj in (QgsNetworkAccessManager, QgsFeedback, QgsSettings, QgsAuthMethodConfig, QgsApplication,
                 QgsTask, QgsCoordinateTransform, QgsProject):
         setattr(core, obj.__name__, obj)
     mods["qgis.PyQt.QtCore"].pyqtSignal = pyqtSignal
