@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Contact email in metadata.txt changed to an address that can receive the plugins.qgis.org confirmation mail.
+- Removed the deprecated `supportsQt6` flag: plugins.qgis.org now reads QGIS 4 support from `qgisMaximumVersion=4.99`.
+
 ## 0.1.1
 
 - Easier Gemini key setup: no master password needed. The key is stored encrypted in the QGIS password store when it is available and a master password is already set; otherwise it falls back silently to the plugin settings in your QGIS profile (plain text, with a note under the field). GEMINI_API_KEY from the environment is used when nothing is stored. "Remove stored key" clears every store.
