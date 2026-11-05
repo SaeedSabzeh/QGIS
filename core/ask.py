@@ -1,10 +1,13 @@
 """Command-line entry point.
 
     python -m core.ask <lat> <lon> ["question"] [--provider gemini|ollama] [--model M]
+                                  [--no-fallback]
 
 Without a question, or without a Gemini key (env GEMINI_API_KEY), it prints the findings and the
 mapped articles (no-key mode). With a question it rewrites it to Italian keywords, retrieves,
 asks the model and prints the answer in Italian and English with the cited articles.
+Gemini transient errors are retried, then the next model in llm.DEFAULT_GEMINI_FALLBACKS is
+tried (--model sets the primary model; --no-fallback disables the chain).
 """
 
 import argparse
@@ -52,7 +55,8 @@ def _footer(out):
     print(prompts.LIMITATION_EN, file=out)
 
 
-def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=None):
+def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=None,
+        sleep=None):
     """Run the CLI; returns the process exit code. Injectable for tests."""
     out = out or sys.stdout
     env = os.environ if env is None else env
@@ -61,7 +65,9 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
     ap.add_argument("lon", type=float)
     ap.add_argument("question", nargs="?", default=None)
     ap.add_argument("--provider", choices=["gemini", "ollama"], default="gemini")
-    ap.add_argument("--model", default=None)
+    ap.add_argument("--model", default=None, help="primary model")
+    ap.add_argument("--no-fallback", action="store_true",
+                    help="do not fall back to other Gemini models on failure")
     ap.add_argument("--base-url", default=None, help="Ollama base URL")
     ap.add_argument("-k", type=int, default=5, help="max BM25 extra articles")
     ap.add_argument("--full-text", action="store_true", help="print full article texts")
@@ -97,7 +103,9 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
         return 0
 
     try:
-        client = llm.make_client(args.provider, args.model, key, args.base_url, transport)
+        client = llm.make_client(
+            args.provider, args.model, key, args.base_url, transport,
+            fallbacks=() if args.no_fallback else llm.DEFAULT_GEMINI_FALLBACKS, sleep=sleep)
         keywords = args.question
         try:
             kw = prompts.keywords_from_text(
@@ -105,7 +113,8 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
             if kw:
                 keywords = kw
         except llm.LLMError as exc:
-            p("(keyword rewrite failed, searching with the raw question: %s)" % exc)
+            print("WARNING: keyword rewrite failed (%s); searching with the original question"
+                  % exc, file=sys.stderr)
         p("Italian keywords: %s" % keywords)
         ret = retrieval.retrieve(result, keywords, k=args.k, findings=findings,
                                  data_dir=data_dir)
@@ -113,6 +122,7 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
         _print_articles(ret["ids"], ret["provenance"], by_id, out, args.full_text)
         prompt = prompts.build_answer_prompt(args.question, findings, articles)
         ans = llm.parse_answer(client.complete(prompt), prompt["article_ids"])
+        p("Model: %s" % (client.last_model or client.model))
     except llm.LLMError as exc:
         print("LLM request failed: %s" % exc, file=sys.stderr)
         p("The findings and articles above are still valid.")
