@@ -2,7 +2,7 @@
 
 from qgis.core import QgsApplication, QgsTask
 
-from ._compat import enum
+from ._compat import enum, log
 
 _ACTIVE = set()  # keeps Python references alive while QGIS runs the tasks
 
@@ -43,6 +43,6 @@ def cancel_all():
     for task in list(_ACTIVE):
         try:
             task.cancel()
-        except Exception:
-            pass
+        except RuntimeError as exc:  # underlying C++ task already deleted
+            log("cancel_all: task already gone (%s)" % type(exc).__name__)
     _ACTIVE.clear()

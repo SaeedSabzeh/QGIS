@@ -1,6 +1,6 @@
 """Validate a built plugin zip against the plugins.qgis.org upload rules.
 
-    python scripts/check_plugin_zip.py [dist/norme_milano-0.1.0.zip]
+    python scripts/check_plugin_zip.py [dist/norme_milano-0.1.1.zip]
 
 Exit code 1 (with a list of problems) if any rule is broken.
 """

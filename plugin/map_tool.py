@@ -5,7 +5,7 @@ from qgis.gui import QgsMapToolEmitPoint, QgsVertexMarker
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor
 
-from ._compat import enum
+from ._compat import enum, log
 
 
 def to_wgs84(point, source_crs):
@@ -46,8 +46,8 @@ class PointQueryTool(QgsMapToolEmitPoint):
         if self._marker is not None:
             try:
                 self._canvas.scene().removeItem(self._marker)
-            except Exception:
-                pass
+            except (RuntimeError, AttributeError) as exc:  # marker/scene already deleted
+                log("clear_marker: %s" % type(exc).__name__)
             self._marker = None
 
     def cleanup(self):

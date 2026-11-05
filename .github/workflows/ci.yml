@@ -12,8 +12,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pytest ruff
+      - run: pip install pytest ruff bandit
       - run: ruff check core scripts tests plugin
+      - run: bandit -r plugin core -q
       - run: pytest -q
 
   build:

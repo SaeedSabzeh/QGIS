@@ -14,7 +14,7 @@ from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QByteArray, QUrl
 from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
 
-from ._compat import enum, llm
+from ._compat import enum, llm, log
 
 MAX_BODY_IN_ERROR = 300
 
@@ -67,8 +67,8 @@ def _read_reply(reply):
     try:
         raw = reply.rawHeader(QByteArray(b"Retry-After"))
         retry = bytes(raw).decode("ascii", "ignore") or None
-    except Exception:
-        pass
+    except (AttributeError, TypeError, ValueError) as exc:
+        log("no Retry-After header: %s" % type(exc).__name__)
     no_error = enum(QNetworkReply, "NetworkError", "NoError")
     net_error = None if reply.error() == no_error else reply.errorString()
     return status, body, net_error, retry

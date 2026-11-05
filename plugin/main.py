@@ -156,8 +156,8 @@ class NormeMilanoPlugin:
         key = None
         if s["provider"] == "gemini":
             try:
-                key = settings.read_gemini_key(s["authcfg"])  # main thread: may prompt for the
-            except settings.KeyStoreError as exc:             # auth master password
+                key = settings.read_gemini_key(s["authcfg"])  # main thread; never prompts
+            except settings.KeyStoreError as exc:
                 self.dock.show_error(str(exc))
                 return
         point_result = self._last

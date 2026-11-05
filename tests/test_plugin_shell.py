@@ -197,39 +197,188 @@ def test_fetch_cancel(env):
 
 
 # ----------------------------------------------------------------------------- settings / key
-def test_key_stored_in_auth_manager_only(env):
-    from qgis.core import QgsApplication, QgsSettings
+def _auth(**kw):
+    from qgis.core import QgsApplication
+    am = QgsApplication.authManager()
+    for k, v in kw.items():
+        setattr(am, k, v)
+    return am
+
+
+def test_key_encrypted_when_master_password_set(env, monkeypatch):
+    from qgis.core import QgsSettings
 
     from plugin import settings
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     s = settings.load_settings()
     assert s["provider"] == "none" and not settings.is_ask_available(s)
-    authcfg = settings.store_gemini_key(SECRET)
+    authcfg, where = settings.store_gemini_key(SECRET)
+    assert where == "auth" and authcfg
     s.update(provider="gemini", authcfg=authcfg)
     settings.save_settings(s)
     assert settings.is_ask_available(settings.load_settings())
     assert settings.read_gemini_key(authcfg) == SECRET
+    assert settings.key_location(authcfg) == "auth"
     assert all(SECRET not in str(v) for v in QgsSettings.store.values())
     assert all(k.startswith("norme_milano/") for k in QgsSettings.store)
-    assert QgsApplication.authManager().configs[authcfg]["password"] == SECRET
+    assert _auth().configs[authcfg]["password"] == SECRET
     # updating keeps the same auth config id
-    assert settings.store_gemini_key("other", authcfg) == authcfg
+    assert settings.store_gemini_key("other", authcfg) == (authcfg, "auth")
     settings.remove_gemini_key(authcfg)
     with pytest.raises(settings.KeyStoreError):
         settings.read_gemini_key(authcfg)
 
 
-def test_master_password_not_set_gives_clear_error(env):
-    from qgis.core import QgsApplication
+def test_disabled_auth_falls_back_to_profile_settings(env, monkeypatch):
+    from qgis.core import QgsSettings
 
     from plugin import settings
-    QgsApplication.authManager().master_set = False
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    _auth(disabled=True)
+    authcfg, where = settings.store_gemini_key(SECRET)  # no error, no dialog
+    assert (authcfg, where) == ("", "settings")
+    assert QgsSettings.store["norme_milano/gemini_key"] == SECRET
+    assert settings.read_gemini_key("") == SECRET
+    assert settings.key_location("") == "settings"
+    s = settings.load_settings()
+    s["provider"] = "gemini"
+    assert settings.is_ask_available(s)
+    assert SECRET not in str(s)
+    assert _auth().configs == {}
+
+
+def test_master_password_not_set_falls_back_too(env, monkeypatch):
+    from plugin import settings
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    _auth(master_set=False)
+    assert not settings.auth_store_ready()
+    assert settings.store_gemini_key(SECRET) == ("", "settings")
+    assert settings.read_gemini_key("") == SECRET
+
+
+def test_locked_auth_store_at_read_time(env, monkeypatch):
+    from plugin import settings
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    authcfg, _ = settings.store_gemini_key(SECRET)
+    _auth(master_set=False)  # locked later
+    s = settings.load_settings()
+    s.update(provider="gemini", authcfg=authcfg)
+    assert settings.is_ask_available(s)  # does not touch the auth manager
     with pytest.raises(settings.KeyStoreError) as ei:
-        settings.store_gemini_key(SECRET)
-    assert "master password" in str(ei.value)
-    assert SECRET not in str(ei.value)
-    QgsApplication.authManager().disabled = True
+        settings.read_gemini_key(authcfg)
+    assert "Enter the key again" in str(ei.value) and SECRET not in str(ei.value)
+    assert settings.key_location(authcfg) == "auth-locked"
+    # a profile-settings or environment key still works while the store is locked
+    monkeypatch.setenv("GEMINI_API_KEY", "ENV-KEY-1")
+    assert settings.read_gemini_key(authcfg) == "ENV-KEY-1"
+
+
+def test_environment_key_is_read_only_fallback(env, monkeypatch):
+    from qgis.core import QgsSettings
+
+    from plugin import settings
+    monkeypatch.setenv("GEMINI_API_KEY", "ENV-KEY-1")
+    s = settings.load_settings()
+    s["provider"] = "gemini"
+    assert settings.is_ask_available(s)
+    assert settings.read_gemini_key("") == "ENV-KEY-1"
+    assert settings.key_location("") == "env"
+    settings.remove_gemini_key("")  # cannot remove the environment variable
+    assert settings.read_gemini_key("") == "ENV-KEY-1"
+    # a stored key wins over the environment
+    _auth(disabled=True)
+    settings.store_gemini_key(SECRET)
+    assert settings.read_gemini_key("") == SECRET
+    assert "ENV-KEY-1" not in str(QgsSettings.store)
+
+
+def test_remove_clears_both_stores(env, monkeypatch):
+    from qgis.core import QgsSettings
+
+    from plugin import settings
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    authcfg, _ = settings.store_gemini_key(SECRET)
+    QgsSettings().setValue("norme_milano/gemini_key", SECRET)  # also a plain copy
+    settings.remove_gemini_key(authcfg)
+    assert _auth().configs == {}
+    assert not QgsSettings.store["norme_milano/gemini_key"]
     with pytest.raises(settings.KeyStoreError):
-        settings.store_gemini_key(SECRET)
+        settings.read_gemini_key("")
+    assert settings.key_location("") == "none"
+
+
+def test_migrates_authcfg_from_0_1_0(env, monkeypatch):
+    from plugin import settings
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    am = _auth()
+    am.configs["old0001"] = {"password": SECRET, "method": "Basic"}
+    assert settings.read_gemini_key("old0001") == SECRET
+    assert settings.store_gemini_key("new-key", "old0001") == ("old0001", "auth")
+    assert am.configs["old0001"]["password"] == "new-key"
+
+
+def test_key_never_in_errors_or_logs(env, monkeypatch, capsys):
+    import qgis.core
+
+    from plugin import settings
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    logged = []
+    qgis.core.QgsMessageLog.logMessage = lambda *a, **k: logged.append(a)
+    am = _auth()
+
+    def boom(*a, **k):
+        raise RuntimeError("auth backend gone")
+    am.storeAuthenticationConfig = boom
+    assert settings.store_gemini_key(SECRET) == ("", "settings")  # falls back, no raise
+    am.loadAuthenticationConfig = boom
+    assert settings.read_gemini_key("x") == SECRET
+    _auth(master_set=False)
+    with pytest.raises(settings.KeyStoreError) as ei:
+        settings.store_gemini_key("")
+    texts = [str(ei.value)] + [str(x) for x in logged]
+    out = capsys.readouterr()
+    assert logged and all(SECRET not in t for t in texts + [out.out, out.err])
+
+
+def test_dialog_note_and_masked_field(env, monkeypatch):
+    from plugin import settings
+
+    class Label:
+        def __init__(self, text=""):
+            self.text = text
+
+        def setText(self, text):  # noqa: N802
+            self.text = text
+
+        def __getattr__(self, name):
+            return lambda *a, **k: None
+
+    monkeypatch.setattr(settings, "QLabel", Label)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    _auth(disabled=True)
+    dlg = settings.SettingsDialog(None)
+    assert dlg.key_note.text == settings.NOTE_PLAIN and "not encrypted" in settings.NOTE_PLAIN
+    _auth(disabled=False)
+    assert settings.SettingsDialog(None).key_note.text == settings.NOTE_NONE_AUTH
+    monkeypatch.setenv("GEMINI_API_KEY", "ENV-KEY-1")
+    assert settings.SettingsDialog(None).key_note.text == settings.NOTE_ENV
+    st = settings.load_settings()
+    st["authcfg"], _ = settings.store_gemini_key(SECRET)
+    settings.save_settings(st)
+    assert settings.SettingsDialog(None).key_note.text == settings.NOTE_AUTH
+
+
+def test_initgui_does_not_touch_auth_manager(env, monkeypatch):
+    am = _auth()
+
+    def fail(*a, **k):
+        raise AssertionError("auth manager touched at startup")
+    for name in ("isDisabled", "masterPasswordIsSet", "setMasterPassword",
+                 "loadAuthenticationConfig"):
+        setattr(am, name, fail)
+    p = env.classFactory(FakeIface())
+    p.initGui()
+    p.unload()
 
 
 def test_ollama_enables_ask_without_key(env):

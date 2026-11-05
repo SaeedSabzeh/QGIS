@@ -1,9 +1,14 @@
-"""Settings storage, Gemini key handling (QgsAuthManager) and the settings / first-run dialog.
+"""Settings storage, Gemini key handling and the settings / first-run dialog.
 
-Non-secret settings live in QgsSettings under "norme_milano/". The Gemini API key is stored ONLY
-in the encrypted QGIS authentication database (an auth config of method "Basic" whose password
-is the key); QgsSettings keeps just the auth config id.
+Non-secret settings live in QgsSettings under "norme_milano/". The Gemini API key is looked up in
+this order: (a) the encrypted QGIS authentication database (an auth config of method "Basic",
+used only when the auth system works AND a master password is already set - the plugin never asks
+for or creates one), (b) the plugin settings in the QGIS profile (plain text, key
+"norme_milano/gemini_key"), (c) the GEMINI_API_KEY environment variable (read-only).
+Saving uses (a) when available and silently falls back to (b). The key is never logged.
 """
+
+import os
 
 from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsSettings
 from qgis.PyQt.QtWidgets import (
@@ -20,7 +25,7 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from . import net, tasks
-from ._compat import enum, llm, pipeline
+from ._compat import enum, llm, log, pipeline
 
 PREFIX = "norme_milano/"
 GEMINI_KEY_URL = "https://aistudio.google.com/apikey"
@@ -41,12 +46,15 @@ PRIVACY_NOTE = (
     "leaves your machine. / Nel piano gratuito di Gemini, Google puo usare i prompt per "
     "migliorare i suoi prodotti."
 )
-AUTH_HELP = (
-    "The key is stored in the QGIS encrypted authentication database, which needs a master "
-    "password: set one in Settings > Options > Authentication, then try again. / La chiave "
-    "e salvata nel database di autenticazione cifrato di QGIS, che richiede una password "
-    "principale: impostarla in Impostazioni > Opzioni > Autenticazione."
-)
+KEY_SETTING = PREFIX + "gemini_key"
+ENV_VAR = "GEMINI_API_KEY"
+NOTE_PLAIN = ("Stored in your QGIS profile settings (not encrypted). To encrypt it, set a QGIS "
+              "master password in Options > Authentication.")
+NOTE_AUTH = "Stored encrypted in the QGIS password store."
+NOTE_ENV = "Using %s from the environment." % ENV_VAR
+NOTE_NONE_AUTH = "Will be stored encrypted in the QGIS password store."
+REENTER_HELP = ("The stored Gemini key could not be read (the QGIS password store is locked or "
+                "unavailable). Enter the key again in Settings.")
 AUTH_CONFIG_NAME = "Norme Milano - Gemini API key"
 
 
@@ -77,69 +85,120 @@ def save_settings(values):
             qs.setValue(PREFIX + name, values[name])
 
 
+def _plain_key():
+    value = QgsSettings().value(KEY_SETTING, "")
+    return str(value).strip() if value else ""
+
+
+def _env_key():
+    return os.environ.get(ENV_VAR, "").strip()
+
+
 def is_ask_available(settings):
-    """Gemini key stored, or Ollama chosen."""
+    """Ollama chosen, or Gemini with a key from any of auth DB / profile settings / environment.
+
+    Never touches the auth manager (called from initGui): only checks that a key is recorded.
+    """
     if settings["provider"] == "ollama":
         return True
-    return settings["provider"] == "gemini" and bool(settings.get("authcfg"))
+    return settings["provider"] == "gemini" and bool(
+        settings.get("authcfg") or _plain_key() or _env_key())
 
 
-# --------------------------------------------------------------------------- key in auth DB
-def _auth_manager():
-    am = QgsApplication.authManager()
-    if am is None or am.isDisabled():
-        raise KeyStoreError("The QGIS authentication system is not available. " + AUTH_HELP)
-    if not am.masterPasswordIsSet() and not am.setMasterPassword(True):
-        raise KeyStoreError("The authentication master password is not set. " + AUTH_HELP)
-    return am
+# --------------------------------------------------------------------------- key storage
+def auth_store_ready():
+    """True when the QGIS auth system works and a master password is already set (no prompt)."""
+    try:
+        am = QgsApplication.authManager()
+        return bool(am is not None and not am.isDisabled() and am.masterPasswordIsSet())
+    except (AttributeError, RuntimeError) as exc:
+        log("auth manager unavailable: %s" % type(exc).__name__)
+        return False
 
 
 def _ok(result):
     return bool(result[0] if isinstance(result, tuple) else result)
 
 
+def _store_in_auth(key, authcfg):
+    """Returns the auth config id, or "" when the auth store could not take the key."""
+    try:
+        am = QgsApplication.authManager()
+        cfg = QgsAuthMethodConfig()
+        cfg.setMethod("Basic")
+        cfg.setName(AUTH_CONFIG_NAME)
+        cfg.setConfig("username", "gemini-api-key")
+        cfg.setConfig("password", key)
+        if authcfg:
+            cfg.setId(authcfg)
+            if _ok(am.updateAuthenticationConfig(cfg)):
+                return authcfg
+            cfg.setId("")  # the stored config vanished: create a new one
+        if _ok(am.storeAuthenticationConfig(cfg)) and cfg.id():
+            return cfg.id()
+    except (AttributeError, RuntimeError) as exc:
+        log("could not use the auth store: %s" % type(exc).__name__)
+    return ""
+
+
 def store_gemini_key(key, authcfg=""):
-    """Save `key` in the auth DB (updating `authcfg` when it exists). Returns the auth config id."""
+    """Save `key`. Returns (authcfg, where): where is "auth" (encrypted; authcfg is its id) or
+    "settings" (plain text in the QGIS profile; authcfg is ""). Falls back silently."""
     key = (key or "").strip()
     if not key:
         raise KeyStoreError("Empty key.")
-    am = _auth_manager()
-    cfg = QgsAuthMethodConfig()
-    cfg.setMethod("Basic")
-    cfg.setName(AUTH_CONFIG_NAME)
-    cfg.setConfig("username", "gemini-api-key")
-    cfg.setConfig("password", key)
-    if authcfg:
-        cfg.setId(authcfg)
-        if _ok(am.updateAuthenticationConfig(cfg)):
-            return authcfg
-        cfg.setId("")  # the stored config vanished: create a new one
-    if not _ok(am.storeAuthenticationConfig(cfg)) or not cfg.id():
-        raise KeyStoreError("Could not store the key in the authentication database. " + AUTH_HELP)
-    return cfg.id()
+    if auth_store_ready():
+        new_id = _store_in_auth(key, authcfg)
+        if new_id:
+            QgsSettings().setValue(KEY_SETTING, "")  # no stale plain copy
+            return new_id, "auth"
+        log("auth store refused the key; using profile settings")
+    QgsSettings().setValue(KEY_SETTING, key)
+    return "", "settings"
 
 
-def read_gemini_key(authcfg):
-    """Return the stored key, or raise KeyStoreError. Call on the main thread."""
-    if not authcfg:
-        raise KeyStoreError("No Gemini key configured.")
-    am = _auth_manager()
-    cfg = QgsAuthMethodConfig()
-    if not _ok(am.loadAuthenticationConfig(authcfg, cfg, True)):
-        raise KeyStoreError("The stored Gemini key could not be read. Enter it again in Settings.")
-    key = cfg.config("password")
-    if not key:
-        raise KeyStoreError("The stored Gemini key is empty. Enter it again in Settings.")
-    return key
-
-
-def remove_gemini_key(authcfg):
-    if not authcfg:
-        return
+def _read_from_auth(authcfg):
+    if not authcfg or not auth_store_ready():
+        return ""
     try:
-        _auth_manager().removeAuthenticationConfig(authcfg)
-    except KeyStoreError:
-        pass
+        cfg = QgsAuthMethodConfig()
+        if _ok(QgsApplication.authManager().loadAuthenticationConfig(authcfg, cfg, True)):
+            return (cfg.config("password") or "").strip()
+    except (AttributeError, RuntimeError) as exc:
+        log("could not read the auth store: %s" % type(exc).__name__)
+    return ""
+
+
+def read_gemini_key(authcfg=""):
+    """Return the key (auth store, then profile settings, then environment) or raise
+    KeyStoreError. Never prompts for the master password. Call on the main thread."""
+    key = _read_from_auth(authcfg) or _plain_key() or _env_key()
+    if key:
+        return key
+    if authcfg:
+        raise KeyStoreError(REENTER_HELP)
+    raise KeyStoreError("No Gemini key configured. Enter it in Settings.")
+
+
+def key_location(authcfg=""):
+    """Where the key comes from: "auth", "auth-locked", "settings", "env" or "none" (for the UI)."""
+    if authcfg and _read_from_auth(authcfg):
+        return "auth"
+    if authcfg and not _plain_key() and not _env_key():
+        return "auth-locked"
+    if _plain_key():
+        return "settings"
+    return "env" if _env_key() else "none"
+
+
+def remove_gemini_key(authcfg=""):
+    """Remove the key from the auth store and the profile settings (the env var is untouched)."""
+    if authcfg and auth_store_ready():
+        try:
+            QgsApplication.authManager().removeAuthenticationConfig(authcfg)
+        except (AttributeError, RuntimeError) as exc:
+            log("could not remove the auth config: %s" % type(exc).__name__)
+    QgsSettings().setValue(KEY_SETTING, "")
 
 
 # --------------------------------------------------------------------------- client
@@ -180,14 +239,14 @@ class SettingsDialog(QDialog):
         form.addRow("Gemini model", self.gemini_model)
         self.gemini_key = QLineEdit()
         self.gemini_key.setEchoMode(enum(QLineEdit, "EchoMode", "Password"))
-        self.gemini_key.setPlaceholderText(
-            "stored (leave empty to keep it)" if s["authcfg"] else "paste your Gemini API key")
         form.addRow("Gemini API key", self.gemini_key)
+        self.key_note = QLabel("")
+        self.key_note.setWordWrap(True)
+        form.addRow("", self.key_note)
         link = QLabel('<a href="%s">Create a Gemini key (Google AI Studio)</a>' % GEMINI_KEY_URL)
         link.setOpenExternalLinks(True)
         form.addRow("", link)
         self.remove_key = QPushButton("Remove stored key")
-        self.remove_key.setEnabled(bool(s["authcfg"]))
         self.remove_key.clicked.connect(self._remove_key)
         form.addRow("", self.remove_key)
 
@@ -218,6 +277,7 @@ class SettingsDialog(QDialog):
         layout.addWidget(buttons)
         self.provider.currentIndexChanged.connect(self._sync_enabled)
         self._sync_enabled()
+        self._refresh_key_ui()
 
     # -- helpers
     def _provider(self):
@@ -232,6 +292,25 @@ class SettingsDialog(QDialog):
             w.setEnabled(oll)
         self.test_button.setEnabled(gem or oll)
 
+    def _refresh_key_ui(self):
+        """Placeholder, storage note and Remove button from the current key state."""
+        where = key_location(self._settings["authcfg"])
+        stored = where in ("auth", "auth-locked", "settings")
+        self.gemini_key.setPlaceholderText(
+            "stored (leave empty to keep it)" if stored else "paste your Gemini API key")
+        if where == "auth":
+            note = NOTE_AUTH
+        elif where == "auth-locked":
+            note = REENTER_HELP
+        elif where == "settings":
+            note = NOTE_PLAIN
+        elif where == "env":
+            note = NOTE_ENV
+        else:
+            note = NOTE_NONE_AUTH if auth_store_ready() else NOTE_PLAIN
+        self.key_note.setText(note)
+        self.remove_key.setEnabled(bool(self._settings["authcfg"]) or bool(_plain_key()))
+
     def _collect(self):
         s = dict(self._settings)
         s.update(provider=self._provider(),
@@ -244,8 +323,7 @@ class SettingsDialog(QDialog):
         remove_gemini_key(self._settings["authcfg"])
         self._settings["authcfg"] = ""
         save_settings(self._settings)
-        self.remove_key.setEnabled(False)
-        self.gemini_key.setPlaceholderText("paste your Gemini API key")
+        self._refresh_key_ui()
         self.test_result.setText("Stored key removed.")
 
     def _test_connection(self):
@@ -277,7 +355,7 @@ class SettingsDialog(QDialog):
         typed = self.gemini_key.text().strip()
         if s["provider"] == "gemini" and typed:
             try:
-                s["authcfg"] = store_gemini_key(typed, s["authcfg"])
+                s["authcfg"], _where = store_gemini_key(typed, s["authcfg"])
             except KeyStoreError as exc:
                 QMessageBox.warning(self, "Norme Milano", str(exc))
                 return  # stay open; the key was not written anywhere
@@ -285,12 +363,13 @@ class SettingsDialog(QDialog):
         s["first_run_done"] = True
         save_settings(s)
         self._settings = s
+        self._refresh_key_ui()
         super().accept()
 
     def done(self, result):
         if self._test_task is not None:
             try:
                 self._test_task.cancel()
-            except Exception:
-                pass
+            except RuntimeError as exc:  # underlying C++ task already deleted
+                log("settings dialog: task already gone (%s)" % type(exc).__name__)
         super().done(result)

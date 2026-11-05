@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- Easier Gemini key setup: no master password needed. The key is stored encrypted in the QGIS password store when it is available and a master password is already set; otherwise it falls back silently to the plugin settings in your QGIS profile (plain text, with a note under the field). GEMINI_API_KEY from the environment is used when nothing is stored. "Remove stored key" clears every store.
+- Security scan cleanups: URL scheme checks before network calls (https, or http to localhost only) and narrower exception handling.
+
 ## 0.1.0 (first experimental release)
 
 - Click a point in Milan: PGT zoning category and constraints are read live from Regione Lombardia's public ArcGIS map services (28 layers: PGT mosaic, landscape sensitivity, geological feasibility, PGRA flood hazard and risk, Natura 2000, regional parks).

@@ -8,8 +8,8 @@ qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 supportsQt6=True
 description=Shows the Milan planning rules (PGT/PTC) and constraints that apply at a clicked point.
-about=Click a point in Milan to see which planning constraints apply there (PGT zoning category, landscape sensitivity, geological feasibility class, PGRA flood hazard and risk, Natura 2000 sites, regional parks) and which articles of the Piano di Governo del Territorio (Piano delle Regole, Piano dei Servizi, Documento di Piano) and of the PTC of the Parco Agricolo Sud Milano govern them. Constraints are read live from Regione Lombardia's public ArcGIS map services; the plugin does not redistribute that data. The article texts and the zone-to-article mapping ship with the plugin. Optionally ask a free-text question in Italian or English: it is answered by Google Gemini or by a local Ollama model, only from the retrieved articles, and any citation outside them is removed and flagged. GUIDANCE ONLY, NOT LEGAL ADVICE: always check the official texts and ask a qualified professional. The plugin queries the clicked POINT, not a whole parcel, so a parcel that crosses two zones can be misreported; finer zoning (historic cores, ADR, ARU) is not available from the regional services. About half of the mapping entries are flagged "verify". PRIVACY: without an LLM provider (provider "None") nothing is sent except the map-service queries (the clicked coordinates go to Regione Lombardia servers). With Gemini, your question and the retrieved article texts are sent to Google, and on the free tier Google may use prompts to improve its products; you need your own API key (stored only in the QGIS encrypted authentication database). With Ollama everything stays on your machine. Experimental release.
-version=0.1.0
+about=Click a point in Milan to see which planning constraints apply there (PGT zoning category, landscape sensitivity, geological feasibility class, PGRA flood hazard and risk, Natura 2000 sites, regional parks) and which articles of the Piano di Governo del Territorio (Piano delle Regole, Piano dei Servizi, Documento di Piano) and of the PTC of the Parco Agricolo Sud Milano govern them. Constraints are read live from Regione Lombardia's public ArcGIS map services; the plugin does not redistribute that data. The article texts and the zone-to-article mapping ship with the plugin. Optionally ask a free-text question in Italian or English: it is answered by Google Gemini or by a local Ollama model, only from the retrieved articles, and any citation outside them is removed and flagged. GUIDANCE ONLY, NOT LEGAL ADVICE: always check the official texts and ask a qualified professional. The plugin queries the clicked POINT, not a whole parcel, so a parcel that crosses two zones can be misreported; finer zoning (historic cores, ADR, ARU) is not available from the regional services. About half of the mapping entries are flagged "verify". PRIVACY: without an LLM provider (provider "None") nothing is sent except the map-service queries (the clicked coordinates go to Regione Lombardia servers). With Gemini, your question and the retrieved article texts are sent to Google, and on the free tier Google may use prompts to improve its products; you need your own API key (stored in the QGIS encrypted password store when a master password is set, otherwise in plain text in your QGIS profile settings, or read from the GEMINI_API_KEY environment variable). With Ollama everything stays on your machine. Experimental release.
+version=0.1.1
 author=Saeed Sabzeh
 email=185818664+SaeedSabzeh@users.noreply.github.com
 repository=https://github.com/SaeedSabzeh/QGIS
@@ -21,7 +21,10 @@ deprecated=False
 hasProcessingProvider=no
 tags=urban planning,zoning,italy,milan,pgt,regulations,lombardia,planning
 category=Plugins
-changelog=0.1.0 (first experimental release)
+changelog=0.1.1
+    - Easier Gemini key setup: no master password needed; falls back to profile settings when the QGIS password store is unavailable
+    - Security scan cleanups
+    0.1.0 (first experimental release)
     - Click a point in Milan: PGT zone and constraints from Regione Lombardia live map services
     - 7 PGT/PTC documents mapped to the constraints (Piano delle Regole, Piano dei Servizi, Documento di Piano, PTC Parco Sud with Allegato A, geological norms, landscape contents)
     - Optional Q&A with Gemini (own API key) or local Ollama, with citation checks

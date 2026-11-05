@@ -11,6 +11,7 @@ tried (--model sets the primary model; --no-fallback disables the chain).
 """
 
 import argparse
+import contextlib
 import os
 import sys
 
@@ -153,10 +154,9 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
 
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):
-        try:
+        # streams without reconfigure() (or already closed) keep their encoding
+        with contextlib.suppress(AttributeError, OSError, ValueError):
             stream.reconfigure(encoding="utf-8", errors="replace")
-        except Exception:
-            pass
     return run(argv)
 
 
