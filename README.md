@@ -1,5 +1,18 @@
 # Norme Milano: a QGIS plugin for Milan's planning rules
 
+[![CI](https://github.com/SaeedSabzeh/QGIS/actions/workflows/ci.yml/badge.svg)](https://github.com/SaeedSabzeh/QGIS/actions/workflows/ci.yml)
+[![QGIS plugin](https://img.shields.io/badge/QGIS%20plugin-0.1.3%20experimental-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/norme_milano/)
+[![QGIS](https://img.shields.io/badge/QGIS-3.28%E2%80%934.x-589632)](https://qgis.org)
+[![License: GPL v2+](https://img.shields.io/badge/license-GPL--2.0--or--later-blue)](LICENSE)
+
+*Clicca un punto di Milano e scopri quali norme del PGT si applicano lì, con gli articoli e una risposta in italiano o inglese.*
+
+![Norme Milano in QGIS: a click on the Duomo shows the NAF zone, its governing articles of the Piano delle Regole, and an answer to "Can I build a basement here?"](docs/screenshot.jpg)
+
+<sub>Map: © OpenStreetMap contributors. Constraints: Regione Lombardia geoservices.</sub>
+
+**Quick start:** in QGIS open **Plugins → Manage and Install Plugins → Settings**, tick **Show also experimental plugins**, then search for **Norme Milano**. Until the plugin is approved, download `norme_milano-0.1.3.zip` from [Releases](https://github.com/SaeedSabzeh/QGIS/releases) and use **Install from ZIP**.
+
 Click a point in Milan and the plugin shows which planning rules apply there:
 
 - **Constraints found at the point**, from Regione Lombardia's live map services: the PGT zoning categories (historic cores, consolidated urban fabric, transformation and regeneration areas, services, agricultural and landscape areas), landscape sensitivity class, geological feasibility class, PGRA flood hazard and risk, Natura 2000 sites and regional parks.
