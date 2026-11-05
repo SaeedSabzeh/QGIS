@@ -164,9 +164,9 @@ class NormeMilanoPlugin:
         if self._ask_task is not None:
             self._ask_task.cancel()
 
-        def work(is_canceled):
+        def work(is_canceled, report):
             client = settings.build_client(s, key, net.make_transport(is_canceled))
-            return pipeline.ask(question, point_result, client)
+            return pipeline.ask(question, point_result, client, on_progress=report)
 
         def done(ans, error):
             self._ask_task = None
@@ -181,5 +181,6 @@ class NormeMilanoPlugin:
             self.dock.show_answer(ans)
 
         self.dock.set_asking(True)
-        self._ask_task = tasks.start("Norme Milano: ask", work, done)
+        self._ask_task = tasks.start("Norme Milano: ask", work, done,
+                                     on_progress=self.dock.set_progress)
 

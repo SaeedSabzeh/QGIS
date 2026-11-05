@@ -486,12 +486,12 @@ def test_retry_same_model_on_503_then_success():
     assert t.models == ["p", "p"] and c.last_model == "p" and sleeps == [2.0]
 
 
-def test_fallback_after_three_503s():
-    t = scripted(http_err(503), http_err(503), http_err(503), OK)
+def test_fallback_after_two_503s():
+    t = scripted(http_err(503), http_err(503), OK)
     c, sleeps = gem(t)
     c.complete({"user": "U"})
-    assert t.models == ["p", "p", "p", "f1"] and c.last_model == "f1"
-    assert sleeps == [2.0, 4.0]  # no sleep between models
+    assert t.models == ["p", "p", "f1"] and c.last_model == "f1"
+    assert sleeps == [2.0]  # one quick retry, no sleep between models
 
 
 def test_404_falls_back_immediately():
@@ -511,36 +511,41 @@ def test_401_and_400_stop_immediately():
 
 
 def test_all_models_exhausted_raises_last_error():
-    t = scripted(*[http_err(503)] * 9)
+    t = scripted(*[http_err(503)] * 6)
     c, _ = gem(t)
     with pytest.raises(llm.LLMError) as e:
         c.complete({"user": "U"})
-    assert e.value.status == 503 and len(t.models) == 9 and c.last_model is None
+    assert e.value.status == 503 and len(t.models) == 6 and c.last_model is None
 
 
 def test_no_fallback_and_dedup_chain():
     c = llm.GeminiClient("k", model="a", fallbacks=("a", "b", "b"))
     assert c.models == ["a", "b"]
-    t = scripted(http_err(503), http_err(503), http_err(503))
+    t = scripted(http_err(503), http_err(503))
     c, _ = gem(t)
     c.fallbacks = ()
     with pytest.raises(llm.LLMError):
         c.complete({"user": "U"})
-    assert t.models == ["p", "p", "p"]
+    assert t.models == ["p", "p"]
 
 
-def test_retry_after_honoured_and_capped():
-    t = scripted(http_err(429, retry_after=7), http_err(429, retry_after=500), OK)
+def test_retry_after_honoured_when_short_else_fall_back():
+    t = scripted(http_err(429, retry_after=3), OK)
     c, sleeps = gem(t)
     c.complete({"user": "U"})
-    assert sleeps == [7.0, llm.DEFAULT_MAX_DELAY]
+    assert sleeps == [3.0] and t.models == ["p", "p"]
+    # longer than the cap: no waiting, straight to the next model
+    t = scripted(http_err(429, retry_after=500), OK)
+    c, sleeps = gem(t)
+    c.complete({"user": "U"})
+    assert sleeps == [] and t.models == ["p", "f1"]
 
 
 def test_backoff_has_jitter_and_cap():
     t = scripted(http_err(500), http_err(500), http_err(500), OK)
     sleeps = []
     c = llm.GeminiClient("k", model="p", fallbacks=("f",), transport=t, sleep=sleeps.append,
-                         rng=lambda: 0.0, base_delay=2, max_delay=3)
+                         rng=lambda: 0.0, base_delay=2, max_delay=3, max_attempts=3)
     c.complete({"user": "U"})
     assert sleeps == [1.0, 1.5]  # 50% of min(cap, 2) and of min(cap, 4)
 
@@ -596,6 +601,7 @@ def test_ollama_retries_timeout_without_fallback():
         return reply
 
     c = llm.make_client("ollama", model="m", transport=transport, sleep=sleeps.append)
+    c.max_attempts = 3
     assert c.complete({"user": "U"}) == "{}" and len(calls) == 3 and len(sleeps) == 2
     assert c.last_model == "m"
 

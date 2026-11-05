@@ -61,9 +61,11 @@ def _footer(out, ids=(), data_dir=None):
 
 
 def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=None,
-        sleep=None):
+        sleep=None, err=None):
     """Run the CLI; returns the process exit code. Injectable for tests."""
     out = out or sys.stdout
+    err = err or sys.stderr
+    progress = lambda m: print(m, file=err)  # noqa: E731
     env = os.environ if env is None else env
     ap = argparse.ArgumentParser(prog="python -m core.ask", description=__doc__.split("\n\n")[0])
     ap.add_argument("lat", type=float)
@@ -115,7 +117,8 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
         keywords = args.question
         try:
             kw = prompts.keywords_from_text(
-                client.complete(prompts.build_keywords_prompt(args.question)))
+                client.complete(prompts.build_keywords_prompt(args.question),
+                                on_progress=progress, budget=llm.KEYWORDS_BUDGET))
             if kw:
                 keywords = kw
         except llm.LLMError as exc:
@@ -129,7 +132,8 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
         _print_articles(ret["ids"], ret["provenance"], by_id, out, args.full_text)
         prompt = prompts.build_answer_prompt(
             args.question, findings, articles, keywords=keywords, provenance=ret["provenance"])
-        ans = llm.parse_answer(client.complete(prompt), prompt["article_ids"])
+        ans = llm.parse_answer(client.complete(prompt, on_progress=progress),
+                               prompt["article_ids"])
         p("Model: %s" % (client.last_model or client.model))
     except llm.LLMError as exc:
         print("LLM request failed: %s" % exc, file=sys.stderr)

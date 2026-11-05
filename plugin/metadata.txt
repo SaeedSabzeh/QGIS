@@ -8,7 +8,7 @@ qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Shows the Milan planning rules (PGT/PTC) and constraints that apply at a clicked point.
 about=Click a point in Milan to see which planning constraints apply there (PGT zoning category, landscape sensitivity, geological feasibility class, PGRA flood hazard and risk, Natura 2000 sites, regional parks) and which articles of the Piano di Governo del Territorio (Piano delle Regole, Piano dei Servizi, Documento di Piano) and of the PTC of the Parco Agricolo Sud Milano govern them. Constraints are read live from Regione Lombardia's public ArcGIS map services; the plugin does not redistribute that data. The article texts and the zone-to-article mapping ship with the plugin. Optionally ask a free-text question in Italian or English: it is answered by Google Gemini or by a local Ollama model, only from the retrieved articles, and any citation outside them is removed and flagged. GUIDANCE ONLY, NOT LEGAL ADVICE: always check the official texts and ask a qualified professional. The plugin queries the clicked POINT, not a whole parcel, so a parcel that crosses two zones can be misreported; finer zoning (historic cores, ADR, ARU) is not available from the regional services. About half of the mapping entries are flagged "verify". PRIVACY: without an LLM provider (provider "None") nothing is sent except the map-service queries (the clicked coordinates go to Regione Lombardia servers). With Gemini, your question and the retrieved article texts are sent to Google, and on the free tier Google may use prompts to improve its products; you need your own API key (stored in the QGIS encrypted password store when a master password is set, otherwise in plain text in your QGIS profile settings, or read from the GEMINI_API_KEY environment variable). With Ollama everything stays on your machine. Experimental release.
-version=0.1.2
+version=0.1.3
 author=Saeed Sabzeh
 email=saeed.sabzeh.80@gmail.com
 repository=https://github.com/SaeedSabzeh/QGIS
@@ -20,7 +20,11 @@ deprecated=False
 hasProcessingProvider=no
 tags=urban planning,zoning,italy,milan,pgt,regulations,lombardia,planning
 category=Plugins
-changelog=0.1.2
+changelog=0.1.3
+    - Faster answers when Gemini is overloaded: one quick retry, then the next model; 20 s per request (45 s for the last model), about 65 s at most
+    - The panel shows which model is being tried
+    - Answers are shown with formatting (bold, lists, headings) instead of raw markdown symbols
+    0.1.2
     - Contact email that can receive the repository's confirmation mail
     - Removed the deprecated supportsQt6 flag (QGIS 4 support comes from qgisMaximumVersion=4.99)
     0.1.1

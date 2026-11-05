@@ -10,12 +10,12 @@ import sys
 from pathlib import Path
 
 try:
-    from .core import llm, pipeline, prompts, retrieval, services  # noqa: F401
+    from .core import llm, mdlite, pipeline, prompts, retrieval, services  # noqa: F401
 except ImportError:
     _root = str(Path(__file__).resolve().parents[1])
     if _root not in sys.path:
         sys.path.insert(0, _root)
-    from core import llm, pipeline, prompts, retrieval, services  # noqa: F401
+    from core import llm, mdlite, pipeline, prompts, retrieval, services  # noqa: F401
 
 
 def enum(cls, scope, name):

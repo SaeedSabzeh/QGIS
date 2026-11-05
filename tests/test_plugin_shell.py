@@ -161,7 +161,7 @@ def test_transport_sends_key_in_header_only_and_retries(env):
     FakeNAM.responder = lambda m, req, data: replies.pop(0)
     sleeps = []
     client = llm.GeminiClient(SECRET, "m1", transport=net.make_transport(), fallbacks=(),
-                              sleep=sleeps.append)
+                              sleep=sleeps.append, max_attempts=3)
     assert "ok" in client.complete({"system": "s", "user": "u"})
     assert sleeps and sleeps[1] == 2.0  # Retry-After honoured through the adapter
     for method, req, data in FakeNAM.calls:
@@ -551,3 +551,78 @@ def test_build_zip_and_packaged_import(tmp_path, monkeypatch):
         fake_qgis.uninstall()
         for n in [n for n in sys.modules if n.split(".")[0] == "norme_milano"]:
             del sys.modules[n]
+
+
+# ----------------------------------------------------------------------------- timeouts / progress
+def test_transport_sets_transfer_timeout_and_passes_feedback(env):
+    from plugin import net
+    FakeNAM.responder = lambda m, req, data: FakeReply(200, b"{}")
+    net.make_transport()("https://x.test/a", {}, {}, 20)
+    method, req, _ = FakeNAM.calls[-1]
+    assert req.timeout == 20000
+
+
+def test_watchdog_aborts_a_hanging_blocking_call(env, monkeypatch):
+    import time
+
+    from plugin import net
+    monkeypatch.setattr(net, "WATCHDOG_GRACE", 0.0)
+
+    def hang(feedback):  # a blocking call that only returns once its feedback is canceled
+        for _ in range(400):
+            if feedback.isCanceled():
+                return "aborted"
+            time.sleep(0.005)
+        return "never aborted"
+
+    reply, timed_out = net._blocking(hang, 0.02)
+    assert reply == "aborted" and timed_out is True
+    reply, timed_out = net._blocking(lambda fb: "fast", 5)
+    assert reply == "fast" and timed_out is False
+
+
+def test_timed_out_request_becomes_transient_llm_error(env, monkeypatch):
+    from plugin import net
+    monkeypatch.setattr(net, "_blocking",
+                        lambda call, timeout: (FakeReply(0, b"", error_string="x"), True))
+    with pytest.raises(net.llm.LLMError) as e:
+        net.make_transport()("https://x.test/a?key=SECRET", {}, {}, 20)
+    assert e.value.transient and "timed out after 20 s" in str(e.value)
+    assert "SECRET" not in str(e.value)
+
+
+def test_task_progress_reaches_dock_status_only_while_busy(env):
+    from plugin import dock, tasks
+    d = dock.RulesDock(None)
+    seen = []
+    d.set_status = seen.append
+    got = []
+
+    def work(is_canceled, report):
+        report("Trying m1...")
+        report("m1 busy, trying m2...")
+        return "done"
+
+    tasks.start("t", work, lambda res, err: got.append((res, err)), on_progress=d.set_progress)
+    assert got == [("done", None)]
+    assert seen == []  # not busy: messages are ignored
+    d.set_asking(True)
+    tasks.start("t", work, lambda res, err: None, on_progress=d.set_progress)
+    assert seen[0] == d.ASKING
+    assert seen[-1].startswith(d.ASKING) and seen[-1].endswith("m1 busy, trying m2...")
+    d.set_asking(False)
+    d.set_progress("late")
+    assert "late" not in seen[-1]
+    # plain tasks (no progress) keep the one-argument work signature
+    tasks.start("t", lambda is_canceled: 5, lambda res, err: got.append(res))
+    assert got[-1] == 5
+
+
+def test_dock_renders_markdown_answer_safely(env):
+    from plugin import dock
+    d = dock.RulesDock(None)
+    d.show_answer({"answer_it": "1. **Fattibilità** <script>x</script>\n- voce",
+                   "answer_en": "**bold**", "cited_articles": [], "model": "m"})
+    html = d.answer.toHtml()
+    assert "<ol><li><b>Fattibilità</b>" in html and "<ul><li>voce</li></ul>" in html
+    assert "<script" not in html and "&lt;script&gt;" in html and "**" not in html

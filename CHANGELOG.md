@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3
+
+- Faster answers when Gemini is overloaded. A model that times out or answers 503 gets at most one quick retry (1-2 s), then the plugin moves to the next model. Requests time out after 20 s (45 s for the last model), and one question waits about 65 s at most (10 s more for the optional keyword step). A `Retry-After` longer than 5 s now means "use the next model" instead of waiting. The timeout is enforced in the QGIS network path too (transfer timeout plus a watchdog that aborts the blocking call).
+- The dock status line shows progress while waiting ("Trying gemini-3.8-flash...", "gemini-3.8-flash busy, trying gemini-3.5-flash..."). `python -m core.ask` prints the same lines to stderr.
+- Answers render as formatted text (bold, italic, lists, headings, code) instead of raw markdown. The converter escapes all HTML first, so model output can never inject markup. The prompt now says light markdown is fine.
+
 ## 0.1.2
 
 - Contact email in metadata.txt changed to an address that can receive the plugins.qgis.org confirmation mail.
