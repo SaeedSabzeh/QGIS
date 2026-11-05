@@ -4,6 +4,10 @@ A prompt is a dict {"system": str, "user": str, ...}; llm clients read those two
 """
 
 import json
+import math
+from collections import Counter
+
+from . import retrieval
 
 DISCLAIMER_EN = (
     "Guidance only, not legal advice. Check the official texts and ask a qualified professional "
@@ -33,6 +37,8 @@ Follow these rules strictly:
    Regole). Say that they are outside the NTA and are not among the supplied articles; do not
    cite them as articles.
 7. The result concerns the clicked point only, not the whole parcel.
+8. An article header marked "(estratto)" is an excerpt: passages left out are shown as "[...]".
+   If the answer may depend on omitted text, say so honestly instead of guessing.
 Reply with a single JSON object and nothing else:
 {"answer_it": "<answer in Italian>", "answer_en": "<same answer in English>",
  "cited_articles": ["PR-art-N", ...]}"""
@@ -81,29 +87,158 @@ def format_finding(f):
     return "\n".join(lines)
 
 
-def format_article(a, max_chars):
+DEFAULT_MAX_TOTAL_CHARS = 120000   # default budget for the ARTICLES section
+HARD_CAP_CHARS = 250000            # never exceeded, whatever max_total_chars says
+MIN_ARTICLE_CHARS = 600            # a non-governing article is not worth a smaller excerpt
+OMIT_MARK = "[...]"
+EXCERPT_TAG = "(estratto)"
+
+# Priority classes: lower is included first.
+P_GOVERNING, P_EXTRA, P_GENERAL, P_CANDIDATE = 0, 1, 2, 3
+_ROLE_PRIORITY = {"articles": P_GOVERNING, "bm25": P_EXTRA,
+                  "general_articles": P_GENERAL, "candidate_articles": P_CANDIDATE}
+
+
+def article_header(a, excerpt=False):
     head = "[%s] Art. %s - %s" % (a["id"], a.get("number", ""), a.get("title", ""))
     if a.get("capo"):
         head += "  (%s)" % a["capo"]
-    return head + "\n" + truncate_text(a.get("text", ""), max_chars)
+    if excerpt:
+        head += "  " + EXCERPT_TAG
+    return head
 
 
-def build_answer_prompt(question, findings, articles, max_chars_per_article=3500,
-                        max_total_chars=30000):
-    """Build the answer prompt.
+def format_article(a, max_chars=None):
+    """Header + text; plain head truncation when `max_chars` is given (legacy helper)."""
+    text = a.get("text", "")
+    cut = max_chars is not None and len(text) > max_chars
+    return article_header(a, excerpt=cut) + "\n" + truncate_text(text, max_chars)
 
-    `articles` is an ordered list of article dicts (mapped first). Articles that do not fit in
-    `max_total_chars` are left out; the ids actually included are returned as `article_ids` and
-    are the only ones the model may cite.
+
+def _paragraph_scores(paras, query_tokens):
+    """BM25-style score of each paragraph against the query tokens (idf from the paragraphs)."""
+    tfs = [Counter(retrieval.tokenize(p)) for p in paras]
+    lens = [sum(c.values()) for c in tfs]
+    avg = (sum(lens) / len(lens)) if lens else 1.0
+    n = len(paras)
+    df = Counter()
+    for c in tfs:
+        df.update(c.keys())
+    scores = []
+    for c, ln in zip(tfs, lens):
+        s = 0.0
+        for t in query_tokens:
+            f = c.get(t)
+            if f:
+                idf = math.log(1 + (n - df[t] + 0.5) / (df[t] + 0.5))
+                norm = 1 - 0.75 + 0.75 * ln / (avg or 1.0)
+                s += idf * f * 2.5 / (f + 1.5 * norm)
+        scores.append(s)
+    return scores
+
+
+def trim_text(text, allowance, query_tokens=()):
+    """Shrink `text` to about `allowance` chars, keeping what matters for the question.
+
+    Paragraphs are lines. The first paragraph is always kept, then the paragraphs with the best
+    overlap with `query_tokens` (then, with room left, the following ones in document order),
+    restored to their original order; every gap is marked with an "[...]" line.
+    Returns (text, was_trimmed).
     """
-    blocks, ids, total = [], [], 0
-    for a in articles:
-        block = format_article(a, max_chars_per_article)
-        if blocks and total + len(block) > max_total_chars:
+    if len(text) <= allowance:
+        return text, False
+    paras = [x for x in text.split("\n") if x.strip()]
+    if not paras:
+        return text, False
+    room = max(allowance - len(OMIT_MARK) - 1, 0)
+    if len(paras[0]) > room:
+        return truncate_text(paras[0], room), True
+    keep = {0}
+    used = len(paras[0]) + 1
+    scores = _paragraph_scores(paras, set(query_tokens)) if query_tokens else [0.0] * len(paras)
+    for i in sorted(range(1, len(paras)), key=lambda i: (-scores[i], i)):
+        cost = len(paras[i]) + 1 + len(OMIT_MARK) + 1  # worst case: a gap marker before it
+        if used + cost + len(OMIT_MARK) + 1 <= room:
+            keep.add(i)
+            used += cost
+    out, prev = [], -1
+    for i in sorted(keep):
+        if i != prev + 1:
+            out.append(OMIT_MARK)
+        out.append(paras[i])
+        prev = i
+    if prev != len(paras) - 1:
+        out.append(OMIT_MARK)
+    return "\n".join(out), True
+
+
+def _priority(aid, provenance):
+    roles = [x.get("role") for x in (provenance or {}).get(aid, [])]
+    pris = [_ROLE_PRIORITY[r] for r in roles if r in _ROLE_PRIORITY]
+    return min(pris) if pris else P_GENERAL
+
+
+def _water_fill(lengths, total):
+    """Per-item caps with sum <= total, trimming the longest items first."""
+    caps = list(lengths)
+    if sum(caps) <= total:
+        return caps
+    left, n = total, len(caps)
+    for pos, i in enumerate(sorted(range(n), key=lambda i: caps[i])):
+        caps[i] = min(caps[i], left // (n - pos))
+        left -= caps[i]
+    return caps
+
+
+def build_answer_prompt(question, findings, articles, keywords="", provenance=None,
+                        max_total_chars=DEFAULT_MAX_TOTAL_CHARS, hard_cap_chars=HARD_CAP_CHARS,
+                        max_chars_per_article=None):
+    """Build the answer prompt with a role-aware character budget.
+
+    Priority: governing articles (role "articles" in `provenance`, as from retrieve()) are
+    included in FULL; then BM25 extras (role "bm25"), then general_articles, then
+    candidate_articles, each in full while it fits and otherwise trimmed query-aware (trim_text,
+    using `question` + `keywords`) to what is left. Trimmed articles carry "(estratto)" in the
+    header. If the governing articles alone exceed the budget, the longest are trimmed. The budget
+    is min(max_total_chars, hard_cap_chars). Without `provenance` every article counts as
+    general and the given order is the priority. `max_chars_per_article` optionally caps the
+    non-governing ones. `article_ids` lists the included (citable) ids in priority order.
+    """
+    budget = min(max_total_chars, hard_cap_chars)
+    qtokens = set(retrieval.tokenize("%s %s" % (question or "", keywords or ""), loose=True))
+    ranked = sorted(range(len(articles)),
+                    key=lambda i: (_priority(articles[i]["id"], provenance), i))
+    gov = [i for i in ranked if _priority(articles[i]["id"], provenance) == P_GOVERNING]
+
+    def full_len(i):
+        return len(article_header(articles[i])) + 1 + len(articles[i].get("text", ""))
+
+    def render(i, allowance):
+        a = articles[i]
+        if allowance >= full_len(i):
+            return article_header(a) + "\n" + a.get("text", "")
+        overhead = len(article_header(a, True)) + 1
+        body, cut = trim_text(a.get("text", ""), max(allowance - overhead, 0), qtokens)
+        return article_header(a, cut) + "\n" + body
+
+    chosen, used = {}, 0
+    if gov:
+        for i, cap in zip(gov, _water_fill([full_len(i) + 2 for i in gov], budget)):
+            chosen[i] = render(i, cap - 2)
+            used += len(chosen[i]) + 2
+    for i in ranked:
+        if i in chosen:
             continue
-        blocks.append(block)
-        ids.append(a["id"])
-        total += len(block)
+        cap = budget - used - 2
+        if max_chars_per_article is not None:
+            cap = min(cap, max_chars_per_article)
+        if cap < MIN_ARTICLE_CHARS and full_len(i) > cap:
+            continue
+        chosen[i] = render(i, cap)
+        used += len(chosen[i]) + 2
+    order = [i for i in ranked if i in chosen]
+    ids = [articles[i]["id"] for i in order]
+    blocks = [chosen[i] for i in order]
     fnd = "\n".join(format_finding(f) for f in findings) or "(no constraint or zone found at the point)"
     user = (
         "FINDINGS at the clicked point:\n%s\n\nARTICLES (the only citable ids: %s):\n\n%s\n\n"

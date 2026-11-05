@@ -120,7 +120,8 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
                                  data_dir=data_dir)
         articles = [by_id[i] for i in ret["ids"] if i in by_id]
         _print_articles(ret["ids"], ret["provenance"], by_id, out, args.full_text)
-        prompt = prompts.build_answer_prompt(args.question, findings, articles)
+        prompt = prompts.build_answer_prompt(
+            args.question, findings, articles, keywords=keywords, provenance=ret["provenance"])
         ans = llm.parse_answer(client.complete(prompt), prompt["article_ids"])
         p("Model: %s" % (client.last_model or client.model))
     except llm.LLMError as exc:
