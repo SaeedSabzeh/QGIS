@@ -156,22 +156,109 @@ def test_retrieve_orders_mapped_first_and_dedups():
 
 
 # ---- prompts / llm -------------------------------------------------------------------------
+def _art(n, text, title="T"):
+    return {"id": "PR-art-%d" % n, "number": n, "title": title, "text": text}
+
+
+def _prov(**roles):
+    """_prov(articles=[1], bm25=[2], ...) -> provenance dict."""
+    out = {}
+    for role, nums in roles.items():
+        for n in nums:
+            out.setdefault("PR-art-%d" % n, []).append({"role": role})
+    return out
+
+
+def _long_art(n, term_line_at=40, lines=60):
+    rows = ["Art. %d testo introduttivo." % n]
+    rows += ["comma %d filler generico di norma senza rilievo %s" % (i, "z" * 60)
+             for i in range(1, lines)]
+    rows[term_line_at] = "comma %d per il piano interrato valgono regole speciali" % term_line_at
+    return _art(n, "\n".join(rows))
+
+
 def test_prompt_contains_rules_findings_and_truncates():
-    arts = [{"id": "PR-art-1", "number": 1, "title": "T", "capo": "C", "text": "x. " * 5000}]
+    arts = [_art(1, "x. " * 5000)]
     findings = retrieval.lookup(DUOMO)
     p = prompts.build_answer_prompt("Che cosa posso costruire?", findings, arts,
-                                    max_chars_per_article=500)
+                                    max_total_chars=1500)
     assert "ONLY" in p["system"] and "answer_it" in p["system"] and "PR-art-1" in p["user"]
-    assert "troncato" in p["user"] and "VERIFY" in p["user"]
+    assert "troncato" in p["user"] and "(estratto)" in p["user"] and "VERIFY" in p["user"]
     assert "EXTERNAL RULE" in p["user"]
     assert p["article_ids"] == ["PR-art-1"] and len(p["user"]) < 6000
 
 
-def test_prompt_total_budget_drops_articles():
-    arts = [{"id": "PR-art-%d" % i, "number": i, "title": "T", "text": "y" * 900}
-            for i in range(1, 6)]
+def test_governing_article_in_full_under_default_budget():
+    big = _long_art(45)
+    assert len(big["text"]) > 3500
+    p = prompts.build_answer_prompt("q", [], [big], provenance=_prov(articles=[45]))
+    assert big["text"] in p["user"] and "(estratto)" not in p["user"]
+    assert "[...]" not in p["user"] and p["article_ids"] == ["PR-art-45"]
+
+
+def test_trim_keeps_first_paragraph_query_terms_and_order():
+    big = _long_art(45)
+    p = prompts.build_answer_prompt("piano interrato", [], [big], keywords="interrato",
+                                    provenance=_prov(articles=[45]), max_total_chars=2500)
+    u = p["user"]
+    assert "(estratto)" in u and "[...]" in u
+    assert "Art. 45 testo introduttivo." in u
+    assert "comma 40 per il piano interrato" in u
+    assert u.index("testo introduttivo") < u.index("comma 40 per il piano")
+    body = u[u.index("[PR-art-45] Art."):u.index("QUESTION")]
+    assert len(body) < 2600
+    nums = [int(l.split()[1]) for l in body.splitlines() if l.startswith("comma ")]
+    assert nums == sorted(nums)
+
+
+def test_priority_governing_extras_general_candidate():
+    arts = [_art(i, "w" * 900) for i in (1, 2, 3, 4)]
+    prov = _prov(candidate_articles=[1], general_articles=[2], bm25=[3], articles=[4])
+    p = prompts.build_answer_prompt("q", [], arts, provenance=prov, max_total_chars=2200)
+    assert p["article_ids"][:2] == ["PR-art-4", "PR-art-3"]
+    assert "PR-art-1" not in p["article_ids"]
+    full = prompts.build_answer_prompt("q", [], arts, provenance=prov)
+    assert full["article_ids"] == ["PR-art-4", "PR-art-3", "PR-art-2", "PR-art-1"]
+
+
+def test_governing_exceeding_budget_trims_longest_last():
+    short, long_ = _art(1, "s" * 500), _long_art(2)
+    p = prompts.build_answer_prompt("piano interrato", [], [short, long_],
+                                    provenance=_prov(articles=[1, 2]), max_total_chars=3000)
+    assert p["article_ids"] == ["PR-art-1", "PR-art-2"]
+    assert "s" * 500 in p["user"] and "(estratto)" in p["user"]
+    assert len(p["user"]) < 3000 + 1500  # budget + findings/question/wrapper overhead
+
+
+def test_hard_cap_overrides_total():
+    big = _art(1, "\n".join("riga %d %s" % (i, "k" * 80) for i in range(500)))
+    p = prompts.build_answer_prompt("q", [], [big], provenance=_prov(articles=[1]),
+                                    max_total_chars=10 ** 9, hard_cap_chars=5000)
+    assert len(p["user"]) < 5000 + 1500
+
+
+def test_article_ids_only_included():
+    arts = [_art(i, "y" * 900) for i in range(1, 6)]
     p = prompts.build_answer_prompt("q", [], arts, max_total_chars=2000)
     assert 0 < len(p["article_ids"]) < 5
+    for aid in p["article_ids"]:
+        assert "[%s]" % aid in p["user"]
+    for a in arts:
+        if a["id"] not in p["article_ids"]:
+            assert "[%s]" % a["id"] not in p["user"].split("QUESTION")[0].split("ARTICLES")[1]
+
+
+def test_real_art45_interrato_survives_trimming():
+    by_id = retrieval.articles_by_id()
+    a45 = by_id["PR-art-45"]
+    assert len(a45["text"]) > 15000
+    prov = _prov(articles=[45])
+    full = prompts.build_answer_prompt("piano interrato", [], [a45], keywords="piano interrato",
+                                       provenance=prov)
+    assert a45["text"] in full["user"]
+    small = prompts.build_answer_prompt("piano interrato", [], [a45], keywords="piano interrato",
+                                        provenance=prov, max_total_chars=4000)
+    assert "(estratto)" in small["user"] and "interrat" in small["user"][small["user"].index("[PR-art-45]"):]
 
 
 def test_parse_answer_fences_and_rejection():
