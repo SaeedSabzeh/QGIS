@@ -10,7 +10,7 @@ Click a point in Milan and the plugin shows which planning rules apply there:
 
 ## Status
 
-The plugin works in **QGIS 3.44.15 LTR** (Qt 5.15, Python 3.12). Clicks at the Duomo, Lambro and Chiaravalle return the expected findings and articles. It is written to also support QGIS 4 (Qt6), but that has not been tested yet. Phases 0–4 of the [implementation plan](docs/implementation-plan.md) are done (the constraint checklist still needs a manual check), and version 0.1.0 is ready to publish as experimental.
+The plugin works in **QGIS 3.44.15 LTR** (Qt 5.15, Python 3.12). Clicks at the Duomo, Lambro and Chiaravalle return the expected findings and articles. It is written to also support QGIS 4 (Qt6), but that has not been tested yet. Phases 0–4 of the [implementation plan](docs/implementation-plan.md) are done (the constraint checklist still needs a manual check), and version 0.1.1 is ready to publish as experimental.
 
 ## Sources
 
@@ -47,7 +47,7 @@ Without an LLM provider, the plugin still shows the findings and the full articl
 python scripts/build_plugin.py
 ```
 
-In QGIS, open **Plugins → Manage and Install Plugins → Install from ZIP** and choose `dist/norme_milano-0.1.0.zip` (`dist/norme_milano.zip` is an identical copy). The build also validates the zip against the plugins.qgis.org rules (`scripts/check_plugin_zip.py`). To ask questions, open **Plugins → Norme Milano → Settings**, choose Gemini (with a key from https://aistudio.google.com/apikey) or Ollama, and set the QGIS master password when asked. The key is stored in QGIS's encrypted password store, never in plain settings. On Gemini's free tier, Google may use prompts to improve its products.
+In QGIS, open **Plugins → Manage and Install Plugins → Install from ZIP** and choose `dist/norme_milano-0.1.1.zip` (`dist/norme_milano.zip` is an identical copy). The build also validates the zip against the plugins.qgis.org rules (`scripts/check_plugin_zip.py`). To ask questions, open **Plugins → Norme Milano → Settings**, choose Gemini (with a key from https://aistudio.google.com/apikey) or Ollama, and paste the key. No master password is needed: if the QGIS password store is available and a master password is already set, the key is stored encrypted there; otherwise it is stored in plain text in your QGIS profile settings (a note under the field says which). You can also set the `GEMINI_API_KEY` environment variable. On Gemini's free tier, Google may use prompts to improve its products.
 
 For the manual test checklist, see [docs/testing-in-qgis.md](docs/testing-in-qgis.md).
 
@@ -142,7 +142,7 @@ The source PDFs go in `data/raw/`, which is git-ignored.
 2. Make the GitHub repository **public**: `metadata.txt` links to it (repository, tracker, homepage).
 3. Optionally tag the release: `git tag v0.1.0 && git push origin v0.1.0`. The `release.yml` workflow builds the zip and attaches it to a GitHub pre-release.
 4. Create an account or log in with an **OSGeo ID** at https://www.osgeo.org/community/getting-started-osgeo/.
-5. Upload `dist/norme_milano-0.1.0.zip` at https://plugins.qgis.org/plugins/add/ . It is published as **experimental** (`experimental=True`), so users must enable "Show also experimental plugins" to see it. A new plugin may wait for approval by the staff.
+5. Upload `dist/norme_milano-0.1.1.zip` at https://plugins.qgis.org/plugins/add/ . It is published as **experimental** (`experimental=True`), so users must enable "Show also experimental plugins" to see it. A new plugin may wait for approval by the staff.
 6. Courtesy email to Regione Lombardia (sit_rl@regione.lombardia.it, sitpianificazione@regione.lombardia.it) about reuse terms and attribution wording: the Italian draft is in [docs/email-regione-lombardia.md](docs/email-regione-lombardia.md). Nothing has been sent.
 
 ## Licence

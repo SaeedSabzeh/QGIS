@@ -5,6 +5,7 @@ Packaged layout (scripts/build_plugin.py): core/ and data/ sit inside the plugin
 fall back to putting the repo root on sys.path.
 """
 
+import contextlib
 import sys
 from pathlib import Path
 
@@ -23,3 +24,11 @@ def enum(cls, scope, name):
     if holder is not None and hasattr(holder, name):
         return getattr(holder, name)
     return getattr(cls, name)
+
+
+def log(message, level="Info"):
+    """Write a line to the QGIS message log (tag "Norme Milano"). Never pass secrets here."""
+    # logging must never break the plugin
+    with contextlib.suppress(ImportError, AttributeError, RuntimeError):
+        from qgis.core import Qgis, QgsMessageLog
+        QgsMessageLog.logMessage(str(message), "Norme Milano", enum(Qgis, "MessageLevel", level))

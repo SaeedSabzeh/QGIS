@@ -6,12 +6,15 @@ Both clients expose `complete(prompt_parts) -> str`, where prompt_parts is a dic
 and never logged or included in error messages.
 """
 
+import contextlib
 import json
 import random
 import re
 import time
 import urllib.error
 import urllib.request
+
+from . import urlcheck
 
 DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"  # change here; also settable per call / --model
 # Tried in order when the primary model keeps failing (overloaded / unavailable). Easy to edit.
@@ -50,22 +53,22 @@ def _parse_retry_after(value):
 
 def post_json(url, headers, payload, timeout=60):
     """Default transport: POST `payload` as JSON, return the decoded JSON reply."""
+    urlcheck.check_url(url)
     req = urllib.request.Request(
         url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        # scheme validated by urlcheck.check_url above (https, or http to localhost only)
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         body = ""
-        try:
+        # an unreadable error body just stays empty
+        with contextlib.suppress(OSError, ValueError):
             body = exc.read().decode("utf-8", "replace")[:500]
-        except Exception:
-            pass
         retry_after = None
-        try:
+        # missing or odd headers just mean no Retry-After hint
+        with contextlib.suppress(AttributeError, TypeError, ValueError):
             retry_after = _parse_retry_after(exc.headers.get("Retry-After"))
-        except Exception:
-            pass
         raise LLMError("HTTP %s from %s: %s" % (exc.code, url.split("?")[0], body),
                        status=exc.code, retry_after=retry_after,
                        transient=exc.code in TRANSIENT_STATUSES) from None

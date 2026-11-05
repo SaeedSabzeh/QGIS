@@ -9,6 +9,8 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
+from . import urlcheck
+
 # Verified live layer URLs (see docs/phase0-services.md). All services are EPSG:32632;
 # the query sends lon/lat (inSR=4326) and the server reprojects.
 _PGT = "https://www.cartografia.servizirl.it/arcgis1/rest/services/territorio/tav_previsioni_b/MapServer"
@@ -72,7 +74,8 @@ def build_query_url(layer_url: str, x: float, y: float, wkid: int = 4326) -> str
 
 def fetch_json(url: str, timeout: int = DEFAULT_TIMEOUT) -> dict:
     """Default fetch function: GET `url` and decode the JSON body."""
-    with urllib.request.urlopen(url, timeout=timeout) as resp:
+    urlcheck.check_url(url)  # https only (or http to localhost)
+    with urllib.request.urlopen(url, timeout=timeout) as resp:  # nosec B310
         return json.load(resp)
 
 
