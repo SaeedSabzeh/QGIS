@@ -1,5 +1,7 @@
 """Plugin class: toolbar action, map tool, dock panel, settings, background tasks."""
 
+import os
+
 from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtGui import QIcon
 
@@ -15,6 +17,7 @@ from .map_tool import PointQueryTool
 
 MENU = "&Norme Milano"
 TITLE = "Norme Milano"
+ICON_PATH = os.path.join(os.path.dirname(__file__), "icon.png")
 
 
 class NormeMilanoPlugin:
@@ -35,7 +38,7 @@ class NormeMilanoPlugin:
         canvas = self.iface.mapCanvas()
         win = self.iface.mainWindow()
 
-        self.action = QAction(QIcon(), "Norme Milano", win)
+        self.action = QAction(QIcon(ICON_PATH), "Norme Milano", win)
         self.action.setToolTip("Norme Milano: click a point to see the planning rules "
                                "/ clic su un punto per le norme")
         self.action.setCheckable(True)
@@ -52,6 +55,7 @@ class NormeMilanoPlugin:
         self.tool.pointQueried.connect(self.on_point)
 
         self.dock = RulesDock(win)
+        self.dock.setWindowIcon(QIcon(ICON_PATH))
         self.dock.askRequested.connect(self.on_ask)
         self.dock.settingsRequested.connect(self.open_settings)
         self.iface.addDockWidget(enum(Qt, "DockWidgetArea", "RightDockWidgetArea"), self.dock)

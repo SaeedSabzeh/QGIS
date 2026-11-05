@@ -199,6 +199,7 @@ def test_fetch_cancel(env):
 # ----------------------------------------------------------------------------- settings / key
 def test_key_stored_in_auth_manager_only(env):
     from qgis.core import QgsApplication, QgsSettings
+
     from plugin import settings
     s = settings.load_settings()
     assert s["provider"] == "none" and not settings.is_ask_available(s)
@@ -219,6 +220,7 @@ def test_key_stored_in_auth_manager_only(env):
 
 def test_master_password_not_set_gives_clear_error(env):
     from qgis.core import QgsApplication
+
     from plugin import settings
     QgsApplication.authManager().master_set = False
     with pytest.raises(settings.KeyStoreError) as ei:
@@ -295,6 +297,7 @@ def test_articles_lazy_text_and_readable_title(env):
 # ----------------------------------------------------------------------------- end to end
 def test_click_then_ask_end_to_end(env):
     from qgis.core import QgsSettings
+
     from plugin import settings
 
     def responder(method, req, data):

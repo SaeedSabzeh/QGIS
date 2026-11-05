@@ -1,17 +1,28 @@
 [general]
 name=Norme Milano
+# qgisMinimumVersion=3.28: the oldest LTR line this code has been written for. The code only needs
+# APIs present since 3.6 (QgsNetworkAccessManager.blockingGet/blockingPost) and 3.x
+# (QgsSettings, QgsAuthMethodConfig, QgsTask); 3.28 is the oldest version still reasonable to
+# support and is the one the Qt5/Qt6 compatibility layer targets. Tested on QGIS 3.44 LTR.
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 supportsQt6=True
-description=Shows the planning rules (PGT/NTA) and constraints that apply at a point in Milan.
-about=Click a point in Milan to see its PGT zone, the NTA articles mapped to it, and Natura 2000 and flood-risk constraints. Optionally ask a question answered by Gemini or a local Ollama model, citing only the retrieved articles. Guidance only, not legal advice.
-version=0.0.1
+description=Shows the Milan planning rules (PGT/PTC) and constraints that apply at a clicked point.
+about=Click a point in Milan to see which planning constraints apply there (PGT zoning category, landscape sensitivity, geological feasibility class, PGRA flood hazard and risk, Natura 2000 sites, regional parks) and which articles of the Piano di Governo del Territorio (Piano delle Regole, Piano dei Servizi, Documento di Piano) and of the PTC of the Parco Agricolo Sud Milano govern them. Constraints are read live from Regione Lombardia's public ArcGIS map services; the plugin does not redistribute that data. The article texts and the zone-to-article mapping ship with the plugin. Optionally ask a free-text question in Italian or English: it is answered by Google Gemini or by a local Ollama model, only from the retrieved articles, and any citation outside them is removed and flagged. GUIDANCE ONLY, NOT LEGAL ADVICE: always check the official texts and ask a qualified professional. The plugin queries the clicked POINT, not a whole parcel, so a parcel that crosses two zones can be misreported; finer zoning (historic cores, ADR, ARU) is not available from the regional services. About half of the mapping entries are flagged "verify". PRIVACY: without an LLM provider (provider "None") nothing is sent except the map-service queries (the clicked coordinates go to Regione Lombardia servers). With Gemini, your question and the retrieved article texts are sent to Google, and on the free tier Google may use prompts to improve its products; you need your own API key (stored only in the QGIS encrypted authentication database). With Ollama everything stays on your machine. Experimental release.
+version=0.1.0
 author=Saeed Sabzeh
 email=185818664+SaeedSabzeh@users.noreply.github.com
 repository=https://github.com/SaeedSabzeh/QGIS
 tracker=https://github.com/SaeedSabzeh/QGIS/issues
 homepage=https://github.com/SaeedSabzeh/QGIS
+icon=icon.png
 experimental=True
 deprecated=False
-tags=urban planning,zoning,italy,milan,pgt,regulations
+hasProcessingProvider=no
+tags=urban planning,zoning,italy,milan,pgt,regulations,lombardia,planning
 category=Plugins
+changelog=0.1.0 (first experimental release)
+    - Click a point in Milan: PGT zone and constraints from Regione Lombardia live map services
+    - 7 PGT/PTC documents mapped to the constraints (Piano delle Regole, Piano dei Servizi, Documento di Piano, PTC Parco Sud with Allegato A, geological norms, landscape contents)
+    - Optional Q&A with Gemini (own API key) or local Ollama, with citation checks
+    - Guidance only; point lookup, not parcel

@@ -1,0 +1,84 @@
+writing to C:\Users\SAEED\Desktop\Claude\QGIS\eval\results\llm_gemini-3.8-flash_2026-11-05.jsonl (resumes: 0 done)
+  q01 ok (gemini-3.5-flash, 60.4s) cited=['PR-art-5']
+  q02 ok (gemini-3.5-flash, 24.6s) cited=['PR-art-5']
+  q03 ok (gemini-3.1-flash-lite, 71.5s) cited=['PR-art-6']
+  q04 ok (gemini-3.5-flash, 36.9s) cited=['PR-art-6']
+  q05 ok (gemini-3.1-flash-lite, 33.0s) cited=['PR-art-8', 'PS-art-11']
+  q06 ok (gemini-3.1-flash-lite, 29.2s) cited=['PR-art-31', 'PR-art-12']
+  q07 ok (gemini-3.1-flash-lite, 28.5s) cited=['PR-art-18', 'PR-art-19']
+  q08 ok (gemini-3.1-flash-lite, 27.3s) cited=['PR-art-18']
+  q09 ok (gemini-3.1-flash-lite, 25.8s) cited=['PR-art-21']
+  q10 ok (gemini-3.1-flash-lite, 24.6s) cited=['PR-art-23']
+  q11 ok (gemini-3.1-flash-lite, 27.1s) cited=[]
+  q12 ok (gemini-3.1-flash-lite, 27.1s) cited=['PR-art-35']
+  q13 ok (gemini-3.1-flash-lite, 35.0s) cited=['PR-art-34']
+  q14 ok (gemini-3.1-flash-lite, 26.2s) cited=['PR-art-38']
+  q15 ok (gemini-3.1-flash-lite, 27.8s) cited=['PR-art-39']
+  q16 ok (gemini-3.1-flash-lite, 36.9s) cited=['PR-art-40']
+  q17 ok (gemini-3.1-flash-lite, 26.9s) cited=['PR-art-41']
+  q18 ok (gemini-3.1-flash-lite, 30.0s) cited=['PR-art-44', 'CG-art-44']
+  q19 ok (gemini-3.1-flash-lite, 27.7s) cited=['PR-art-43']
+  q20 ok (gemini-3.1-flash-lite, 29.4s) cited=['PR-art-45']
+  q21 ok (gemini-3.1-flash-lite, 30.0s) cited=['PR-art-46']
+  q22 ok (gemini-3.1-flash-lite, 34.5s) cited=['PR-art-50']
+  q23 ok (gemini-3.1-flash-lite, 27.1s) cited=['PR-art-52']
+  q24 ok (gemini-3.1-flash-lite, 24.5s) cited=['PR-art-33']
+  q25 ok (gemini-3.1-flash-lite, 61.3s) cited=['PS-art-11']
+  q26 ok (gemini-3.1-flash-lite, 86.7s) cited=['PS-art-6', 'PR-art-13']
+  q27 ok (gemini-3.1-flash-lite, 22.7s) cited=['PS-art-4']
+  q28 ok (gemini-3.1-flash-lite, 22.5s) cited=['PS-art-10']
+  q29 ok (gemini-3.1-flash-lite, 83.6s) cited=['PS-art-8']
+  q30 ok (gemini-3.1-flash-lite, 21.5s) cited=['PS-art-12', 'PR-art-35']
+  q31 ok (gemini-3.1-flash-lite, 23.4s) cited=['DP-art-2']
+  q32 ok (gemini-3.1-flash-lite, 23.7s) cited=['DP-art-6']
+  q33 ok (gemini-3.1-flash-lite, 24.9s) cited=['DP-art-7', 'PR-art-7']
+  q34 ok (gemini-3.1-flash-lite, 21.9s) cited=['PTC-art-42']
+  q35 ok (gemini-3.1-flash-lite, 26.0s) cited=['PTC-art-44', 'PS-art-12', 'PR-art-35']
+  q36 ok (gemini-3.1-flash-lite, 23.7s) cited=['PTC-art-21']
+  q37 ok (gemini-3.1-flash-lite, 43.6s) cited=['PR-art-35', 'PS-art-12', 'PTC-art-25', 'PTC-art-26', 'PTC-all-A']
+  q38 ok (gemini-3.1-flash-lite, 24.8s) cited=['PR-art-35', 'PTC-art-42']
+  q39 ok (gemini-3.1-flash-lite, 21.7s) cited=[]
+  q40 ok (gemini-3.1-flash-lite, 26.3s) cited=[]
+# LLM evaluation: gemini-3.8-flash
+
+40 answers (38 scored for citations, 2 "not in the corpus").
+Models used: gemini-3.1-flash-lite x37, gemini-3.5-flash x3.
+
+| metric | value |
+|---|---|
+| citation precision (cited in gold+acceptable / cited) | 96% |
+| citation recall (gold cited / gold) | 92% |
+| gold article present in the prompt context | 93% |
+| answers with no accepted citation | 3% |
+| rejected-citation rate (invented ids / all cited) | 0% |
+| questions with at least one rejected citation | 0 |
+| reply was not valid JSON | 0 |
+| not-in-corpus: answer declines (heuristic regex) | 2 / 2 |
+| not-in-corpus: cited nothing | 2 / 2 |
+| latency mean / median / max (s) | 33.3 / 27.1 / 86.7 |
+
+## By document
+
+| document | n | citation precision | citation recall | gold in context |
+|---|---|---|---|---|
+| DP | 3 | 100% | 100% | 100% |
+| PR | 24 | 98% | 94% | 94% |
+| PS | 7 | 93% | 86% | 86% |
+| PTC | 4 | 83% | 88% | 100% |
+
+## By language
+
+| language | n | citation precision | citation recall | gold in context |
+|---|---|---|---|---|
+| en | 17 | 98% | 94% | 94% |
+| it | 21 | 94% | 90% | 93% |
+
+## Questions with missed gold or rejected citations
+
+| id | gold | cited | rejected | gold in context |
+|---|---|---|---|---|
+| q04 | PR-art-6, PR-art-17 | PR-art-6 |  | 50% |
+| q11 | PR-art-25 |  |  | 0% |
+| q24 | PS-art-11 | PR-art-33 |  | 0% |
+| q38 | PTC-art-42, PR-art-50 | PR-art-35, PTC-art-42 |  | 100% |
+

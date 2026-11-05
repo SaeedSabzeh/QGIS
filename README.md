@@ -10,7 +10,7 @@ Click a point in Milan and the plugin shows which planning rules apply there:
 
 ## Status
 
-The plugin works in **QGIS 3.44.15 LTR** (Qt 5.15, Python 3.12). Clicks at the Duomo, Lambro and Chiaravalle return the expected findings and articles. It is written to also support QGIS 4 (Qt6), but that has not been tested yet. Phases 0–3 of the [implementation plan](docs/implementation-plan.md) are done, and Phase 4 (evaluation) is in progress.
+The plugin works in **QGIS 3.44.15 LTR** (Qt 5.15, Python 3.12). Clicks at the Duomo, Lambro and Chiaravalle return the expected findings and articles. It is written to also support QGIS 4 (Qt6), but that has not been tested yet. Phases 0–4 of the [implementation plan](docs/implementation-plan.md) are done (the constraint checklist still needs a manual check), and version 0.1.0 is ready to publish as experimental.
 
 ## Sources
 
@@ -47,7 +47,7 @@ Without an LLM provider, the plugin still shows the findings and the full articl
 python scripts/build_plugin.py
 ```
 
-In QGIS, open **Plugins → Manage and Install Plugins → Install from ZIP** and choose `dist/norme_milano.zip`. To ask questions, open **Plugins → Norme Milano → Settings**, choose Gemini (with a key from https://aistudio.google.com/apikey) or Ollama, and set the QGIS master password when asked. The key is stored in QGIS's encrypted password store, never in plain settings. On Gemini's free tier, Google may use prompts to improve its products.
+In QGIS, open **Plugins → Manage and Install Plugins → Install from ZIP** and choose `dist/norme_milano-0.1.0.zip` (`dist/norme_milano.zip` is an identical copy). The build also validates the zip against the plugins.qgis.org rules (`scripts/check_plugin_zip.py`). To ask questions, open **Plugins → Norme Milano → Settings**, choose Gemini (with a key from https://aistudio.google.com/apikey) or Ollama, and set the QGIS master password when asked. The key is stored in QGIS's encrypted password store, never in plain settings. On Gemini's free tier, Google may use prompts to improve its products.
 
 For the manual test checklist, see [docs/testing-in-qgis.md](docs/testing-in-qgis.md).
 
@@ -91,7 +91,16 @@ The Italian keyword rewrite closes most of the gap on English questions: without
 
 Of the 4 questions with a missed gold article, 3 had the article missing from the prompt (a retrieval miss, not the model's fault). In the other, q38, the model cited one of the two gold articles. Per-question results are in `eval/results/llm_gemini-3.8-flash_2026-11-05.jsonl`, and the summary in [eval/results/summary_llm.md](eval/results/summary_llm.md).
 
-**Answer correctness** (LLM-as-judge against each question's answer key, using [eval/rubric.md](eval/rubric.md)): *in progress.*
+**Answer correctness** (`--mode judge`: an LLM scores each answer against the question's key facts, 0–2 per fact, using [eval/rubric.md](eval/rubric.md); the judge ran on `gemini-3.1-flash-lite` because of the same overload):
+
+| Metric | Value |
+|---|---|
+| Mean score (key-fact points / maximum) | **75%** |
+| Fully correct (every key fact scored 2) | 16 / 40 |
+| "Not in the corpus" questions | 100% |
+| Hallucinations flagged by the judge | 1, a **false positive** on review (see below) |
+
+The low scores are mostly **incomplete** answers, not wrong ones. For example, q06 covers the parking location and the bicycle quota but leaves out the tree-planting rule. The one flagged hallucination (q16, radar height limits) was checked by hand: all four values in the answer (133, 134, 141 and 150 m above sea level) are in PR art. 40. The judge flagged them only because they were not in its answer key. A rerun with `gemini-3.8-flash`, for both answers and judging, is planned once Google's load allows. The summary is in [eval/results/summary_judge.md](eval/results/summary_judge.md).
 
 **Constraint correctness**: 20 points were queried live with no layer errors. [eval/constraint_checklist.md](eval/constraint_checklist.md) still needs to be checked by hand against the official map viewers.
 
@@ -126,6 +135,15 @@ python scripts/build_maps.py
 ```
 
 The source PDFs go in `data/raw/`, which is git-ignored.
+
+## Release / publishing (manual steps for the owner)
+
+1. Run `python -m pytest -q`, `python -m ruff check core scripts tests plugin` and `python scripts/build_plugin.py`. Check that `version=` in `plugin/metadata.txt` and [CHANGELOG.md](CHANGELOG.md) say what you want to release.
+2. Make the GitHub repository **public**: `metadata.txt` links to it (repository, tracker, homepage).
+3. Optionally tag the release: `git tag v0.1.0 && git push origin v0.1.0`. The `release.yml` workflow builds the zip and attaches it to a GitHub pre-release.
+4. Create an account or log in with an **OSGeo ID** at https://www.osgeo.org/community/getting-started-osgeo/.
+5. Upload `dist/norme_milano-0.1.0.zip` at https://plugins.qgis.org/plugins/add/ . It is published as **experimental** (`experimental=True`), so users must enable "Show also experimental plugins" to see it. A new plugin may wait for approval by the staff.
+6. Courtesy email to Regione Lombardia (sit_rl@regione.lombardia.it, sitpianificazione@regione.lombardia.it) about reuse terms and attribution wording: the Italian draft is in [docs/email-regione-lombardia.md](docs/email-regione-lombardia.md). Nothing has been sent.
 
 ## Licence
 
