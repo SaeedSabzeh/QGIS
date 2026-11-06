@@ -13,13 +13,13 @@ Ranking: mapped governing articles first (then general, explanatory, candidate),
 | MRR | 0.716 |
 | hit@5 | 82% |
 | hit@5 incl. acceptable | 84% |
-| gold in the real prompt (5 extras) | 93% |
+| gold in the real prompt (5 extras with a point, 8 without) | 99% |
 
 ## Contribution of the map (BM25 alone vs map + BM25)
 
-| subset | n | BM25 recall@5 | map+BM25 recall@5 | BM25 recall@10 | map+BM25 recall@10 | BM25 MRR | map+BM25 MRR | gold in real prompt (map + 5 extras) |
+| subset | n | BM25 recall@5 | map+BM25 recall@5 | BM25 recall@10 | map+BM25 recall@10 | BM25 MRR | map+BM25 MRR | gold in real prompt (map + 5 extras, 8 without a point) |
 |---|---|---|---|---|---|---|---|---|
-| all scored | 38 | 88% | 80% | 99% | 89% | 0.804 | 0.716 | 93% |
+| all scored | 38 | 88% | 80% | 99% | 89% | 0.804 | 0.716 | 99% |
 | questions with a point | 9 | 78% | 44% | 100% | 61% | 0.696 | 0.326 | 100% |
 
 Mapped articles per question with a point: mean 30.4, max 38 (they all go before the BM25 extras, so top-k recall with a point is lower than BM25 alone; the real prompt keeps all of them plus 5 extras).

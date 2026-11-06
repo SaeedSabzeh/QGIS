@@ -13,7 +13,7 @@ the way core.pipeline.ask does before the LLM call:
      score order inside each group (retrieve() does this partition).
 Questions without a point have no mapped articles, so the ranking is the BM25 order alone.
 Extras are taken with k=10 so that the list is long enough for recall@10; the real prompt uses
-the first 5 extras (reported as "in prompt"). Questions with `gold_articles: []` ("not in the
+the first retrieval.extras_k() extras, 5 with mapped articles and 8 without (reported as "in prompt"). Questions with `gold_articles: []` ("not in the
 corpus") are left out of the retrieval metrics. Gold-only recall is fractional per question
 (|gold in top k| / |gold|); "hit" counts a question when at least one gold article is in the
 top k; "hit+acc" also accepts `acceptable_articles`.
@@ -210,7 +210,7 @@ def retrieval_rows(questions, cache, keywords_mode="question", replay=None, refr
         raw = get_raw(q.get("point"), cache, refresh, offline, fetch, cache_path)
         ranked, mapped, extras = rank_question(raw, kw, 10, data_dir)
         base_ranked, _, _ = rank_question(get_raw(None, cache), kw, 10, data_dir)
-        in_prompt = set(mapped) | set(extras[:5])
+        in_prompt = set(mapped) | set(extras[:retrieval.extras_k(len(mapped))])
         row = {
             "id": q["id"], "lang": q["lang"], "doc": gold_doc(q), "type": q.get("type"),
             "has_point": bool(q.get("point")), "gold": gold, "ranked": ranked[:10],
@@ -238,7 +238,7 @@ def retrieval_summary(rows, label="question text as keywords"):
              "BM25 order (normative before explanatory). recall is fractional over the gold ids.", ""]
     all_cols = [("recall@5", "r5"), ("recall@10", "r10"), ("MRR", "mrr"),
                 ("hit@5", "hit5"), ("hit@5 incl. acceptable", "hit5_acc"),
-                ("gold in the real prompt (5 extras)", "in_prompt")]
+                ("gold in the real prompt (5 extras with a point, 8 without)", "in_prompt")]
     lines += ["## Overall (map where a point is given, plus BM25)", "",
               md_table(["metric", "value"], [
                   [name, fmt(mean(r[f] for r in scored), pct=(f != "mrr"))
@@ -247,7 +247,7 @@ def retrieval_summary(rows, label="question text as keywords"):
     pts = [r for r in scored if r["has_point"]]
     lines += ["## Contribution of the map (BM25 alone vs map + BM25)", "",
               md_table(["subset", "n", "BM25 recall@5", "map+BM25 recall@5", "BM25 recall@10",
-                        "map+BM25 recall@10", "BM25 MRR", "map+BM25 MRR", "gold in real prompt (map + 5 extras)"], [
+                        "map+BM25 recall@10", "BM25 MRR", "map+BM25 MRR", "gold in real prompt (map + 5 extras, 8 without a point)"], [
                   ["all scored", len(scored), fmt(mean(r["bm25_r5"] for r in scored)),
                    fmt(mean(r["r5"] for r in scored)), fmt(mean(r["bm25_r10"] for r in scored)),
                    fmt(mean(r["r10"] for r in scored)), fmt(mean(r["bm25_mrr"] for r in scored), False),

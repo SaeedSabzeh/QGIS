@@ -45,7 +45,7 @@ def query_point(lat, lon, fetch=None, data_dir=None):
     }
 
 
-def ask(question, point_result, client, k=5, data_dir=None, on_progress=None):
+def ask(question, point_result, client, k=None, data_dir=None, on_progress=None):
     """Answer `question` for a `query_point` result with an LLM client (llm.make_client).
 
     Raises llm.LLMError when the answer request fails. A failed keyword rewrite is not fatal
