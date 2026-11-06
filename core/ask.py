@@ -76,7 +76,8 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
     ap.add_argument("--no-fallback", action="store_true",
                     help="do not fall back to other Gemini models on failure")
     ap.add_argument("--base-url", default=None, help="Ollama base URL")
-    ap.add_argument("-k", type=int, default=5, help="max BM25 extra articles")
+    ap.add_argument("-k", type=int, default=None,
+                    help="max BM25 extra articles (default: 5 with mapped articles, 8 without)")
     ap.add_argument("--full-text", action="store_true", help="print full article texts")
     args = ap.parse_args(argv)
     p = lambda s="": print(s, file=out)  # noqa: E731

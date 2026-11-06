@@ -221,6 +221,15 @@ def test_retrieve_orders_mapped_first_and_dedups():
     assert retrieval.retrieve(DUOMO)["extras"] == []
 
 
+def test_retrieve_default_extras_depend_on_mapping():
+    q = "dotazione servizi standard urbanistici superficie lorda indice 0.35"
+    assert retrieval.extras_k(0) == retrieval.EXTRAS_K_UNMAPPED == 8
+    assert retrieval.extras_k(3) == retrieval.EXTRAS_K == 5
+    assert retrieval.extras_k(0, 2) == 2                             # an explicit k wins
+    assert len(retrieval.retrieve(hit({}), q)["extras"]) == 8
+    res = retrieval.retrieve(DUOMO, q)
+    assert res["mapped"] and len(res["extras"]) == 5
+
 # ---- prompts / llm -------------------------------------------------------------------------
 def _art(n, text, title="T"):
     return {"id": "PR-art-%d" % n, "number": n, "title": title, "text": text}

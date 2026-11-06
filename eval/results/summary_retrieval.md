@@ -13,11 +13,11 @@ Ranking: mapped governing articles first (then general, explanatory, candidate),
 | MRR | 0.623 |
 | hit@5 | 74% |
 | hit@5 incl. acceptable | 82% |
-| gold in the real prompt (5 extras) | 86% |
+| gold in the real prompt (5 extras with a point, 8 without) | 86% |
 
 ## Contribution of the map (BM25 alone vs map + BM25)
 
-| subset | n | BM25 recall@5 | map+BM25 recall@5 | BM25 recall@10 | map+BM25 recall@10 | BM25 MRR | map+BM25 MRR | gold in real prompt (map + 5 extras) |
+| subset | n | BM25 recall@5 | map+BM25 recall@5 | BM25 recall@10 | map+BM25 recall@10 | BM25 MRR | map+BM25 MRR | gold in real prompt (map + 5 extras, 8 without a point) |
 |---|---|---|---|---|---|---|---|---|
 | all scored | 38 | 79% | 72% | 89% | 83% | 0.716 | 0.623 | 86% |
 | questions with a point | 9 | 72% | 44% | 89% | 61% | 0.718 | 0.327 | 100% |

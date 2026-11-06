@@ -485,11 +485,25 @@ def search(query, k=5, index=None, data_dir=None):
     return index.search(query, k)
 
 
-def retrieve(query_result, question=None, k=5, index=None, data_dir=None, findings=None):
+# BM25 extras kept by default. With no mapped article the search hits are the only evidence and
+# the prompt is far below its budget, so more of them are kept (eval 2026-11-05: gold at rank 7-8).
+EXTRAS_K = 5
+EXTRAS_K_UNMAPPED = 8
+
+
+def extras_k(n_mapped, k=None):
+    """Number of BM25 extras retrieve() keeps: `k` when given, else by whether anything is mapped."""
+    if k is not None:
+        return k
+    return EXTRAS_K if n_mapped else EXTRAS_K_UNMAPPED
+
+
+def retrieve(query_result, question=None, k=None, index=None, data_dir=None, findings=None):
     """Mapped articles first, then up to `k` BM25 extras from `question` (no duplicates).
 
     The question should already be Italian keywords (see prompts.keywords_prompt). `k` bounds
-    only the extras: every mapped article is kept. Extras come from all documents; hits of
+    only the extras: every mapped article is kept. When `k` is None it is EXTRAS_K with mapped
+    articles and EXTRAS_K_UNMAPPED without (see extras_k). Extras come from all documents; hits of
     normative documents rank before those of explanatory ones (score order inside each group).
     Returns a dict: findings, mapped, extras, ids (ordered), provenance ({id: [...]}; extras
     are tagged role "bm25" with the score).
@@ -498,6 +512,7 @@ def retrieve(query_result, question=None, k=5, index=None, data_dir=None, findin
         findings = lookup(query_result, data_dir)
     prov = article_provenance(findings)
     mapped = list(prov)
+    k = extras_k(len(mapped), k)
     extras = []
     if question and question.strip():
         hits = search(question, k=4 * k + len(mapped), index=index, data_dir=data_dir)
