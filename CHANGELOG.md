@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4
+
+- No longer flagged experimental.
+- Keeps 8 BM25 extra articles when no article is mapped to the clicked point.
+
 ## 0.1.3
 
 - Faster answers when Gemini is overloaded. A model that times out or answers 503 gets at most one quick retry (1-2 s), then the plugin moves to the next model. Requests time out after 20 s (45 s for the last model), and one question waits about 65 s at most (10 s more for the optional keyword step). A `Retry-After` longer than 5 s now means "use the next model" instead of waiting. The timeout is enforced in the QGIS network path too (transfer timeout plus a watchdog that aborts the blocking call).
