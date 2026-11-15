@@ -1,0 +1,106 @@
+{
+  "release": "0.1.5",
+  "checked_on": "2026-11-16",
+  "context": "Public benchmark prompts without map hits. Generated answers are retained as evaluation evidence.",
+  "records": [
+    {
+      "id": "q03",
+      "question": "What is the basic floor-area index in the consolidated urban fabric and what is the maximum that can be reached?",
+      "elapsed_s": 31.0,
+      "model": "gemini-3.5-flash",
+      "keywords": "What is the basic floor-area index in the consolidated urban fabric and what is the maximum that can be reached?",
+      "answer_it": "In base al Piano delle Regole (PR-art-6): - **Indice di edificabilità territoriale di base (unico)**: Negli ambiti del Tessuto Urbano Consolidato (TUC) è pari a **0,35 mq/mq** (Piano delle Regole, art. 6, comma 1). Sono escluse dall'attribuzione di tale indice le aree destinate all'agricoltura e le aree destinate all'Edilizia Residenziale Sociale, nonché le aree individuate all'art. 6, comma 7. - **Indice di edificabilità territoriale massimo**: Nelle aree compresi nel TUC è consentito il raggiungimento di un indice massimo di **0,70 mq/mq** (Piano delle Regole, art. 6, comma 2). Tuttavia, negli ambiti caratterizzati da elevati livelli di accessibilità (art. 17), tale indice massimo è elevato a **1 mq/mq** (Piano delle Regole, art. 6, comma 3). Il raggiungimento di tali indici massimi è subordinato alla verifica positiva delle indicazioni morfologiche. - **Eccezioni e deroghe**: Fanno eccezione i casi disciplinati dall'art. 16 comma 2 (Grandi Funzioni Urbane) e dall'art. 21 comma 5 (tipologia rurale). Il superamento dell'indice massimo è inoltre consentito nei casi specificamente previsti dall'art. 6, comma 4 (ad esempio art. 9 comma 3 per ERS in zone ad alta accessibilità). *Nota: Questa guida ha solo scopo informativo e non costituisce parere legale. Verificare sempre i testi ufficiali del PGT.*",
+      "answer_en": "Based on the Piano delle Regole (PR-art-6): - **Basic (single) floor-area index**: In the Consolidated Urban Fabric (TUC), the single territorial floor-area index is **0.35 sq.m/sq.m** (Piano delle Regole, art. 6, paragraph 1). Agricultural areas and Social Housing areas are excluded from receiving this index, as well as areas specified in art. 6, paragraph 7. - **Maximum floor-area index**: Within the TUC, the maximum territorial floor-area index reachable is **0.70 sq.m/sq.m** (Piano delle Regole, art. 6, paragraph 2). However, in areas characterized by high levels of accessibility (art. 17), this maximum threshold is raised to **1 sq.m/sq.m** (Piano delle Regole, art. 6, paragraph 3). Reaching these maximum indices is subject to the positive verification of morphological guidelines. - **Exceptions and conditions**: Exceptions apply to cases under art. 16 paragraph 2 (Grandi Funzioni Urbane) and art. 21 paragraph 5 (rural typology). Exceeding the maximum index is allowed in specific cases listed under art. 6, paragraph 4 (such as ERS under art. 9 paragraph 3 in high accessibility areas). *Note: This guidance is for informational purposes only and does not constitute legal advice. Official PGT documents should always be consulted.*",
+      "cited_articles": [
+        "PR-art-6"
+      ],
+      "rejected_citations": [],
+      "evidence": [
+        {
+          "article_id": "PR-art-6",
+          "quote": "Alle aree comprese negli ambiti del Tessuto Urbano Consolidato (TUC) disciplinate dal presente Piano e alle aree a pertinenza indiretta individuate nella Tav. S.02 del Piano dei Servizi è attribuito un Indice di edificabilità Territoriale unico pari a 0,35 mq/mq"
+        },
+        {
+          "article_id": "PR-art-6",
+          "quote": "Nelle aree comprese nel Tessuto Urbano Consolidato (TUC) è consentito il raggiungimento di un Indice di edificabilità Territoriale massimo di 0,70 mq/mq"
+        },
+        {
+          "article_id": "PR-art-6",
+          "quote": "Entro gli ambiti caratterizzati da elevati livelli di accessibilità, di cui all’articolo 17, così come identificati sulla Tav. R.02, il suddetto Indice di edificabilità Territoriale massimo è elevato a 1 mq/mq"
+        }
+      ],
+      "rejected_evidence": 0,
+      "source_check": "complete",
+      "parse_error": false
+    },
+    {
+      "id": "q24",
+      "question": "Do I have to provide public service areas when I build new floor area using only the basic 0.35 index?",
+      "elapsed_s": 45.8,
+      "model": "gemini-3.5-flash",
+      "keywords": "Do I have to provide public service areas when I build new floor area using only the basic 0.35 index?",
+      "answer_it": "**Valutazione delle dotazioni di servizi per nuova costruzione con indice base 0.35 mq/mq**\n\nNo, in base a quanto previsto dalle norme del PGT per il punto specificato, **non sono richieste dotazioni territoriali per servizi** nei casi di interventi di nuova costruzione realizzati utilizzando esclusivamente l'Indice di edificabilità Territoriale (IT) unico base di 0,35 mq/mq.\n\n**Condizioni e conseguenze al superamento della soglia:**\n- **Soglia base (0,35 mq/mq):** Fino al limite espresso dall'indice unico di 0,35 mq/mq, l'intervento non necessita di reperire o monetizzare aree per servizi (Piano delle Regole - art. 33, comma 1; Piano dei Servizi - art. 11, comma 1).\n- **Conseguenza del superamento:** Qualora la nuova costruzione generi una Superficie Lorda (SL) eccedente la quota realizzabile con l'indice di 0,35 mq/mq, per la parte in eccedenza scatta l’obbligo di reperire aree per servizi pubblici o di interesse pubblico/generale (o provvedere alla relativa monetizzazione/cessione), in percentuali parametrate alla destinazione d'uso (ad esempio, 100% della SL per funzioni residenziali o direzionali, fino al 200% per strutture commerciali principali), come previsto dal Piano delle Regole - art. 33 e dal Piano dei Servizi - art. 11, comma 2.\n\n*Nota: La presente risposta costituisce un'indicazione orientativa riferita esclusivamente al punto selezionato e non sostituisce una verifica dei testi ufficiali e degli atti abilitativi presso gli uffici competenti.*",
+      "answer_en": "**Assessment of service provision requirements for new construction using the basic 0.35 sq m/sq m index**\n\nNo, according to the PGT rules applicable to the clicked point, **no public service provisions (dotazioni territoriali per servizi) are required** for new construction interventions carried out using only the basic single Territorial Buildability Index (IT) of 0.35 sq m/sq m.\n\n**Applicable conditions and consequences of exceeding the threshold:**\n- **Base threshold (0.35 sq m/sq m):** Up to the limit generated by the basic single index of 0.35 sq m/sq m, the intervention is exempt from providing public or general interest service areas (Piano delle Regole - art. 33, paragraph 1; Piano dei Servizi - art. 11, paragraph 1).\n- **Consequence of exceeding the threshold:** If the new construction creates floor area (SL) exceeding that allowed by the basic 0.35 sq m/sq m index, service provision obligations apply to the excess portion. The required percentage of service area varies according to the functional category (e.g., 100% of the excess SL for residential or commercial/office uses, up to 200% for large commercial structures), via land transfer, public use commitment, or monetization as specified in Piano delle Regole - art. 33 and Piano dei Servizi - art. 11, paragraph 2.\n\n*Note: This response is for guidance only, applies solely to the clicked point, and does not replace legal advice or verification against official texts.*",
+      "cited_articles": [
+        "PR-art-33",
+        "PS-art-11"
+      ],
+      "rejected_citations": [],
+      "evidence": [
+        {
+          "article_id": "PR-art-33",
+          "quote": "Nei casi di interventi di nuova costruzione con l’utilizzo dell’Indice di edificabilità Territoriale (IT) unico di 0,35 mq/mq e nei casi di recupero della SL esistente senza cambio di destinazione d’uso non sono richieste dotazioni territoriali per servizi."
+        },
+        {
+          "article_id": "PS-art-11",
+          "quote": "Nei casi di interventi di nuova costruzione con l’utilizzo dell’Indice di edificabilità Territoriale (IT) unico di 0,35 mq/ mq non sono richieste dotazioni territoriali per servizi."
+        }
+      ],
+      "rejected_evidence": 0,
+      "source_check": "complete",
+      "parse_error": false
+    },
+    {
+      "id": "q38",
+      "question": "Dentro il Parco Agricolo Sud, posso costruire a 50 metri da un Naviglio? Cosa dicono il PTC e il Piano delle Regole?",
+      "elapsed_s": 24.1,
+      "model": "gemini-3.5-flash",
+      "keywords": "Dentro il Parco Agricolo Sud, posso costruire a 50 metri da un Naviglio? Cosa dicono il PTC e il Piano delle Regole?",
+      "answer_it": "**Valutazione del punto cliccato**\nNel punto esaminato non risulta alcun vincolo o zona specifica nei dati forniti. Di seguito si illustrano le regole generali valide per l'ambito richiesto sulla base dei testi forniti.\n\n**Rapporto tra Piano delle Regole e PTC del Parco**\nAi sensi del **Piano delle Regole - art. 35**, all'interno del perimetro del Parco Agricolo Sud Milano si applicano le norme del relativo Piano Territoriale di Coordinamento (PTC), che prevalgono sulle previsioni difformi del PGT. Si precisa che il PTC del Parco Agricolo Sud Milano corrisponde al testo della D.G.R. 7/818 del 2000 senza le successive modifiche alle relative NTA; all'interno del parco il PTC prevale sia sul Piano delle Regole sia sul Piano dei Servizi.\n\n**Possibilità di costruire a 50 metri da un Naviglio**\nIn base al **PTC Parco Agricolo Sud Milano - art. 42**, comma 4, in attesa dell'adozione dello specifico piano di settore, è espressamente vietata qualsiasi edificazione all'interno della fascia di 100 metri dalle sponde dei Navigli e dei grandi canali irrigui. Pertanto, la costruzione a 50 metri dalla sponda non è consentita.\n\n*Nota: Le presenti informazioni costituiscono un orientamento e non un parere legale; si raccomanda di verificare i testi ufficiali.*",
+      "answer_en": "**Evaluation of the clicked point**\nNo specific constraint or zone was found at the clicked point in the provided findings. The following general rules apply based on the provided documents.\n\n**Relationship between Piano delle Regole and Park PTC**\nAccording to **Piano delle Regole - art. 35**, within the Parco Agricolo Sud Milano, the provisions of its Territorial Coordination Plan (PTC) apply and prevail over conflicting PGT provisions. Note that the PTC of the Parco Agricolo Sud Milano refers to the text of D.G.R. 7/818 of 2000 without later NTA amendments; inside the park, the PTC prevails over both the Piano delle Regole and the Piano dei Servizi.\n\n**Possibility of building 50 meters from a Naviglio**\nUnder **PTC Parco Agricolo Sud Milano - art. 42**, paragraph 4, pending the adoption of a specific sector plan, building is prohibited within a 100-meter strip from the banks of the Navigli and major irrigation canals. Consequently, building at a distance of 50 meters (which falls within the 100 m buffer) is not permitted.\n\n*Note: This response provides guidance, not legal advice; users should consult the official texts.*",
+      "cited_articles": [
+        "PTC-art-42",
+        "PR-art-35"
+      ],
+      "rejected_citations": [],
+      "evidence": [
+        {
+          "article_id": "PTC-art-42",
+          "quote": "è vietata l’edificazione in fascia di m. 100 dalle sponde."
+        },
+        {
+          "article_id": "PR-art-35",
+          "quote": "All’interno dei territori ricompresi nel Parco Agricolo Sud Milano e Parco Nord Milano si applicano le indicazioni e i contenuti normativi e cartografici dei relativi PTC dei Parchi medesimi che sono recepiti di diritto nel PGT e prevalgono su previsioni difformi."
+        }
+      ],
+      "rejected_evidence": 0,
+      "source_check": "complete",
+      "parse_error": false
+    },
+    {
+      "id": "q39",
+      "question": "What are the detailed steps and timelines of the 'valutazione di incidenza' (Natura 2000 appropriate assessment) procedure for a project near a SIC?",
+      "elapsed_s": 37.8,
+      "model": "gemini-3.5-flash",
+      "keywords": "What are the detailed steps and timelines of the 'valutazione di incidenza' (Natura 2000 appropriate assessment) procedure for a project near a SIC?",
+      "answer_it": "I testi normativi forniti non contengono informazioni relative alle fasi dettagliate e alle tempistiche della procedura di valutazione di incidenza (Natura 2000 / VINCA) per interventi in prossimità di un SIC.\n\nSi precisa che la presente scheda fornisce un mero orientamento informativo e non costituisce consulenza legale; si invita pertanto a consultare i testi ufficiali e la normativa di settore vigenti.",
+      "answer_en": "The supplied regulatory texts do not contain details regarding the specific steps and timelines for the 'valutazione di incidenza' (Natura 2000 appropriate assessment) procedure for projects near an SCI.\n\nPlease note that this response is for guidance only and does not constitute legal advice; the official texts and applicable regulations should be consulted directly.",
+      "cited_articles": [],
+      "rejected_citations": [],
+      "evidence": [],
+      "rejected_evidence": 0,
+      "source_check": "review",
+      "parse_error": false
+    }
+  ]
+}

@@ -7,20 +7,25 @@ name=Norme Milano
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Shows the Milan planning rules (PGT/PTC) and constraints that apply at a clicked point.
-about=Click a point in Milan to see which planning constraints apply there (PGT zoning category, landscape sensitivity, geological feasibility class, PGRA flood hazard and risk, Natura 2000 sites, regional parks) and which articles of the Piano di Governo del Territorio (Piano delle Regole, Piano dei Servizi, Documento di Piano) and of the PTC of the Parco Agricolo Sud Milano govern them. Constraints are read live from Regione Lombardia's public ArcGIS map services; the plugin does not redistribute that data. The article texts and the zone-to-article mapping ship with the plugin. Optionally ask a free-text question in Italian or English: it is answered by Google Gemini or by a local Ollama model, only from the retrieved articles, and any citation outside them is removed and flagged. GUIDANCE ONLY, NOT LEGAL ADVICE: always check the official texts and ask a qualified professional. The plugin queries the clicked POINT, not a whole parcel, so a parcel that crosses two zones can be misreported; finer zoning (historic cores, ADR, ARU) is not available from the regional services. About half of the mapping entries are flagged "verify". PRIVACY: without an LLM provider (provider "None") nothing is sent except the map-service queries (the clicked coordinates go to Regione Lombardia servers). With Gemini, your question and the retrieved article texts are sent to Google, and on the free tier Google may use prompts to improve its products; you need your own API key (stored in the QGIS encrypted password store when a master password is set, otherwise in plain text in your QGIS profile settings, or read from the GEMINI_API_KEY environment variable). With Ollama everything stays on your machine.
-version=0.1.4
+about=Look up planning constraints at a point in the Comune di Milano. The municipal PGT map supplies NAF, ADR and ARU zoning where mapped, both parks and geological feasibility. Regione Lombardia services supply the regional PGT, PGRA flood and Natura 2000 layers. Findings and articles link to official sources. Check uncertain mappings and consult the current official documents for a parcel or proposed project. Optional Italian and English questions use Gemini (your own API key) or local Ollama. The dock shows supporting excerpts found in the supplied texts and flags answers that need source review. Privacy: in-city coordinates go to the Comune and Regione public map services. With Gemini, questions and selected planning information go to Google. Ollama runs locally. See the documentation for data coverage and provider settings.
+version=0.1.5
 author=Saeed Sabzeh
 email=saeed.sabzeh.80@gmail.com
 repository=https://github.com/SaeedSabzeh/QGIS
 tracker=https://github.com/SaeedSabzeh/QGIS/issues
-homepage=https://github.com/SaeedSabzeh/QGIS
+homepage=https://github.com/SaeedSabzeh/QGIS/tree/codex/norme-milano-0.1.5
 icon=icon.png
 experimental=False
 deprecated=False
 hasProcessingProvider=no
 tags=urban planning,zoning,italy,milan,pgt,regulations,lombardia,planning
 category=Plugins
-changelog=0.1.4
+changelog=0.1.5
+    - Add official Milan PGT zoning, park and geology layers with direct source links
+    - Check the municipal boundary before lookup and distinguish candidate rules from mapped rules
+    - Check source excerpts for Q&A, improve multipart prompts and keep explicitly requested documents in search
+    - Keep answers tied to the latest map point and document the live GIS comparison
+    0.1.4
     - Marked as a stable release (no longer experimental)
     - Keeps 8 keyword-matched extra articles when no article is mapped to the point
     0.1.3

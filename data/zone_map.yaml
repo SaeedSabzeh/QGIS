@@ -26,6 +26,28 @@ sources:
 layer_service: "tav_previsioni_b (Regione Lombardia, MapServer arcgis1/territorio)"
 
 layers:
+  milano_naf:
+    description: "NAF - Nuclei di antica formazione (Tav. R.02)"
+    articles: [PR-art-18, PR-art-19]
+    general_articles: [PR-art-6, PR-art-8, PR-art-13]
+    why: >-
+      The Comune's Tav. R.02, layer 38, identifies this point as NAF. Art. 18 defines the
+      area and art. 19 sets its discipline. The detailed intervention classes are on Tav. R.03.
+  milano_adr:
+    description: "ADR - Ambiti contraddistinti da un Disegno urbano Riconoscibile (Tav. R.02)"
+    articles: [PR-art-20, PR-art-21]
+    general_articles: [PR-art-6, PR-art-8, PR-art-13]
+    why: >-
+      The Comune's Tav. R.02, layer 39, identifies the ADR. Art. 20 defines it and art. 21
+      regulates the interventions. Check Tav. R.03 for the detailed morphology.
+  milano_aru:
+    description: "ARU - Ambiti di Rinnovamento Urbano (Tav. R.02)"
+    articles: [PR-art-22, PR-art-23]
+    general_articles: [PR-art-6, PR-art-8, PR-art-13]
+    why: >-
+      The Comune's Tav. R.02, layer 40, identifies the ARU. Art. 22 defines it and art. 23
+      regulates the interventions. Check Tav. R.03 for the detailed morphology.
+
   naf:
     layer_id: 12
     field: COD_NUC
@@ -90,8 +112,8 @@ layers:
     note: >-
       The rules of the single trasformazione areas are in the Documento di Piano (schede degli
       ambiti di trasformazione, in the Relazione generale, which is not in the corpus). The
-      listed articles are NOT the governing discipline of the area; only the two PCU values below
-      have a verified governing text, in the park's PTC.
+      listed articles provide context. The two PCU values below suggest candidate park provisions.
+      A park-zone hit on Tav. R.02 is needed to confirm the relevant PTC provision at the point.
     verify: true
     inside_parco_sud:
       general_articles: [PTC-art-1]
@@ -101,7 +123,7 @@ layers:
     by_value:
       AMB_TRAS:
         "26":
-          articles: [PTC-art-26, PTC-all-A]
+          candidate_articles: [PTC-art-26, PTC-all-A]
           why: >-
             NOME_AMB "L'Idroscalo (PCU4)": PCU = Piano di Cintura Urbana. PTC art. 26 "Territori
             agricoli e verde di cintura urbana – ambito dei piani di cintura urbana" governs the
@@ -113,7 +135,7 @@ layers:
             Inside the park the PTC prevails (PR art. 35 c.1, PS art. 12).
           verify: true
         "29":
-          articles: [PTC-art-26, PTC-all-A]
+          candidate_articles: [PTC-art-26, PTC-all-A]
           why: >-
             NOME_AMB "Le Abbazie (PCU3)": PCU = Piano di Cintura Urbana. PTC art. 26 governs the
             comparti of the piani di cintura urbana; PTC Allegato A "Comparto 3: Parco delle

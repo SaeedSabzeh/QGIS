@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5
+
+- Added Milan's live Tav. R.02 findings for NAF, ADR, ARU and both regional parks, and its Tav. G.17 geological classes and article references.
+- Check the municipal boundary locally before querying map services. Preserve the regional fallback and mark conflicting or insufficient evidence as uncertain.
+- Added official map and document links. Show article PDF page ranges and excerpts that can be located in the text sent to the model.
+- Improved multipart Q&A prompts and retrieval for explicitly named planning documents. Discard a pending answer when the user clicks a new point.
+- Documented the live municipal versus regional comparison and the limits of the historical answer evaluation. [Release notes](docs/norme-milano-0.1.5.md)
+
 ## 0.1.4
 
 - No longer flagged experimental.

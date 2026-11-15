@@ -25,7 +25,7 @@ def test_query_point_no_key_mode():
 def test_all_failed_flag():
     def bad(url, timeout):
         raise OSError("down")
-    assert pipeline.query_point(0, 0, fetch=bad)["all_failed"]
+    assert pipeline.query_point(45.4642, 9.19, fetch=bad)["all_failed"]
 
 
 class FakeClient:

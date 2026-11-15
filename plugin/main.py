@@ -30,6 +30,8 @@ class NormeMilanoPlugin:
         self._last = None        # last query_point result (kept for questions)
         self._query_task = None
         self._ask_task = None
+        self._query_token = None
+        self._ask_token = None
         self._unloaded = False
 
     # ------------------------------------------------------------------ QGIS lifecycle
@@ -67,6 +69,7 @@ class NormeMilanoPlugin:
 
     def unload(self):
         self._unloaded = True
+        self._query_token = self._ask_token = None
         tasks.cancel_all()
         self._query_task = self._ask_task = None
         canvas = self.iface.mapCanvas()
@@ -115,15 +118,24 @@ class NormeMilanoPlugin:
 
     def _refresh_ask_state(self):
         if self.dock is not None:
-            self.dock.set_ask_enabled(settings.is_ask_available(settings.load_settings()))
+            provider = settings.is_ask_available(settings.load_settings())
+            self.dock.set_ask_enabled(provider and self._last is not None,
+                                      "Click a point in Milan first." if provider else "")
 
     # ------------------------------------------------------------------ point query
     def on_point(self, lat, lon):
         if self._unloaded:
             return
+        token = self._query_token = object()
+        self._ask_token = None
         if self._query_task is not None:
             self._query_task.cancel()
+        if self._ask_task is not None:
+            self._ask_task.cancel()
+            self._ask_task = None
         self._last = None
+        self.dock.set_asking(False)
+        self._refresh_ask_state()
         self.dock.show()
         self.dock.set_querying(lat, lon)
 
@@ -131,16 +143,20 @@ class NormeMilanoPlugin:
             return pipeline.query_point(lat, lon, fetch=net.make_fetch(is_canceled))
 
         def done(res, error):
-            self._query_task = None
-            if self._unloaded:
+            if self._query_token is not token or self._unloaded:
                 return
+            self._query_task = self._query_token = None
             if error is not None:
                 self.dock.show_error("Query failed: %s" % error)
                 return
-            self._last = res
+            if not res.get("scope_note") and not res.get("all_failed"):
+                self._last = res
+            self._refresh_ask_state()
             self.dock.show_point_result(res)
 
-        self._query_task = tasks.start("Norme Milano: query point", work, done)
+        task = tasks.start("Norme Milano: query point", work, done)
+        if self._query_token is token:
+            self._query_task = task
 
     # ------------------------------------------------------------------ question
     def on_ask(self, question):
@@ -161,6 +177,7 @@ class NormeMilanoPlugin:
                 self.dock.show_error(str(exc))
                 return
         point_result = self._last
+        token = self._ask_token = object()
         if self._ask_task is not None:
             self._ask_task.cancel()
 
@@ -169,9 +186,9 @@ class NormeMilanoPlugin:
             return pipeline.ask(question, point_result, client, on_progress=report)
 
         def done(ans, error):
-            self._ask_task = None
-            if self._unloaded:
+            if self._ask_token is not token or self._unloaded:
                 return
+            self._ask_task = self._ask_token = None
             self.dock.set_asking(False)
             if error is not None:
                 self.dock.show_error(
@@ -181,6 +198,7 @@ class NormeMilanoPlugin:
             self.dock.show_answer(ans)
 
         self.dock.set_asking(True)
-        self._ask_task = tasks.start("Norme Milano: ask", work, done,
-                                     on_progress=self.dock.set_progress)
+        task = tasks.start("Norme Milano: ask", work, done, on_progress=self.dock.set_progress)
+        if self._ask_token is token:
+            self._ask_task = task
 

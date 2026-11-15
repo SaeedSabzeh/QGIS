@@ -1,6 +1,7 @@
 """Dock panel: constraints found, articles (expandable full text), question box + answer."""
 
 from html import escape
+from urllib.parse import urlsplit
 
 from qgis.PyQt.QtCore import QSize, Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import (
@@ -26,6 +27,16 @@ MIN_WIDTH = 320
 
 def _wrap(text):
     return " ".join(str(text).split())
+
+
+def _source_link(url, label):
+    try:
+        parts = urlsplit(str(url or ""))
+    except ValueError:
+        return ""
+    if parts.scheme == "https" and parts.hostname and parts.username is None:
+        return '<a href="%s">%s</a>' % (escape(parts.geturl(), quote=True), escape(label))
+    return ""
 
 
 def _refs(ids):
@@ -92,6 +103,10 @@ def finding_html(f):
         out.append("%s<b>External rule (outside the PGT texts%s):</b> %s</p>" % (
             para, ", unverified" if ext.get("verify") else "",
             escape(_wrap(ext.get("text", "")))))
+    if link := _source_link(f.get("map_url"), "Official map layer"):
+        out.append(para + link + "</p>")
+    if link := _source_link(f.get("document_url"), "Official park plan"):
+        out.append(para + link + "</p>")
     return "".join(out) + "<hr>"
 
 
@@ -121,7 +136,7 @@ class RulesDock(QDockWidget):
         box1 = QGroupBox("Vincoli / Constraints found")
         l1 = QVBoxLayout(box1)
         self.findings = QTextBrowser()
-        self.findings.setOpenExternalLinks(False)
+        self.findings.setOpenExternalLinks(True)
         l1.addWidget(self.findings)
         split.addWidget(box1)
 
@@ -157,7 +172,7 @@ class RulesDock(QDockWidget):
         self.ask_hint.setWordWrap(True)
         l3.addWidget(self.ask_hint)
         self.answer = QTextBrowser()
-        self.answer.setOpenExternalLinks(False)
+        self.answer.setOpenExternalLinks(True)
         l3.addWidget(self.answer)
         split.addWidget(box3)
 
@@ -189,6 +204,7 @@ class RulesDock(QDockWidget):
         self.findings.clear()
         self.articles.clear()
         self.answer.clear()
+        self.set_sources("")
 
     def set_ask_enabled(self, enabled, hint=""):
         self._ask_allowed = bool(enabled)
@@ -228,7 +244,10 @@ class RulesDock(QDockWidget):
             msg += "%d of %d layers failed (non-fatal): %s. " % (
                 len(errors), res.get("layers_total", 0), ", ".join(sorted(errors)))
         self.set_status(msg.strip())
-        self.show_findings(res["findings"], errors)
+        if res.get("scope_note"):
+            self.findings.setHtml("<p>%s</p>" % escape(res["scope_note"]))
+        else:
+            self.show_findings(res["findings"], errors)
         self.show_articles(res["articles"])
         self.set_sources(res.get("sources", ""))
 
@@ -275,26 +294,48 @@ class RulesDock(QDockWidget):
             return
         self._articles_loaded[row["id"]] = True
         child = item.child(0)
-        edit = QPlainTextEdit(row["text"])
-        edit.setReadOnly(True)
+        link = _source_link(row.get("source_url"), "Open official publication")
+        if link:
+            edit = QTextBrowser()
+            edit.setOpenExternalLinks(True)
+            pages = row.get("pages") or []
+            page_note = (" · source PDF pp. %s" % "–".join(map(str, dict.fromkeys(pages)))) if pages else ""
+            version = str(row.get("version_date") or "")
+            edit.setHtml("<p>%s%s · %s</p><p>%s</p>" %
+                         (escape(version), escape(page_note), link,
+                          escape(row["text"]).replace("\n", "<br>")))
+        else:
+            edit = QPlainTextEdit(row["text"])
+            edit.setReadOnly(True)
         edit.setMinimumHeight(220)
         child.setSizeHint(0, QSize(0, 230))
         self.articles.setItemWidget(child, 0, edit)
 
     def show_answer(self, ans):
-        parts = [
+        parts = []
+        if ans.get("source_check") == "review":
+            parts.append("<p><b>Check sources / Verificare le fonti</b><br>"
+                         "Some citation support could not be verified.</p>")
+        parts.extend([
             "<p><b>Risposta (IT)</b></p>%s" % mdlite.to_html(ans["answer_it"]),
             "<p><b>Answer (EN)</b></p>%s" % mdlite.to_html(ans["answer_en"]),
             "<p><b>Model:</b> %s<br><b>Cited articles:</b> %s</p>" % (
                 escape(str(ans.get("model", "?"))),
                 escape(", ".join(ans["cited_articles"]) or "none")),
-        ]
+        ])
+        if evidence := ans.get("evidence"):
+            linked = {row["id"]: row for row in ans.get("articles", [])}
+            parts.append("<p><b>Passages found in supplied articles</b></p>")
+            for item in evidence:
+                row = linked.get(item["article_id"], {})
+                citation = row.get("cite") or item["article_id"]
+                source = _source_link(row.get("source_url"), citation) or escape(citation)
+                parts.append("<p>%s<br>%s</p>" % (source, escape(item["quote"])))
         if ans.get("rejected_citations"):
             parts.append("<p><b>WARNING:</b> the model cited articles that were not supplied; "
                          "they were removed: %s</p>" % escape(", ".join(ans["rejected_citations"])))
         if ans.get("parse_error"):
-            parts.append("<p><b>WARNING:</b> the model reply was not valid JSON; shown as raw "
-                         "text, citations dropped.</p>")
+            parts.append("<p>The model reply could not be parsed.</p>")
         for w in ans.get("warnings", []):
             parts.append("<p><i>%s</i></p>" % escape(w))
         self.answer.setHtml("".join(parts))

@@ -62,7 +62,7 @@ def test_query_all_service_error_payload_is_an_error():
 def test_query_all_uses_lon_lat_order_and_registry():
     seen = []
     services.query_all(45.5, 9.2, fetch=lambda u, t: seen.append(u) or {"features": []})
-    assert len(seen) == len(services.SERVICES) == 28
+    assert len(seen) == len(services.SERVICES) == 34
     assert all("geometry=9.2%2C45.5" in u for u in seen)
 
 
@@ -106,8 +106,9 @@ def test_lookup_duomo():
 
 def test_lookup_lambro_and_hazard_mapping():
     f = by_layer(retrieval.lookup(LAMBRO))
-    # AT 26 = PCU4 "Idroscalo": no PR/DP article governs it, the PTC (art. 26 + Allegato A) does
-    assert f["pgt_at"]["articles"] == ["PTC-art-26", "PTC-all-A"] and f["pgt_at"]["verify"] is True
+    # A regional PCU code suggests the compartment. The municipal park polygon confirms the rule.
+    assert f["pgt_at"]["articles"] == []
+    assert f["pgt_at"]["candidate_articles"] == ["PTC-art-26", "PTC-all-A"] and f["pgt_at"]["verify"] is True
     assert "PR-art-53" in f["pgt_at"]["general_articles"] and "DP-art-2" in f["pgt_at"]["general_articles"]
     assert f["pgt_fattibilita_geo"]["articles"] == ["PR-art-45"]
     assert f["pgra_H_RP"]["articles"][:2] == ["PR-art-45", "PR-art-46"]
@@ -150,7 +151,8 @@ def test_servizi_hit_maps_to_piano_dei_servizi_first():
 def test_at_26_and_29_map_to_the_park_ptc():
     for code in (26, 29):
         f = retrieval.lookup(hit({"pgt_at": [{"AMB_TRAS": code}]}))[0]
-        assert f["articles"] == ["PTC-art-26", "PTC-all-A"] and f["verify"] is True
+        assert f["articles"] == []
+        assert f["candidate_articles"] == ["PTC-art-26", "PTC-all-A"] and f["verify"] is True
     other = retrieval.lookup(hit({"pgt_at": [{"AMB_TRAS": 1}]}))[0]
     assert other["articles"] == []                                  # unverified AT: nothing governs
 

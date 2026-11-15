@@ -15,10 +15,11 @@ NAME = "norme_milano"
 MAX_BYTES = 5 * 1024 * 1024
 REQUIRED_META = ("name", "qgisMinimumVersion", "description", "about", "version", "author",
                  "email", "repository", "tracker")
+RUNTIME_DATA = ("articles.json", "documents.json", "zone_map.json", "constraint_map.json",
+                "milano-confine.json")
 REQUIRED_FILES = ("__init__.py", "metadata.txt", "icon.png", "LICENSE", "main.py",
-                  "core/__init__.py", "data/articles.json", "data/documents.json",
-                  "data/zone_map.json", "data/constraint_map.json")
-ALLOWED_DATA = {"articles.json", "documents.json", "zone_map.json", "constraint_map.json"}
+                  "core/__init__.py") + tuple("data/" + name for name in RUNTIME_DATA)
+ALLOWED_DATA = set(RUNTIME_DATA)
 FORBIDDEN_PARTS = {"__pycache__", "tests", "eval", "scripts", "raw", ".git", "docs"}
 FORBIDDEN_SUFFIXES = (".pyc", ".pyo", ".yaml", ".yml", ".exe", ".dll", ".so", ".dylib", ".pdf",
                       ".docx", ".zip", ".qgz", ".env")

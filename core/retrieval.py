@@ -14,6 +14,8 @@ import unicodedata
 from collections import Counter
 from pathlib import Path
 
+from . import services
+
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 ID_PREFIX = "PR-art-"      # a bare article number means the Piano delle Regole
 
@@ -102,6 +104,10 @@ def sources_used(ids, data_dir=None):
 # ---------------------------------------------------------------------------------------------
 # layer name (core.services.SERVICES) -> (map file, key in that file)
 LAYER_RULES = {
+    **{name: ("zone", name) for name in services.MUNICIPAL_ZONES},
+    "milano_geology": ("zone", "fattibilita_geologica"),
+    "milano_park_north": ("constraint", "parco_regionale"),
+    "milano_park_south": ("constraint", "parco_regionale"),
     "pgt_naf": ("zone", "naf"),
     "pgt_previsioni_tuc": ("zone", "tuc"),
     "pgt_at": ("zone", "at"),
@@ -125,6 +131,9 @@ for _s in "HML":
 
 # Attribute fields worth showing per map key (matched case-insensitively; blanks dropped).
 KEY_FIELDS = {
+    "milano_naf": ["nomeambito", "tipo"],
+    "milano_adr": ["ambito", "nomeambito"],
+    "milano_aru": ["ambito", "nomeambito"],
     "naf": ["COD_NUC"],
     "tuc": ["AMB_URB", "COD_DEST1", "DCOD_DEST1", "SPEC_DEST"],
     "at": ["AMB_TRAS", "NOME_AMB", "DFUN_PREV1"],
@@ -133,10 +142,10 @@ KEY_FIELDS = {
     "agricole": ["COD_AGR", "SPEC_AGR"],
     "paesaggio": ["COD_PAES", "TIPO_AMB", "DESCRIZION"],
     "sensibilita": ["CLASSE", "DESCRIZION"],
-    "fattibilita_geologica": ["CLASSE", "DESCR_FATTIBILITA", "FATTORI_PERICOLO"],
+    "fattibilita_geologica": ["CLASSE", "DESCR_FATTIBILITA", "FATTORI_PERICOLO", "rif_norma"],
     "natura2000_zsc_sic": ["COD_SITO", "NOME_SITO"],
     "natura2000_zps": ["COD_ZPS", "NOME_ZPS"],
-    "parco_regionale": ["NOME_PA", "NOME_ENTE", "DATTUA_PA"],
+    "parco_regionale": ["NOME_PA", "NOME_ENTE", "DATTUA_PA", "nome"],
     "pgra_hazard": ["Codscenar", "Tritorno", "Nomeelidr", "Ambitoter"],
     "pgra_risk": ["Ris", "Danno", "CatUE", "Nomeelidr"],
 }
@@ -190,11 +199,17 @@ def _ids(lst):
 
 
 PARCO_SUD = "parco agricolo sud milano"
+MUNICIPAL_PARKS = {"milano_park_north": "Parco Nord Milano",
+                   "milano_park_south": "Parco Agricolo Sud Milano"}
+NORTH_PTC = "https://parconord.milano.it/wp-content/uploads/2019/09/Norme-Tecniche-di-Attuazione-PTC-Parco-Nord-Milano-2020.pdf"
 
 
 def in_parco_sud(query_result):
     """True when a parchi_regionali hit of `query_result` is the Parco Agricolo Sud Milano."""
-    for attrs in ((query_result.get("layers") or {}).get("parchi_regionali")) or []:
+    layers = query_result.get("layers") or {}
+    if layers.get("milano_park_south"):
+        return True
+    for attrs in layers.get("parchi_regionali") or []:
         name = _get(attrs, "NOME_PA")
         if isinstance(name, str) and name.strip().lower() == PARCO_SUD:
             return True
@@ -335,15 +350,61 @@ def _add_geology_constraint(finding, geo):
         finding["note"] = (finding["note"] + " " + cnote).strip()
 
 
+def _municipal_attributes(layer, attrs):
+    if layer in MUNICIPAL_PARKS:
+        return dict(attrs, NOME_PA=MUNICIPAL_PARKS[layer])
+    if layer == "milano_geology":
+        # G.17 supplies the subclass and the native article/subparagraph reference.
+        code = str(_get(attrs, "classi_new") or "")
+        cls = re.match(r"IV|III|II|I|V", code.upper())
+        label = str(_get(attrs, "legenda") or "")
+        return dict(attrs, CLASSE=label.split(" - ", 1)[0] if label else (cls[0] if cls else None),
+                    DESCR_FATTIBILITA=_get(attrs, "legenda"), FATTORI_PERICOLO=code)
+    return attrs
+
+
+def _apply_municipal_context(finding, layer, municipal_zones, layers, errors):
+    if layer in services.MUNICIPAL_ZONES and (
+        len(municipal_zones) > 1 or any(key in errors for key in services.MUNICIPAL_ZONES)
+    ):
+        finding["candidate_articles"] = finding["articles"]
+        finding["articles"] = []
+        finding["verify"] = True
+        finding["note"] = (
+            "Multiple municipal zone categories intersect here. Compare their boundaries on Tav. R.02."
+            if len(municipal_zones) > 1 else
+            "Some municipal zone layers were unavailable. Verify the detailed category on Tav. R.02."
+        )
+    if layer == "pgt_previsioni_tuc" and municipal_zones:
+        finding["candidate_articles"] = []
+        finding["note"] = "The regional TUC finding provides broad context. See the Comune's Tav. R.02 finding for the detailed category."
+    if layer == "pgt_naf" and "milano_naf" in layers:
+        finding["candidate_articles"] = finding["articles"]
+        finding["articles"] = []
+        finding["verify"] = True
+        finding["note"] = "The regional layer identifies the broader historic area. Verify this point on the Comune's Tav. R.02 and R.03."
+
+
 def lookup(query_result, data_dir=None):
     """Turn `query_all` output into a list of findings (one per hit)."""
     zone_map, constraint_map = load_maps(data_dir)
     zone_layers = zone_map.get("layers", {})
     constraints = constraint_map.get("constraints", {})
     findings = []
+    layers = query_result.get("layers") or {}
+    errors = query_result.get("errors") or {}
+    municipal_zones = [layer for layer in services.MUNICIPAL_ZONES if layers.get(layer)]
+    municipal_parks = {name.casefold() for layer, name in MUNICIPAL_PARKS.items() if layers.get(layer)}
     in_park = in_parco_sud(query_result)
-    for layer, hits in (query_result.get("layers") or {}).items():
+    for layer, hits in layers.items():
+        if (layer == "pgt_naf" and municipal_zones) or (
+            layer == "pgt_fattibilita_geo" and layers.get("milano_geology")
+        ):
+            continue
         for attrs in hits or []:
+            if layer == "parchi_regionali" and str(_get(attrs, "NOME_PA")).strip().casefold() in municipal_parks:
+                continue
+            attrs = _municipal_attributes(layer, attrs)
             if layer == "pgra_APSFR":
                 findings.append(_apsfr_finding(layer, attrs))
                 continue
@@ -355,13 +416,25 @@ def lookup(query_result, data_dir=None):
                 entry = zone_layers.get(key)
                 if entry:
                     f = _zone_finding(layer, key, entry, attrs, in_park)
+                    _apply_municipal_context(f, layer, municipal_zones, layers, errors)
                     if key == "fattibilita_geologica":
                         _add_geology_constraint(f, constraints.get("geologia"))
                     findings.append(f)
             else:
                 entry = constraints.get(key)
                 if entry:
-                    findings.append(_constraint_finding(layer, key, entry, attrs))
+                    f = _constraint_finding(layer, key, entry, attrs)
+                    if layer in MUNICIPAL_PARKS:
+                        f["verify"] = False
+                    if _get(attrs, "NOME_PA") == MUNICIPAL_PARKS["milano_park_north"]:
+                        f["document_url"] = NORTH_PTC
+                    if layer == "milano_park_south":
+                        for number in re.findall(r"\bArt\.\s*(25|26|27)\b", str(_get(attrs, "nome")), re.I):
+                            f["articles"] = _union(f["articles"], [f"PTC-art-{number}"])
+                            f["why"] += " Tav. R.02 identifies the park zone and references this PTC article."
+                    findings.append(f)
+    for finding in findings:
+        finding["map_url"] = services.SERVICES.get(finding["layer"])
     return findings
 
 
@@ -489,6 +562,39 @@ def search(query, k=5, index=None, data_dir=None):
 # the prompt is far below its budget, so more of them are kept (eval 2026-11-05: gold at rank 7-8).
 EXTRAS_K = 5
 EXTRAS_K_UNMAPPED = 8
+QUERY_TERMS = (
+    (r"\bfloor[- ]area (?:index|ratio)\b|\bFAR\b", "indice edificabilità territoriale"),
+    (r"consolidated urban fabric", "tessuto urbano consolidato"),
+    (r"public service areas|service provision", "dotazione servizi territoriali"),
+    (r"public[- ]transport accessibility", "accessibilità trasporto pubblico"),
+    (r"change of use", "mutamento destinazione uso"),
+    (r"building setbacks|setback distances", "distanze confini fabbricati"),
+    (r"flood hazard|flood risk", "pericolosità alluvionale PGRA"),
+    (r"basements?|below[- ]ground floors?", "piani interrati seminterrati"),
+    (r"groundwater|water table", "falda acquifera fattibilità geologica"),
+    (r"\bnavigli[oi]\b|\bcanals?\b", "navigli reticolo idrografico fasce di rispetto sponde"),
+    (r"edificabilit[aà] territoriale massim[oa]|maximum (?:floor[- ]area|FAR)",
+     "criteri di densità accessibilità trasporto pubblico indice massimo"),
+)
+DOCUMENT_NAMES = (
+    ("PR", r"\bPR\b|piano delle regole"),
+    ("PS", r"\bPS\b|piano dei servizi"),
+    ("DP", r"\bDP\b|documento di piano"),
+    ("PTC", r"\bPTC\b|piano territoriale di coordinamento"),
+)
+
+
+def _question_context(keywords, question):
+    """Keep explicit documents/references and add Italian terms for English searches."""
+    text = question or keywords
+    additions = [terms for pattern, terms in QUERY_TERMS if re.search(pattern, text, re.I)]
+    docs, refs = [], []
+    for doc, aliases in DOCUMENT_NAMES:
+        if re.search(aliases, text, re.I):
+            docs.append(doc)
+        for number in re.findall(rf"(?:{aliases})[\s,–-]+art(?:icolo)?[.\s-]*(\d+)\b", text, re.I):
+            refs.append(f"{doc}-art-{number}")
+    return " ".join([keywords, *additions]), docs, refs
 
 
 def extras_k(n_mapped, k=None):
@@ -498,7 +604,8 @@ def extras_k(n_mapped, k=None):
     return EXTRAS_K if n_mapped else EXTRAS_K_UNMAPPED
 
 
-def retrieve(query_result, question=None, k=None, index=None, data_dir=None, findings=None):
+def retrieve(query_result, question=None, k=None, index=None, data_dir=None, findings=None,
+             original_question=None):
     """Mapped articles first, then up to `k` BM25 extras from `question` (no duplicates).
 
     The question should already be Italian keywords (see prompts.keywords_prompt). `k` bounds
@@ -515,11 +622,18 @@ def retrieve(query_result, question=None, k=None, index=None, data_dir=None, fin
     k = extras_k(len(mapped), k)
     extras = []
     if question and question.strip():
-        hits = search(question, k=4 * k + len(mapped), index=index, data_dir=data_dir)
+        query, requested_docs, references = _question_context(question, original_question)
         by_id = articles_by_id(data_dir)
+        limit = len(by_id) if requested_docs else 4 * k + len(mapped)
+        hits = search(query, k=limit, index=index, data_dir=data_dir)
         # stable partition: normative first (the sort is stable, the hits are score-ordered)
         hits = sorted(hits, key=lambda h: not by_id.get(h[0], {}).get("normative", True))
-        for aid, score in hits:
+        named = [(aid, 0) for aid in references if aid in by_id]
+        for doc in requested_docs:
+            match = next((hit for hit in hits if by_id.get(hit[0], {}).get("doc") == doc), None)
+            if match:
+                named.append(match)
+        for aid, score in named + hits:
             if aid in prov or len(extras) >= k:
                 continue
             extras.append(aid)

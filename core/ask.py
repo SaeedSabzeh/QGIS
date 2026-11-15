@@ -15,7 +15,7 @@ import contextlib
 import os
 import sys
 
-from . import llm, prompts, retrieval, services
+from . import llm, pipeline, prompts, retrieval, services
 
 TEXT_PREVIEW = 400
 
@@ -84,9 +84,12 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
 
     p("Point: lat %s, lon %s" % (args.lat, args.lon))
     try:
-        result = (query_fn or services.query_all)(args.lat, args.lon)
+        result = (query_fn or services.query_milan)(args.lat, args.lon)
     except Exception as exc:  # query_all should not raise, but never show a traceback
         print("Could not query the map services: %s" % exc, file=sys.stderr)
+        return 1
+    if result.get("scope_note"):
+        p(result["scope_note"])
         return 1
     errors = result.get("errors", {})
     if result.get("layers") and len(errors) == len(result["layers"]):
@@ -127,14 +130,14 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
                   % exc, file=sys.stderr)
         p("Italian keywords: %s" % keywords)
         ret = retrieval.retrieve(result, keywords, k=args.k, findings=findings,
-                                 data_dir=data_dir)
+                                 data_dir=data_dir, original_question=args.question)
         used_ids = ret["ids"]
         articles = [by_id[i] for i in ret["ids"] if i in by_id]
         _print_articles(ret["ids"], ret["provenance"], by_id, out, args.full_text)
         prompt = prompts.build_answer_prompt(
-            args.question, findings, articles, keywords=keywords, provenance=ret["provenance"])
-        ans = llm.parse_answer(client.complete(prompt, on_progress=progress),
-                               prompt["article_ids"])
+            args.question, findings, articles, keywords=keywords, provenance=ret["provenance"],
+            map_errors=errors)
+        ans = pipeline.complete_answer(client, prompt, progress)
         p("Model: %s" % (client.last_model or client.model))
     except llm.LLMError as exc:
         print("LLM request failed: %s" % exc, file=sys.stderr)
@@ -147,11 +150,15 @@ def run(argv=None, query_fn=None, transport=None, env=None, out=None, data_dir=N
     p("Answer (EN): %s" % ans["answer_en"])
     p()
     p("Cited articles: %s" % (", ".join(ans["cited_articles"]) or "none"))
+    if ans["source_check"] == "review":
+        p("Check the official sources: some support could not be verified.")
+    for item in ans.get("evidence", []):
+        p("  [%s] %s" % (item["article_id"], item["quote"]))
     if ans["rejected_citations"]:
         p("WARNING: the model cited articles that were not supplied and were removed: %s"
           % ", ".join(ans["rejected_citations"]))
     if ans["parse_error"]:
-        p("WARNING: the model reply was not valid JSON; shown as raw text, citations dropped.")
+        p("The model reply could not be parsed.")
     p()
     _footer(out, prompt["article_ids"], data_dir)
     return 0

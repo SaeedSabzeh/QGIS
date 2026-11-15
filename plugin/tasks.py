@@ -33,6 +33,7 @@ class _FnTask(QgsTask):
     def finished(self, ok):  # main thread
         _ACTIVE.discard(self)
         if self.isCanceled():
+            self._on_done(None, "Canceled")
             return
         self._on_done(self.result if ok else None, None if ok else (self.error or "failed"))
 

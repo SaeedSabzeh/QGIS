@@ -496,9 +496,59 @@ def test_all_services_failing_is_reported_not_raised(env):
     p.initGui()
     shown = {}
     p.dock.show_point_result = lambda res: shown.setdefault("point", res)
-    p.on_point(45.0, 9.0)
+    p.on_point(45.4642, 9.19)
     assert shown["point"]["all_failed"]
     p.unload()
+
+
+def test_late_query_and_answer_callbacks_cannot_replace_new_point(env, monkeypatch):
+    from plugin import settings, tasks
+
+    queued = []
+
+    class PendingTask:
+        canceled = False
+
+        def cancel(self):
+            self.canceled = True
+
+    def start(description, work, done, on_progress=None):
+        task = PendingTask()
+        queued.append((task, done))
+        return task
+
+    monkeypatch.setattr(tasks, "start", start)
+    monkeypatch.setattr(settings, "is_ask_available", lambda settings: True)
+    p = env.classFactory(FakeIface())
+    p.initGui()
+    shown, answers, errors = [], [], []
+    monkeypatch.setattr(p.dock, "show_point_result", shown.append)
+    monkeypatch.setattr(p.dock, "show_answer", answers.append)
+    monkeypatch.setattr(p.dock, "show_error", errors.append)
+    p.on_point(45.46414, 9.19192)
+    p.on_point(45.52, 9.185)
+    old_query, finish_old_query = queued[0]
+    assert old_query.canceled
+    finish_old_query({"point": "old"}, None)
+    assert shown == []
+    _, finish_current = queued[1]
+    current = {"point": "new"}
+    finish_current(current, None)
+    assert p._last is current and shown == [current]
+    p.on_ask("Can I build here?")
+    old_answer, finish_answer = queued[2]
+    p.on_point(45.417, 9.235)
+    assert old_answer.canceled
+    finish_answer({"answer": "old"}, None)
+    assert not answers
+    _, finish_canceled = queued[3]
+    finish_canceled(None, "Canceled")
+    assert p._query_task is None and errors == ["Query failed: Canceled"]
+    p.on_point(45.465, 9.256)
+    _, finish_after_unload = queued[4]
+    p.unload()
+    finish_after_unload({"point": "unloaded"}, None)
+    assert shown == [current]
 
 
 # ----------------------------------------------------------------------------- static checks
@@ -529,7 +579,8 @@ def test_build_zip_and_packaged_import(tmp_path, monkeypatch):
     folder, archive = build_plugin.build()
     names = zipfile.ZipFile(archive).namelist()
     assert "norme_milano/metadata.txt" in names and "norme_milano/__init__.py" in names
-    for needed in ("articles.json", "documents.json", "zone_map.json", "constraint_map.json"):
+    for needed in ("articles.json", "documents.json", "zone_map.json", "constraint_map.json",
+                   "milano-confine.json"):
         assert "norme_milano/data/" + needed in names
     assert not any("raw" in n.split("/") or n.endswith((".yaml", ".pyc")) for n in names)
     assert "norme_milano/core/llm.py" in names and "norme_milano/core/pipeline.py" in names

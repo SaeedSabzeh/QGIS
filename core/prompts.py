@@ -57,9 +57,37 @@ Follow these rules strictly:
    Piano delle Regole and the Piano dei Servizi.
 11. The geological norms annex ("Componente geologica") reproduces art. 42-51 of the Piano delle
    Regole as of 2020: if it differs from the Piano delle Regole text, the Piano delle Regole wins.
+12. Answer each part of the question separately in both languages. Include the applicable conditions,
+   exceptions, units and thresholds when asked. Distinguish a base value from a maximum. If one part
+   is unresolved, say which one and why, even when the other parts can be answered.
+   When the question asks whether a threshold applies, also give the consequence of exceeding it
+   if the supplied text specifies one.
+13. For each materially different rule, give a short verbatim excerpt from a supplied article
+   in evidence, with its article_id. Keep the quote in the source language and select the words
+   that support the condition or number. Cite only articles that have a matching excerpt in evidence.
+   Do not use an excerpt as proof of a zone at the point.
 Reply with a single JSON object and nothing else:
 {"answer_it": "<answer in Italian>", "answer_en": "<same answer in English>",
- "cited_articles": ["PR-art-N", "PS-art-N", ...]}"""
+ "cited_articles": ["PR-art-N", "PS-art-N", ...],
+ "evidence": [{"article_id": "PR-art-N", "quote": "<verbatim excerpt>"}]}"""
+
+ANSWER_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "answer_it": {"type": "string"},
+        "answer_en": {"type": "string"},
+        "cited_articles": {"type": "array", "items": {"type": "string"}},
+        "evidence": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"article_id": {"type": "string"}, "quote": {"type": "string"}},
+                "required": ["article_id", "quote"],
+            },
+        },
+    },
+    "required": ["answer_it", "answer_en", "cited_articles", "evidence"],
+}
 
 KEYWORDS_SYSTEM = """\
 You turn a question about urban planning rules into Italian search keywords for a keyword
@@ -221,7 +249,7 @@ def _water_fill(lengths, total):
 
 def build_answer_prompt(question, findings, articles, keywords="", provenance=None,
                         max_total_chars=DEFAULT_MAX_TOTAL_CHARS, hard_cap_chars=HARD_CAP_CHARS,
-                        max_chars_per_article=None):
+                        max_chars_per_article=None, map_errors=()):
     """Build the answer prompt with a role-aware character budget.
 
     Priority: governing articles (role "articles" in `provenance`, as from retrieve()) are
@@ -269,12 +297,15 @@ def build_answer_prompt(question, findings, articles, keywords="", provenance=No
     ids = [articles[i]["id"] for i in order]
     blocks = [chosen[i] for i in order]
     fnd = "\n".join(format_finding(f) for f in findings) or "(no constraint or zone found at the point)"
+    if map_errors:
+        fnd += "\nLayers unavailable: %s. Their coverage is unknown." % ", ".join(sorted(map_errors))
     user = (
         "FINDINGS at the clicked point:\n%s\n\nARTICLES (the only citable ids: %s):\n\n%s\n\n"
         "QUESTION: %s\n\nReturn the JSON object now."
         % (fnd, ", ".join(ids) or "none", "\n\n".join(blocks) or "(none)", question.strip())
     )
-    return {"system": SYSTEM_RULES, "user": user, "article_ids": ids}
+    return {"system": SYSTEM_RULES, "user": user, "article_ids": ids, "response_schema": ANSWER_SCHEMA,
+            "evidence_texts": {aid: block.partition("\n")[2] for aid, block in zip(ids, blocks)}}
 
 
 def build_keywords_prompt(question):

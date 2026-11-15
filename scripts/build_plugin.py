@@ -24,7 +24,7 @@ import check_plugin_zip  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 NAME = "norme_milano"
-RUNTIME_DATA = ("articles.json", "documents.json", "zone_map.json", "constraint_map.json")
+RUNTIME_DATA = check_plugin_zip.RUNTIME_DATA
 # Whitelist of what plugin/ and core/ may contribute (no stray files get shipped).
 PLUGIN_SUFFIXES = {".py", ".txt", ".png", ".svg"}
 CORE_SUFFIXES = {".py"}

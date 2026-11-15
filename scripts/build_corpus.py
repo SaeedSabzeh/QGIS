@@ -35,6 +35,7 @@ REGISTRY = [
         "name": "Piano delle Regole",
         "title": "Piano delle Regole – Norme di attuazione, PGT Milano 2030",
         "file": "PR_Norme_Attuazione_20251204.pdf",
+        "source_url": "https://pgt.comune.milano.it/pgt-previgente/pgt-milano-2030-approvato-e-successive-modificazioni/piano-delle-regole-milano-2030/piano-delle-regole-vigente",
         "version_date": "2025-12-04",
         "version_note": "In-force text: adopted DCC 43 of 12/06/2025, approved DCC 93 of "
                         "04/12/2025, BURL n. 5 of 28/01/2026. Replaces the text of 2023 (DCC 100 "
@@ -45,6 +46,7 @@ REGISTRY = [
         "name": "Piano dei Servizi",
         "title": "Piano dei Servizi – Norme di attuazione, PGT Milano 2030",
         "file": "PS_Norme_Attuazione_Catalogo_20230308.pdf",
+        "source_url": "https://pgt.comune.milano.it/pgt-previgente/pgt-milano-2030-approvato-e-successive-modificazioni/piano-dei-servizi/piano-dei-servizi-vigente",
         "version_date": "2022-12-19",
         "version_note": "In force, modified after DCC 100 of 19/12/2022 (BURL n. 6 of 05/02/2020 "
                         "for the original approval). The Catalogo dei servizi (table of service "
@@ -55,6 +57,7 @@ REGISTRY = [
         "name": "Documento di Piano",
         "title": "Documento di Piano – Norme di attuazione, PGT Milano 2030",
         "file": "DP_Norme_Attuazione_202002051_bis_vig.pdf",
+        "source_url": "https://pgt.comune.milano.it/pgt-previgente/pgt-milano-2030-approvato-e-successive-modificazioni/documento-di-piano-milano-2030",
         "version_date": "2019-10-14",
         "version_note": "Approved DCC 34 of 14/10/2019, BURL Serie Avvisi e Concorsi n. 6 of "
                         "05/02/2020. The closing 'Appendice' (referral to the Piano delle Regole "
@@ -66,6 +69,7 @@ REGISTRY = [
         "title": "Parco Agricolo Sud Milano – Piano Territoriale di Coordinamento, "
                  "Norme Tecniche di Attuazione",
         "file": "PASM_PTC_DGR_7_818_20000803.pdf",
+        "source_url": "https://www.cittametropolitana.mi.it/aree-tematiche/ambiente-e-tutela-del-territorio/parco_agricolo_sud_milano/territorio_e_pianificazione/piano_territoriale_di_coordinamento.html",
         "version_date": "2000-08-03",
         "version_note": "DGR 7/818 of 03/08/2000 (BURL 2nd suppl. straordinario n. 38 of "
                         "21/09/2000). The two later amendments were checked: DGR 8/4516 of "
@@ -81,6 +85,7 @@ REGISTRY = [
         "title": "Componente geologica, idrogeologica e sismica – Allegato 1: norme geologiche "
                  "di piano (art. 42-51)",
         "file": "1_CG_GAll01_Relazione_geologica_20200205.pdf",
+        "source_url": "https://pgt.comune.milano.it/pgt-previgente/componente-geologica-e-direttiva-alluvioni/componente-geologica-pgt-milano-2030",
         "version_date": "2020-02-05",
         "duplicate_of": "PR",
         "version_note": "Chapter 7 'Norme geologiche di piano' of the Relazione illustrativa "
@@ -94,6 +99,7 @@ REGISTRY = [
         "name": "Componente sismica",
         "title": "Componente sismica – Allegato 7: relazione illustrativa e norme specifiche",
         "file": "CG_GAll07_Relazione e norme_20200205.pdf",
+        "source_url": "https://pgt.comune.milano.it/pgt-previgente/componente-geologica-e-direttiva-alluvioni/componente-geologica-pgt-milano-2030",
         "version_date": "2020-02-05",
         "version_note": "BURL n. 6 of 05/02/2020. Two sections (soil category of foundation; "
                         "liquefaction analysis).",
@@ -104,6 +110,7 @@ REGISTRY = [
         "title": "Documento di Piano – Allegato 1: Contenuti paesaggistici del piano, "
                  "Infrastrutture verdi e blu e Rete Ecologica Comunale",
         "file": "DP_DAll01_Contenuti_Paesaggistici_REC_202002051_bis_vig.pdf",
+        "source_url": "https://pgt.comune.milano.it/pgt-previgente/pgt-milano-2030-approvato-e-successive-modificazioni/documento-di-piano-milano-2030",
         "version_date": "2019-10-14",
         "version_note": "Explanatory / guidance report (prose, not articles), BURL n. 6 of "
                         "05/02/2020. The catalogue table 'Edifici e ambiti di rilevanza "

@@ -9,7 +9,7 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-from . import urlcheck
+from . import scope, urlcheck
 
 # Verified live layer URLs (see docs/phase0-services.md). All services are EPSG:32632;
 # the query sends lon/lat (inSR=4326) and the server reprojects.
@@ -17,8 +17,17 @@ _PGT = "https://www.cartografia.servizirl.it/arcgis1/rest/services/territorio/ta
 _N2K = "https://www.cartografia.servizirl.it/arcgis2/rest/services/ambiente/Rete_Natura_2000/MapServer"
 _AREE_PROTETTE = "https://www.cartografia.servizirl.it/arcgis2/rest/services/ambiente/AreeProtette/MapServer"
 _PGRA = "https://www.cartografia.servizirl.it/expo/rest/services/gpt/direttiva_alluvioni_2022/MapServer"
+_MILANO = "https://gisportal.comune.milano.it/federated/rest/services/PGT/Milano_2030_PGT_Vigente_Tavola_"
+_R02 = f"{_MILANO}R02/MapServer"
+MUNICIPAL_ZONES = ("milano_naf", "milano_adr", "milano_aru")
 
 SERVICES = {
+    "milano_naf": f"{_R02}/38",
+    "milano_adr": f"{_R02}/39",
+    "milano_aru": f"{_R02}/40",
+    "milano_park_north": f"{_R02}/15",
+    "milano_park_south": f"{_R02}/17",
+    "milano_geology": f"{_MILANO}G17/MapServer/1",
     # Regional mosaic of the current PGT (Milano 2030, BURL 05/02/2020): categories only.
     "pgt_naf": f"{_PGT}/12",  # nuclei di antica formazione (COD_NUC)
     "pgt_at": f"{_PGT}/13",  # ambiti di trasformazione (AMB_TRAS, NOME_AMB)
@@ -31,8 +40,7 @@ SERVICES = {
     "pgt_fattibilita_geo": f"{_PGT}/3",  # fattibilita geologica (CLASSE, FATTORI_PERICOLO)
     "natura2000_zsc": f"{_N2K}/0",  # ZSC/SIC (COD_SITO, NOME_SITO)
     "natura2000_zps": f"{_N2K}/1",  # ZPS (COD_ZPS, NOME_ZPS)
-    # Regional parks (NOME_PA, NOME_ENTE, DATTUA_PA; wkid 32632). Known gap: Parco Nord Milano is
-    # NOT in this layer (no hit even at its centre); Parco Agricolo Sud Milano is.
+    # Regional parks (NOME_PA, NOME_ENTE, DATTUA_PA), also a fallback for Milan's R02.
     "parchi_regionali": f"{_AREE_PROTETTE}/9",
     # PGRA risk classes R4-R1 (field Ris) and the APSFR areas they belong to.
     "pgra_APSFR": f"{_PGRA}/4",  # aree a potenziale rischio significativo (nameAPSFR)
@@ -110,8 +118,12 @@ def query_all(lat, lon, timeout=DEFAULT_TIMEOUT, fetch=None, services=None, max_
                 err = data["error"]
                 msg = err.get("message", err) if isinstance(err, dict) else err
                 raise ValueError(f"service error: {msg}")
-            feats = data.get("features") or []
-            return name, [dict(f.get("attributes") or {}) for f in feats], None
+            feats = data.get("features")
+            if data.get("exceededTransferLimit") or not isinstance(feats, list) or any(
+                not isinstance(f, dict) or not isinstance(f.get("attributes"), dict) for f in feats
+            ):
+                raise ValueError("unexpected feature response")
+            return name, [f["attributes"] for f in feats], None
         except Exception as exc:  # one bad layer must not break the others
             return name, [], f"{type(exc).__name__}: {exc}"
 
@@ -125,3 +137,17 @@ def query_all(lat, lon, timeout=DEFAULT_TIMEOUT, fetch=None, services=None, max_
             if err:
                 errors[name] = err
     return {"point": {"lat": lat, "lon": lon}, "layers": layers, "errors": errors}
+
+
+def query_milan(lat, lon, fetch=None):
+    """Query at a covered point. Exterior clicks stay on the local machine."""
+    try:
+        inside = scope.contains(lat, lon)
+    except (OSError, ValueError):
+        status, note = "unavailable", scope.UNAVAILABLE
+    else:
+        if inside:
+            return query_all(lat, lon, fetch=fetch)
+        status, note = "outside", scope.OUTSIDE
+    return {"point": {"lat": lat, "lon": lon}, "layers": {}, "errors": {},
+            "scope_status": status, "scope_note": note}

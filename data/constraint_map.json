@@ -53,7 +53,7 @@
         "PR-art-35"
       ],
       "why": "PR art. 35 \"Definizione e disciplina\" c.1: inside the perimeters of the regional parks the zoning and implementing rules of the park's PTC apply; the PTC contents are \"recepiti di diritto nel PGT e prevalgono su previsioni difformi\".",
-      "note": "KNOWN GAP: Parco Nord Milano does not appear in this layer (no hit even at its centre), so a point inside Parco Nord gets no park finding from the map service; PR art. 35 c.1-2 names it and the Parco Nord PTC is not in the corpus.",
+      "note": "Milan's Tav. R.02 provides a direct geometry for Parco Nord Milano and Parco Agricolo Sud Milano. Park-specific instruments take precedence as described in PR art. 35.",
       "unmatched_note": "The PTC of this park is not in the corpus: only PR art. 35 is cited; consult the park's own PTC.",
       "verify": true,
       "by_value": {

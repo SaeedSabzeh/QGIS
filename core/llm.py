@@ -189,6 +189,8 @@ class GeminiClient(_Retrying):
             "generationConfig": {"responseMimeType": "application/json",
                                  "temperature": self.temperature},
         }
+        if schema := prompt_parts.get("response_schema"):
+            payload["generationConfig"]["responseJsonSchema"] = schema
         return self._url(model or self.model), headers, payload
 
     @staticmethod
@@ -233,7 +235,7 @@ class GeminiClient(_Retrying):
                 block = (data.get("promptFeedback") or {}).get("blockReason")
                 raise LLMError("Gemini returned no candidates" + (" (blocked: %s)" % block if block else ""))
             parts = (cands[0].get("content") or {}).get("parts") or []
-            text = "".join(p.get("text", "") for p in parts)
+            text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
         except AttributeError:
             raise LLMError("unexpected Gemini response") from None
         if not text.strip():
@@ -332,7 +334,7 @@ def normalize_citation(c):
     return s
 
 
-def parse_answer(text, allowed_ids):
+def parse_answer(text, allowed_ids, evidence_texts=None):
     """Parse the model reply. Returns a dict:
 
     answer_it, answer_en, cited_articles (only ids in `allowed_ids`), rejected_citations
@@ -354,10 +356,33 @@ def parse_answer(text, allowed_ids):
         bucket = cited if cid in allowed else rejected
         if cid not in bucket:
             bucket.append(cid)
-    return {
+    answer = {
         "answer_it": str(obj.get("answer_it") or obj.get("answer") or ""),
         "answer_en": str(obj.get("answer_en") or ""),
         "cited_articles": cited,
         "rejected_citations": rejected,
         "parse_error": False,
     }
+    if evidence_texts is not None:
+        _check_evidence(obj.get("evidence"), answer, evidence_texts)
+    return answer
+
+
+def _check_evidence(items, answer, passages):
+    evidence = []
+    rejected = 0
+    for item in items if isinstance(items, list) else ():
+        if not isinstance(item, dict) or not isinstance(item.get("quote"), str):
+            rejected += 1
+            continue
+        aid = normalize_citation(item.get("article_id", ""))
+        quote = " ".join(item["quote"].split())
+        supplied = " ".join(passages.get(aid, "").split())
+        if aid not in answer["cited_articles"] or not 18 <= len(quote) <= 450 or quote not in supplied:
+            rejected += 1
+            continue
+        row = {"article_id": aid, "quote": quote}
+        if row not in evidence:
+            evidence.append(row)
+    answer["evidence"] = evidence
+    answer["rejected_evidence"] = rejected
