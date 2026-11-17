@@ -7,9 +7,11 @@
 
 *Clicca un punto di Milano e scopri quali norme del PGT si applicano lì, con gli articoli e una risposta in italiano o inglese.*
 
+![Norme Milano in QGIS: a click on the Duomo lists the 11 constraints found there, starting with the NAF zone, and opens the text of Piano delle Regole art. 18](docs/demo-duomo-click.gif)
+
 ![Norme Milano in QGIS: a click on the Duomo shows the NAF zone, its governing articles of the Piano delle Regole, and an answer to "Can I build a basement here?"](docs/screenshot.jpg)
 
-<sub>Map: © OpenStreetMap contributors. Constraints: Regione Lombardia geoservices.</sub>
+<sub>Map: © OpenStreetMap contributors. Constraints: Comune di Milano and Regione Lombardia geoservices.</sub>
 
 **Quick start.** In QGIS, open **Plugins → Manage and Install Plugins**, search for
 **Norme Milano**, then activate its map tool. For a local build, use **Install from ZIP** and
