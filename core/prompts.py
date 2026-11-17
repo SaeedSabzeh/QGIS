@@ -142,7 +142,9 @@ OMIT_MARK = "[...]"
 EXCERPT_TAG = "(estratto)"
 
 # Priority classes: lower is included first.
-P_GOVERNING, P_EXTRA, P_GENERAL, P_EXPLAIN, P_CANDIDATE = 0, 1, 2, 3, 4
+# P_ZONE: candidate articles of the zone itself (regional NAF/TUC, R.03 default). They decide
+# what may be built, so they come right after the governing articles, before overlays' extras.
+P_GOVERNING, P_ZONE, P_EXTRA, P_GENERAL, P_EXPLAIN, P_CANDIDATE = 0, 1, 2, 3, 4, 5
 _ROLE_PRIORITY = {"articles": P_GOVERNING, "bm25": P_EXTRA,
                   "general_articles": P_GENERAL, "explanatory_articles": P_EXPLAIN,
                   "candidate_articles": P_CANDIDATE}
@@ -230,8 +232,13 @@ def trim_text(text, allowance, query_tokens=()):
 
 
 def _priority(aid, provenance):
-    roles = [x.get("role") for x in (provenance or {}).get(aid, [])]
-    pris = [_ROLE_PRIORITY[r] for r in roles if r in _ROLE_PRIORITY]
+    pris = []
+    for x in (provenance or {}).get(aid, []):
+        role = x.get("role")
+        if role == "candidate_articles" and x.get("layer") in retrieval.ZONE_LAYERS:
+            pris.append(P_ZONE)
+        elif role in _ROLE_PRIORITY:
+            pris.append(_ROLE_PRIORITY[role])
     return min(pris) if pris else P_GENERAL
 
 

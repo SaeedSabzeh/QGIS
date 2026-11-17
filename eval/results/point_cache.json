@@ -97,8 +97,155 @@
  "45.4170,9.2350": {
   "errors": {},
   "layers": {
+   "milano_accessibility": [],
+   "milano_adr": [],
+   "milano_agricoltura": [],
+   "milano_aru": [],
+   "milano_ers": [],
+   "milano_geology": [
+    {
+     "classi_new": "IIIc+IIId",
+     "legenda": "III - Fattibilità con consistenti limitazioni",
+     "objectid": 2,
+     "rif_norma": "Artt. 45.5, 45.6  Norme di Attuazione PdR",
+     "st_area(shape)": 1851437.8534588
+    }
+   ],
+   "milano_gfu": [],
+   "milano_in_itinere": [],
+   "milano_mobilita_nuova": [],
+   "milano_naf": [],
+   "milano_navigli_136": [],
+   "milano_navigli_riapertura": [],
+   "milano_nodi": [],
+   "milano_nuclei_esterni": [],
+   "milano_pa_obbligatori": [],
+   "milano_park_north": [],
+   "milano_park_south": [
+    {
+     "ambito": "Parco Agricolo Sud",
+     "nome": "Territori agricoli e verde di cintura metropolitana - ambito dei piani di cintura urbana (Art. 26, NTA PTC)",
+     "objectid": 12,
+     "st_area(shape)": 7748126.306241725
+    }
+   ],
+   "milano_pedonale": [],
+   "milano_piazze": [],
+   "milano_plis_lambro": [],
+   "milano_plis_martesana": [],
+   "milano_r03": [
+    {
+     "Nome": "Limite esenzione dotazioni territoriali (art. 11.3 Piano dei Servizi)",
+     "OBJECTID": "1",
+     "SHAPE.AREA": "137657286,009716",
+     "Shape": "Polygon",
+     "_layerId": 15,
+     "_layerName": "DOTAZIONI TERRITORIALI"
+    }
+   ],
+   "milano_r05": [],
+   "milano_r06": [
+    {
+     "CIVICO": "---",
+     "Data": "30/07/2024",
+     "Fg_Mapp": "già 78, 81, 84, 104-108, 110-111, 119, 336-337, 466, 636",
+     "INDIRIZZO": "VIA SANT'ARIALDO",
+     "Legenda": "Immobile con prescrizione di tutela indiretta con apposito provvedimento (art. 45, DLgs n. 42/2004)",
+     "Nome": "Immobili siti in via S. Arialdo",
+     "OBJECTID": "1462",
+     "OGGETTO": "Vincolo indiretto a tutela dell'Abbazia di Chiaravalle",
+     "PAV": "674",
+     "RifArt": "Art. 21",
+     "RifLeg": "Legge 1089/1939",
+     "Shape": "Polygon",
+     "TipoTutela": "Indiretta",
+     "_layerId": 2,
+     "_layerName": "Ex Monumentali",
+     "field": "Null"
+    },
+    {
+     "CIVICO": "---",
+     "DATA_DECR": "28-03-1984",
+     "Estensione": "NO",
+     "Fg_Mapp": "---",
+     "INDIRIZZO": "---",
+     "Legenda": "Art. 136 lett. c-d) DLgs 42/2004",
+     "Nome": "Chiaravalle",
+     "OBJECTID": "31",
+     "OGGETTO": "Vaste aree a coltura a prato perennemente a verde",
+     "RifArt": "---",
+     "RifLeg": "Legge 1497/1939",
+     "SHAPE.AREA": "9061339,085346",
+     "Shape": "Polygon",
+     "_layerId": 6,
+     "_layerName": "Beni sottoposti a tutela con apposito provvedimento",
+     "created_date": "Null",
+     "created_user": "Null",
+     "last_edited_date": "Null",
+     "last_edited_user": "Null"
+    },
+    {
+     "Fonte": "Parchi Regionali",
+     "Nome": "Parco Agricolo Sud Milano",
+     "OBJECTID": "41",
+     "Rif_Norme": "Art. 142 c. 1 lett. f), DLgs n. 42/2004",
+     "SHAPE.AREA": "16072816,456368",
+     "Shape": "Polygon",
+     "TipoTutela": "Ambiti sottoposti a tutela per legge",
+     "_layerId": 10,
+     "_layerName": "Ambiti sottoposti a tutela per legge"
+    },
+    {
+     "COD_LEG": "t2_c3_s1_l1",
+     "COD_NORM": "art.26",
+     "FID": "27",
+     "Nome": "Ambiti di rilevanza paesisitica",
+     "SHAPE.AREA": "19759630,753204",
+     "Shape": "Polygon",
+     "TipoTutela": "PTCP - 2014",
+     "_layerId": 18,
+     "_layerName": "Ambiti di rilevanza paesistica"
+    }
+   ],
+   "milano_r07": [],
+   "milano_r08": [
+    {
+     "ID_Pista": "---",
+     "Label": "SOI",
+     "Nome": "Orizzontale interna",
+     "OBJECTID": "12",
+     "Shape": "Polygon",
+     "_layerId": 4,
+     "_layerName": "Label",
+     "st_area(shape)": "20738937,051222"
+    },
+    {
+     "Id": "1",
+     "Nome": "Sub-zona 1",
+     "OBJECTID": "4",
+     "Shape": "Polygon",
+     "_layerId": 9,
+     "_layerName": "Sub-zone",
+     "st_area(shape)": "31742014,469023"
+    }
+   ],
+   "milano_rigen_ambientale": [],
+   "milano_ticinello": [],
+   "milano_verde": [],
    "natura2000_zps": [],
    "natura2000_zsc": [],
+   "parchi_regionali": [
+    {
+     "DATTUA_PA": "Parco con P.T.C. approvato",
+     "DTIPO_IDE": "Legge Regionale",
+     "NOME_ENTE": "Provincia di Milano",
+     "NOME_PA": "Parco Agricolo Sud Milano",
+     "OBJECTID_1": 21,
+     "OBJECTID_Area": 470544169.3704013,
+     "OBJECTID_Length": 842793.7579378288,
+     "SEDE_ENTE": "via Pancrazi, 10 - 20145 Milano (MI)"
+    }
+   ],
    "pgra_APSFR": [],
    "pgra_H_ACL": [],
    "pgra_H_RP": [],
@@ -219,7 +366,8 @@
   "point": {
    "lat": 45.417,
    "lon": 9.235
-  }
+  },
+  "retried": []
  },
  "45.4325,9.2390": {
   "errors": {},
@@ -961,8 +1109,124 @@
  "45.4642,9.1900": {
   "errors": {},
   "layers": {
+   "milano_accessibility": [
+    {
+     "nome": "Ambiti caratterizzati da elevati livelli di accessibilità alle reti di trasporto pubblico",
+     "objectid": 12,
+     "st_area(shape)": 78367769.76143126
+    }
+   ],
+   "milano_adr": [],
+   "milano_agricoltura": [],
+   "milano_aru": [],
+   "milano_ers": [],
+   "milano_geology": [
+    {
+     "classi_new": "II",
+     "legenda": "II - Fattibilità con modeste limitazioni",
+     "objectid": 240,
+     "rif_norma": "Art. 44 Norme di Attuazione PdR",
+     "st_area(shape)": 101874798.69811589
+    }
+   ],
+   "milano_gfu": [],
+   "milano_in_itinere": [],
+   "milano_mobilita_nuova": [],
+   "milano_naf": [],
+   "milano_navigli_136": [],
+   "milano_navigli_riapertura": [],
+   "milano_nodi": [],
+   "milano_nuclei_esterni": [],
+   "milano_pa_obbligatori": [],
+   "milano_park_north": [],
+   "milano_park_south": [],
+   "milano_pedonale": [
+    {
+     "nome": "Spazi a vocazione pedonale",
+     "objectid_1": 79,
+     "st_area(shape)": 6277283.609379035
+    }
+   ],
+   "milano_piazze": [],
+   "milano_plis_lambro": [],
+   "milano_plis_martesana": [],
+   "milano_r03": [
+    {
+     "Legenda": "TUC - Tessuto urbano consolidato",
+     "Nome": "Perimetro TUC",
+     "OBJECTID": "46",
+     "Shape": "Polygon",
+     "Shape_Area": "133548432,766976",
+     "_layerId": 0,
+     "_layerName": "TUC - TESSUTO URBANO CONSOLIDATO"
+    },
+    {
+     "Legenda": "TUC - Tessuto urbano consolidato",
+     "Nome": "Nucleo di antica formazione",
+     "OBJECTID": "11",
+     "Shape": "Polygon",
+     "Shape_Area": "11705093,207914",
+     "_layerId": 0,
+     "_layerName": "TUC - TESSUTO URBANO CONSOLIDATO"
+    }
+   ],
+   "milano_r05": [],
+   "milano_r06": [
+    {
+     "CIVICO": "---",
+     "Data": "27/07/1995",
+     "Fg_Mapp": "---",
+     "INDIRIZZO": "PZA DEL DUOMO",
+     "Legenda": "Immobile sottoposto a tutela diretta con apposito provvedimento (art. 10, DLgs n. 42/2004)",
+     "Nome": "Piazza del Duomo",
+     "OBJECTID": "321",
+     "OGGETTO": "Piazza Duomo",
+     "PAV": "663",
+     "RifArt": "Art. 1, 4",
+     "RifLeg": "Legge 1089/1939",
+     "Shape": "Polygon",
+     "TipoTutela": "Diretta con zona di rispetto",
+     "_layerId": 2,
+     "_layerName": "Ex Monumentali",
+     "field": "Null"
+    },
+    {
+     "Nome": "Zona A",
+     "OBJECTID": "3",
+     "Shape": "Polygon",
+     "Shape_Area": "3321281,72539",
+     "_layerId": 26,
+     "_layerName": "Zone di rischio archeologico"
+    }
+   ],
+   "milano_r07": [],
+   "milano_r08": [
+    {
+     "ID_Pista": "---",
+     "Label": "SOE",
+     "Nome": "Orizzontale esterna",
+     "OBJECTID": "3",
+     "Shape": "Polygon",
+     "_layerId": 4,
+     "_layerName": "Label",
+     "st_area(shape)": "116283169,586047"
+    },
+    {
+     "Id": "4",
+     "Nome": "Sub-zona 4",
+     "OBJECTID": "3",
+     "Shape": "Polygon",
+     "_layerId": 9,
+     "_layerName": "Sub-zone",
+     "st_area(shape)": "45213439,556711"
+    }
+   ],
+   "milano_rigen_ambientale": [],
+   "milano_ticinello": [],
+   "milano_verde": [],
    "natura2000_zps": [],
    "natura2000_zsc": [],
+   "parchi_regionali": [],
    "pgra_APSFR": [],
    "pgra_H_ACL": [],
    "pgra_H_RP": [],
@@ -1062,7 +1326,8 @@
   "point": {
    "lat": 45.4642,
    "lon": 9.19
-  }
+  },
+  "retried": []
  },
  "45.4650,9.0920": {
   "errors": {},
@@ -1162,8 +1427,139 @@
  "45.4650,9.2560": {
   "errors": {},
   "layers": {
+   "milano_accessibility": [],
+   "milano_adr": [],
+   "milano_agricoltura": [],
+   "milano_aru": [],
+   "milano_ers": [],
+   "milano_geology": [
+    {
+     "classi_new": "IIIa+IIIc",
+     "legenda": "III - Fattibilità con consistenti limitazioni",
+     "objectid": 115,
+     "rif_norma": "Artt. 45.3, 45.5  Norme di Attuazione PdR",
+     "st_area(shape)": 3809328.03944731
+    }
+   ],
+   "milano_gfu": [],
+   "milano_in_itinere": [],
+   "milano_mobilita_nuova": [],
+   "milano_naf": [],
+   "milano_navigli_136": [],
+   "milano_navigli_riapertura": [],
+   "milano_nodi": [],
+   "milano_nuclei_esterni": [],
+   "milano_pa_obbligatori": [],
+   "milano_park_north": [],
+   "milano_park_south": [
+    {
+     "ambito": "Parco Agricolo Sud",
+     "nome": "Territori agricoli e verde di cintura metropolitana - ambito dei piani di cintura urbana (Art. 26, NTA PTC)",
+     "objectid": 10,
+     "st_area(shape)": 2505069.54107028
+    }
+   ],
+   "milano_pedonale": [],
+   "milano_piazze": [],
+   "milano_plis_lambro": [],
+   "milano_plis_martesana": [],
+   "milano_r03": [
+    {
+     "Nome": "Limite esenzione dotazioni territoriali (art. 11.3 Piano dei Servizi)",
+     "OBJECTID": "1",
+     "SHAPE.AREA": "137657286,009716",
+     "Shape": "Polygon",
+     "_layerId": 15,
+     "_layerName": "DOTAZIONI TERRITORIALI"
+    }
+   ],
+   "milano_r05": [
+    {
+     "Legenda": "Zone di particolare tutela dall'inquinamento luminoso",
+     "Nome": "Osservatorio Sociale \"A. Grosso\" di Brugherio (MB)",
+     "OBJECTID": "4",
+     "Raggio_m": "10",
+     "Rif_Norme": "Art. 9.3, LR n. 31/2015",
+     "SHAPE.AREA": "313705875,153107",
+     "Shape": "Polygon",
+     "_layerId": 29,
+     "_layerName": "ZONE DI PARTICOLARE TUTELA DALL'INQUINAMENTO LUMINOSO"
+    }
+   ],
+   "milano_r06": [
+    {
+     "Fonte": "Parchi Regionali",
+     "Nome": "Parco Agricolo Sud Milano",
+     "OBJECTID": "44",
+     "Rif_Norme": "Art. 142 c. 1 lett. f), DLgs n. 42/2004",
+     "SHAPE.AREA": "3245876,724183",
+     "Shape": "Polygon",
+     "TipoTutela": "Ambiti sottoposti a tutela per legge",
+     "_layerId": 10,
+     "_layerName": "Ambiti sottoposti a tutela per legge"
+    },
+    {
+     "COD_LEG": "t2_c3_s1_l1",
+     "COD_NORM": "art.26",
+     "FID": "4",
+     "Nome": "Ambiti di rilevanza paesisitica",
+     "SHAPE.AREA": "1416562,982199",
+     "Shape": "Polygon",
+     "TipoTutela": "PTCP - 2014",
+     "_layerId": 18,
+     "_layerName": "Ambiti di rilevanza paesistica"
+    }
+   ],
+   "milano_r07": [
+    {
+     "Legenda": "Settore 4 - h max ingombri verticali: 134 m slm",
+     "N. settore": "4",
+     "Nome": "Peschiera e Lambro",
+     "OBJECTID": "8",
+     "Shape": "Polygon",
+     "_layerId": 8,
+     "_layerName": "Fasce di rispetto",
+     "st_area(shape)": "10947069,141996"
+    }
+   ],
+   "milano_r08": [
+    {
+     "ID_Pista": "---",
+     "Label": "SOI",
+     "Nome": "Orizzontale interna",
+     "OBJECTID": "12",
+     "Shape": "Polygon",
+     "_layerId": 4,
+     "_layerName": "Label",
+     "st_area(shape)": "20738937,051222"
+    },
+    {
+     "Id": "1",
+     "Nome": "Sub-zona 1",
+     "OBJECTID": "4",
+     "Shape": "Polygon",
+     "_layerId": 9,
+     "_layerName": "Sub-zone",
+     "st_area(shape)": "31742014,469023"
+    }
+   ],
+   "milano_rigen_ambientale": [],
+   "milano_ticinello": [],
+   "milano_verde": [],
    "natura2000_zps": [],
    "natura2000_zsc": [],
+   "parchi_regionali": [
+    {
+     "DATTUA_PA": "Parco con P.T.C. approvato",
+     "DTIPO_IDE": "Legge Regionale",
+     "NOME_ENTE": "Provincia di Milano",
+     "NOME_PA": "Parco Agricolo Sud Milano",
+     "OBJECTID_1": 21,
+     "OBJECTID_Area": 470544169.3704013,
+     "OBJECTID_Length": 842793.7579378288,
+     "SEDE_ENTE": "via Pancrazi, 10 - 20145 Milano (MI)"
+    }
+   ],
    "pgra_APSFR": [
     {
      "CONTA": 1,
@@ -1391,7 +1787,8 @@
   "point": {
    "lat": 45.465,
    "lon": 9.256
-  }
+  },
+  "retried": []
  },
  "45.4781,9.1240": {
   "errors": {},
@@ -1555,8 +1952,149 @@
  "45.4781,9.2269": {
   "errors": {},
   "layers": {
+   "milano_accessibility": [
+    {
+     "nome": "Ambiti caratterizzati da elevati livelli di accessibilità alle reti di trasporto pubblico",
+     "objectid": 12,
+     "st_area(shape)": 78367769.76143126
+    }
+   ],
+   "milano_adr": [],
+   "milano_agricoltura": [],
+   "milano_aru": [],
+   "milano_ers": [],
+   "milano_geology": [
+    {
+     "classi_new": "II",
+     "legenda": "II - Fattibilità con modeste limitazioni",
+     "objectid": 240,
+     "rif_norma": "Art. 44 Norme di Attuazione PdR",
+     "st_area(shape)": 101874798.69811589
+    }
+   ],
+   "milano_gfu": [],
+   "milano_in_itinere": [],
+   "milano_mobilita_nuova": [],
+   "milano_naf": [],
+   "milano_navigli_136": [],
+   "milano_navigli_riapertura": [],
+   "milano_nodi": [],
+   "milano_nuclei_esterni": [],
+   "milano_pa_obbligatori": [],
+   "milano_park_north": [],
+   "milano_park_south": [],
+   "milano_pedonale": [
+    {
+     "nome": "Spazi a vocazione pedonale",
+     "objectid_1": 79,
+     "st_area(shape)": 6277283.609379035
+    }
+   ],
+   "milano_piazze": [],
+   "milano_plis_lambro": [],
+   "milano_plis_martesana": [],
+   "milano_r03": [
+    {
+     "Legenda": "TUC - Tessuto urbano consolidato",
+     "Nome": "Tessuto urbano di recente formazione",
+     "OBJECTID": "48",
+     "Shape": "Polygon",
+     "Shape_Area": "118674509,397592",
+     "_layerId": 0,
+     "_layerName": "TUC - TESSUTO URBANO CONSOLIDATO"
+    },
+    {
+     "Legenda": "TUC - Tessuto urbano consolidato",
+     "Nome": "Perimetro TUC",
+     "OBJECTID": "46",
+     "Shape": "Polygon",
+     "Shape_Area": "133548432,766976",
+     "_layerId": 0,
+     "_layerName": "TUC - TESSUTO URBANO CONSOLIDATO"
+    }
+   ],
+   "milano_r05": [
+    {
+     "Legenda": "Zone di particolare tutela dall'inquinamento luminoso",
+     "Nome": "Osservatorio Sociale \"A. Grosso\" di Brugherio (MB)",
+     "OBJECTID": "4",
+     "Raggio_m": "10",
+     "Rif_Norme": "Art. 9.3, LR n. 31/2015",
+     "SHAPE.AREA": "313705875,153107",
+     "Shape": "Polygon",
+     "_layerId": 29,
+     "_layerName": "ZONE DI PARTICOLARE TUTELA DALL'INQUINAMENTO LUMINOSO"
+    }
+   ],
+   "milano_r06": [
+    {
+     "CIVICO": "---",
+     "DATA_DECR": "27-01-2010",
+     "Estensione": "SI",
+     "Fg_Mapp": "---",
+     "INDIRIZZO": "---",
+     "Legenda": "Art. 136 lett. c-d) DLgs 42/2004",
+     "Nome": "Aree di pza Piola, via Pacini, via Ampere, pza Da Vinci, vle Romagna, pza Ferravilla",
+     "OBJECTID": "34",
+     "OGGETTO": "Viali e piazze di forte effetto scenico dalla forte unitarietà urbanistica e architettonica",
+     "RifArt": "Art. 136 c. 1 lett.c)-d)",
+     "RifLeg": "DLgs 42/2004",
+     "SHAPE.AREA": "176760,519484",
+     "Shape": "Polygon",
+     "_layerId": 6,
+     "_layerName": "Beni sottoposti a tutela con apposito provvedimento",
+     "created_date": "Null",
+     "created_user": "Null",
+     "last_edited_date": "Null",
+     "last_edited_user": "Null"
+    },
+    {
+     "COD_LEG": "t2_c3_s1_l1",
+     "COD_NORM": "art.26",
+     "FID": "24",
+     "Nome": "Ambiti di rilevanza paesisitica",
+     "SHAPE.AREA": "927803,473057",
+     "Shape": "Polygon",
+     "TipoTutela": "PTCP - 2014",
+     "_layerId": 18,
+     "_layerName": "Ambiti di rilevanza paesistica"
+    }
+   ],
+   "milano_r07": [],
+   "milano_r08": [
+    {
+     "ID_Pista": "---",
+     "Label": "SC",
+     "Nome": "Conica",
+     "OBJECTID": "2",
+     "Shape": "Polygon",
+     "_layerId": 4,
+     "_layerName": "Label",
+     "st_area(shape)": "24650944,228014"
+    },
+    {
+     "Id": "1",
+     "Nome": "Sub-zona 1",
+     "OBJECTID": "4",
+     "Shape": "Polygon",
+     "_layerId": 9,
+     "_layerName": "Sub-zone",
+     "st_area(shape)": "31742014,469023"
+    }
+   ],
+   "milano_rigen_ambientale": [],
+   "milano_ticinello": [],
+   "milano_verde": [
+    {
+     "categoria": "Verde",
+     "legenda": "Verde urbano esistente",
+     "objectid": 9523,
+     "st_area(shape)": 23650.943988185
+    }
+   ],
    "natura2000_zps": [],
    "natura2000_zsc": [],
+   "parchi_regionali": [],
    "pgra_APSFR": [],
    "pgra_H_ACL": [],
    "pgra_H_RP": [],
@@ -1668,7 +2206,8 @@
   "point": {
    "lat": 45.4781,
    "lon": 9.2269
-  }
+  },
+  "retried": []
  },
  "45.4840,9.2330": {
   "errors": {},
@@ -2730,8 +3269,130 @@
  "45.5281,9.2050": {
   "errors": {},
   "layers": {
+   "milano_accessibility": [],
+   "milano_adr": [
+    {
+     "ambito": "ADR",
+     "nomeambito": "Ambiti contraddistinti da un disegno urbano riconoscibile",
+     "objectid": 14690,
+     "st_area(shape)": 30249.16649493
+    }
+   ],
+   "milano_agricoltura": [],
+   "milano_aru": [],
+   "milano_ers": [],
+   "milano_geology": [
+    {
+     "classi_new": "II",
+     "legenda": "II - Fattibilità con modeste limitazioni",
+     "objectid": 240,
+     "rif_norma": "Art. 44 Norme di Attuazione PdR",
+     "st_area(shape)": 101874798.69811589
+    }
+   ],
+   "milano_gfu": [],
+   "milano_in_itinere": [],
+   "milano_mobilita_nuova": [],
+   "milano_naf": [],
+   "milano_navigli_136": [],
+   "milano_navigli_riapertura": [],
+   "milano_nodi": [],
+   "milano_nuclei_esterni": [],
+   "milano_pa_obbligatori": [],
+   "milano_park_north": [],
+   "milano_park_south": [],
+   "milano_pedonale": [],
+   "milano_piazze": [],
+   "milano_plis_lambro": [],
+   "milano_plis_martesana": [],
+   "milano_r03": [
+    {
+     "Legenda": "TUC - Tessuto urbano consolidato",
+     "Nome": "Tessuto urbano di recente formazione",
+     "OBJECTID": "48",
+     "Shape": "Polygon",
+     "Shape_Area": "118674509,397592",
+     "_layerId": 0,
+     "_layerName": "TUC - TESSUTO URBANO CONSOLIDATO"
+    },
+    {
+     "Legenda": "TUC - Tessuto urbano consolidato",
+     "Nome": "Perimetro TUC",
+     "OBJECTID": "46",
+     "Shape": "Polygon",
+     "Shape_Area": "133548432,766976",
+     "_layerId": 0,
+     "_layerName": "TUC - TESSUTO URBANO CONSOLIDATO"
+    },
+    {
+     "Ambito": "ADR",
+     "Legenda": "Tessuti urbani a impianto aperto",
+     "OBJECTID": "14690",
+     "Shape": "Polygon",
+     "Shape_Area": "30249,166495",
+     "_layerId": 11,
+     "_layerName": "Morfologia tessuti"
+    },
+    {
+     "Nome": "Limite esenzione dotazioni territoriali (art. 11.3 Piano dei Servizi)",
+     "OBJECTID": "1",
+     "SHAPE.AREA": "137657286,009716",
+     "Shape": "Polygon",
+     "_layerId": 15,
+     "_layerName": "DOTAZIONI TERRITORIALI"
+    }
+   ],
+   "milano_r05": [
+    {
+     "Legenda": "Zone di particolare tutela dall'inquinamento luminoso",
+     "Nome": "Osservatorio Sociale \"A. Grosso\" di Brugherio (MB)",
+     "OBJECTID": "4",
+     "Raggio_m": "10",
+     "Rif_Norme": "Art. 9.3, LR n. 31/2015",
+     "SHAPE.AREA": "313705875,153107",
+     "Shape": "Polygon",
+     "_layerId": 29,
+     "_layerName": "ZONE DI PARTICOLARE TUTELA DALL'INQUINAMENTO LUMINOSO"
+    }
+   ],
+   "milano_r06": [],
+   "milano_r07": [],
+   "milano_r08": [
+    {
+     "ID_Pista": "---",
+     "Label": "SOE",
+     "Nome": "Orizzontale esterna",
+     "OBJECTID": "3",
+     "Shape": "Polygon",
+     "_layerId": 4,
+     "_layerName": "Label",
+     "st_area(shape)": "116283169,586047"
+    },
+    {
+     "Id": "5",
+     "Nome": "Sub-zona 5",
+     "OBJECTID": "1",
+     "Shape": "Polygon",
+     "_layerId": 9,
+     "_layerName": "Sub-zone",
+     "st_area(shape)": "71111013,15242"
+    },
+    {
+     "Label": "ST",
+     "Layer": "Transizione",
+     "OBJECTID": "12",
+     "Shape": "Polygon",
+     "_layerId": 14,
+     "_layerName": "Label",
+     "st_area(shape)": "33479,889712"
+    }
+   ],
+   "milano_rigen_ambientale": [],
+   "milano_ticinello": [],
+   "milano_verde": [],
    "natura2000_zps": [],
    "natura2000_zsc": [],
+   "parchi_regionali": [],
    "pgra_APSFR": [],
    "pgra_H_ACL": [],
    "pgra_H_RP": [],
@@ -2820,6 +3481,7 @@
   "point": {
    "lat": 45.5281,
    "lon": 9.205
-  }
+  },
+  "retried": []
  }
 }

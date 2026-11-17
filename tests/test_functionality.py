@@ -208,3 +208,37 @@ def test_a_hanging_host_does_not_starve_the_other_hosts():
     res = services.query_all(45.46, 9.19, fetch=fetch, services=layers, deadline=2, timeout=2)
     assert time.monotonic() - started < 3.5
     assert all(res["layers"]["region%d" % i] == [{"A": 1}] for i in range(20))
+
+
+def test_zone_candidates_come_before_general_and_overlay_articles():
+    findings = [
+        {"layer": "milano_accessibility", "category": "a", "articles": ["PR-art-17"],
+         "general_articles": ["PR-art-6"], "candidate_articles": []},
+        {"layer": "pgt_previsioni_tuc", "category": "t", "articles": [],
+         "general_articles": ["PR-art-8", "PR-art-13"], "candidate_articles": ["PR-art-19"]},
+        {"layer": "milano_plis_martesana", "category": "p", "articles": [],
+         "candidate_articles": ["PR-art-35"]},
+    ]
+    order = list(retrieval.article_provenance(findings))
+    assert order == ["PR-art-17", "PR-art-19", "PR-art-6", "PR-art-8", "PR-art-13", "PR-art-35"]
+
+
+def test_regional_tuc_drops_its_candidates_when_a_municipal_zone_governs():
+    findings = [{"layer": "pgt_previsioni_tuc", "articles": ["PR-art-6"], "general_articles": [],
+                 "candidate_articles": ["PR-art-19", "PR-art-21"], "note": ""}]
+    retrieval._demote_regional_tuc(findings, ["milano_adr"])
+    assert findings[0]["candidate_articles"] == []
+
+
+def test_zone_candidates_get_prompt_budget_before_general_articles():
+    from core import prompts
+    findings = [{"layer": "milano_accessibility", "category": "a", "articles": ["PR-art-17"],
+                 "general_articles": ["PR-art-6"], "candidate_articles": []},
+                {"layer": "pgt_naf", "category": "n", "articles": [], "general_articles": [],
+                 "candidate_articles": ["PR-art-19"]}]
+    prov = retrieval.article_provenance(findings)
+    assert prompts._priority("PR-art-19", prov) == prompts.P_ZONE < prompts._priority("PR-art-6", prov)
+    articles = [{"id": "PR-art-6", "text": "g" * 3000}, {"id": "PR-art-19", "text": "z" * 3000},
+                {"id": "PR-art-17", "text": "a" * 1000}]
+    built = prompts.build_answer_prompt("q", findings, articles, provenance=prov, max_total_chars=5000)
+    assert built["article_ids"][:2] == ["PR-art-17", "PR-art-19"]

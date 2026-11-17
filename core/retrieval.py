@@ -577,6 +577,8 @@ def _demote_regional_tuc(findings, municipal_zones):
         if f["layer"] == "pgt_previsioni_tuc" and f.get("articles"):
             f["general_articles"] = _union(f["articles"], f.get("general_articles", []))
             f["articles"] = []
+            if municipal_zones:
+                f["candidate_articles"] = []  # the municipal zone's own article governs
             f["note"] = (note + f.get("note", "")).strip()
 
 
@@ -623,16 +625,23 @@ def _demote_flood_geology(findings):
                          "applies here. " + f.get("note", "")).strip()
 
 
-# Role order: directly governing articles first, then general, explanatory (non-normative), then
-# candidates.
+# Role order: directly governing articles first, then the candidate zone articles (where only the
+# regional zone layers place the point, e.g. NAF art. 18-19), then general, explanatory
+# (non-normative), then the other candidates. The zone candidates come early because the zone
+# article decides what may be built; city-wide overlays must not push it down the prompt.
 ROLES = ("articles", "general_articles", "explanatory_articles", "candidate_articles")
+ZONE_LAYERS = frozenset({"pgt_naf", "pgt_previsioni_tuc", "milano_r03"})
+_ORDER = (("articles", None), ("candidate_articles", True), ("general_articles", None),
+          ("explanatory_articles", None), ("candidate_articles", False))
 
 
 def article_provenance(findings):
     """Ordered {article id: [{layer, category, role}, ...]} across findings, deduplicated."""
     prov = {}
-    for role in ROLES:
+    for role, zone in _ORDER:
         for f in findings:
+            if zone is not None and (f["layer"] in ZONE_LAYERS) != zone:
+                continue
             for n in f.get(role, []):
                 prov.setdefault(article_id(n), []).append(
                     {"layer": f["layer"], "category": f["category"], "role": role})
