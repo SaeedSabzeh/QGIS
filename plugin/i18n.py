@@ -279,8 +279,8 @@ STRINGS = {
         "Pro è in arrivo: verifica dell'intero lotto, report PDF con le fonti, domande senza chiave API.",
         'Pro is in the works: whole-parcel check, PDF report with sources, questions without an API key.'),
     'ea_link': (
-        "Richiedi l'accesso anticipato",
-        'Get early access'),
+        "Richiedi l'accesso anticipato gratuito",
+        'Get free early access'),
     'ea_tip': (
         'Apre la pagina di iscrizione nel browser. Il plugin non raccoglie il tuo indirizzo email.',
         'Opens the sign-up page in your browser. The plugin does not collect your email.'),
