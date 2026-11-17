@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.6
+
+- Redesigned dock: one card per constraint with a colour chip and family, a "more" toggle for values, articles grouped into governing and general, and a clearer status line. A one-time early-access notice is built in but stays off until a sign-up page is set.
+- Queries 18 more Tav. R.02 layers (public-transport accessibility, GFU, in itinere plans, mandatory implementation plans, PLIS, art. 136 Navigli, urban green and others) and identifies Tav. R.03 (NAF intervention types, ADR and ARU morphology, services exemption under PS art. 11), R.05 and R.06 (administrative, heritage and landscape constraints, with the law named in each record) and R.07-R.08 (airport risk, noise, radar and obstacle limits).
+- Each whole-map layer rule is tied to the name the Comune publishes; a renamed layer is shown as "verify" instead of with a wrong article, and the weekly live check fails on a rename.
+- Context is no longer governing: the regional TUC record when the Comune's zone layers answered, geology articles on flood findings when the municipal geology class is known, city-wide airport obstacle surfaces, and the proposed PLIS Martesana (a candidate).
+- A map that does not answer gets a "not checked: unknown, not absent" card. Each click finishes within 30 s, one worker per request so a slow host cannot block the others, and only network errors, 408, 429 and 5xx are retried, once.
+- Answers: numbers not found in the cited articles are listed in a warning (whole numbers, in each answer's language, ignoring article references and dates). The caption says when a fallback model answered. The sources line shows when the norms were last checked and warns after 90 days.
+
 ## 0.1.5
 
 - Added Milan's live Tav. R.02 findings for NAF, ADR, ARU and both regional parks, and its Tav. G.17 geological classes and article references.

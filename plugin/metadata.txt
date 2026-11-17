@@ -7,8 +7,8 @@ name=Norme Milano
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Shows the Milan planning rules (PGT/PTC) and constraints that apply at a clicked point.
-about=Look up planning constraints at a point in the Comune di Milano. The municipal PGT map supplies NAF, ADR and ARU zoning where mapped, both parks and geological feasibility. Regione Lombardia services supply the regional PGT, PGRA flood and Natura 2000 layers. Findings and articles link to official sources. Check uncertain mappings and consult the current official documents for a parcel or proposed project. Optional Italian and English questions use Gemini (your own API key) or local Ollama. The dock shows supporting excerpts found in the supplied texts and flags answers that need source review. Privacy: in-city coordinates go to the Comune and Regione public map services. With Gemini, questions and selected planning information go to Google. Ollama runs locally. See the documentation for data coverage and provider settings.
-version=0.1.5
+about=Look up planning constraints at a point in the Comune di Milano. The Comune's PGT maps supply NAF, ADR and ARU zoning, intervention types (Tav. R.03), administrative, heritage and landscape constraints (Tav. R.05-R.06), airport limits (Tav. R.07-R.08), both parks and geological feasibility. Regione Lombardia services supply the regional PGT, PGRA flood and Natura 2000 layers. Findings and articles link to official sources. Check uncertain mappings and consult the current official documents for a parcel or proposed project. Optional Italian and English questions use Gemini (your own API key) or local Ollama. The dock shows supporting excerpts found in the supplied texts and flags answers that need source review. Privacy: in-city coordinates go to the Comune and Regione public map services. With Gemini, questions and selected planning information go to Google. Ollama runs locally. See the documentation for data coverage and provider settings.
+version=0.1.6
 author=Saeed Sabzeh
 email=saeed.sabzeh.80@gmail.com
 repository=https://github.com/SaeedSabzeh/norme-milano
@@ -20,7 +20,13 @@ deprecated=False
 hasProcessingProvider=no
 tags=urban planning,zoning,italy,milan,pgt,regulations,lombardia,planning
 category=Plugins
-changelog=0.1.5
+changelog=0.1.6
+    - Redesigned panel: constraint cards with colour and family, grouped articles, clearer status
+    - More of the Comune's maps: 18 more Tav. R.02 layers, intervention types (R.03), administrative, heritage and landscape constraints (R.05-R.06) and airport limits (R.07-R.08), each with the law named in the record
+    - Context is no longer shown as governing (regional TUC record, geology articles on flood areas, city-wide airport surfaces, proposed PLIS)
+    - A map that does not answer gets a "not checked" card; a click finishes within 30 s and network errors are retried once
+    - Numbers in an answer that are not in the cited articles are flagged; the sources line shows when the norms were last checked
+    0.1.5
     - Add official Milan PGT zoning, park and geology layers with direct source links
     - Check the municipal boundary before lookup and distinguish candidate rules from mapped rules
     - Check source excerpts for Q&A, improve multipart prompts and keep explicitly requested documents in search
