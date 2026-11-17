@@ -122,6 +122,12 @@ def run(archive):
                 else:
                     assert plugin._last is None and not plugin.dock._ask_allowed
                 print(f"PASS {name}", flush=True)
+            from norme_milano import early_access
+            if early_access.enabled():  # shown after the third successful lookup
+                assert not plugin.dock.ea_strip.isHidden(), "early-access strip not shown"
+                link = early_access.signup_url("it")
+                assert link.startswith(("mailto:", "https://")), link
+                print("PASS early-access strip shown (%s)" % link.split("?")[0], flush=True)
             official = "https://pgt.comune.milano.it/"
             plugin.dock.show_answer({
                 "answer_it": "Risposta di prova", "answer_en": "Test reply", "model": "fixture",

@@ -351,6 +351,8 @@ def test_dialog_note_and_masked_field(env, monkeypatch):
             self.text = text
 
         def __getattr__(self, name):
+            if name == "linkActivated":  # a signal: has .connect
+                return type("Signal", (), {"connect": lambda *a, **k: None})()
             return lambda *a, **k: None
 
     monkeypatch.setattr(settings, "QLabel", Label)
@@ -685,7 +687,9 @@ def test_dock_renders_markdown_answer_safely(env):
 
 def test_early_access_strip_after_third_lookup(env, monkeypatch):
     from plugin import early_access
-    assert early_access.next_state(0, False) == (0, False)  # off while no page is set
+    monkeypatch.setattr(early_access, "SIGNUP_EMAIL", "")
+    monkeypatch.setattr(early_access, "SIGNUP_URL", "")
+    assert early_access.next_state(0, False) == (0, False)  # off while no address or page is set
     monkeypatch.setattr(early_access, "SIGNUP_URL", "https://example.test/pro")
     count, shows = 0, []
     for _ in range(4):
@@ -705,9 +709,26 @@ def test_settings_read_value_casts_types(env):
     assert settings.read_value("lookup_count") == 7
 
 
+def test_early_access_email_link(env, monkeypatch):
+    from urllib.parse import parse_qs, urlsplit
+
+    from plugin import early_access
+    monkeypatch.setattr(early_access, "SIGNUP_EMAIL", "pro@example.test")
+    monkeypatch.setattr(early_access, "SIGNUP_URL", "https://example.test/pro")
+    assert early_access.enabled() and early_access.signup_address() == "pro@example.test"
+    url = early_access.signup_url("it")
+    parts = urlsplit(url)
+    assert parts.scheme == "mailto" and parts.path == "pro@example.test"
+    fields = parse_qs(parts.query)
+    assert fields["subject"] == ["Norme Milano Pro: accesso anticipato"]
+    assert "29 €" in fields["body"][0] and "Nota dell'autore" in fields["body"][0] and "+" not in parts.query  # spaces as %20 for mail apps
+    assert "%0D%0A" in parts.query and "%0A" not in parts.query.replace("%0D%0A", "")
+
+
 def test_early_access_strings_exist_in_both_languages(env):
     from plugin import i18n
-    for key in ("ea_strip", "ea_link", "ea_tip", "ea_close_tip", "ea_settings", "ea_open_failed"):
+    for key in ("ea_strip", "ea_link", "ea_tip", "ea_close_tip", "ea_settings", "ea_open_failed",
+                "ea_tip_mail", "ea_mail_subject", "ea_mail_body", "ea_mail_failed"):
         it, en = i18n.STRINGS[key]
         assert it and en and it != en
 

@@ -180,8 +180,8 @@ class NormeMilanoPlugin:
         if early_access.open_signup(self._lang()):
             self._resolve_early_access()
         else:  # keep the strip so the user can try again
-            self.dock.show_error(self.dock.t("ea_open_failed")
-                                 % early_access.signup_url(self._lang()))
+            key = "ea_mail_failed" if early_access.SIGNUP_EMAIL else "ea_open_failed"
+            self.dock.show_error(self.dock.t(key) % early_access.signup_address())
 
     def _resolve_early_access(self):
         settings.write_value("early_access_resolved", True)

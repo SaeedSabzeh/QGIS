@@ -318,7 +318,8 @@ class SettingsDialog(QDialog):
 
         if early_access.enabled():
             pro = QLabel("<a href='pro'>%s</a>" % t("ea_settings"))
-            pro.setToolTip(t("ea_tip"))
+            from .dock import early_access_tip
+            pro.setToolTip(early_access_tip(t))
             pro.linkActivated.connect(lambda _link: early_access.open_signup(self.lang))
             layout.addWidget(pro)
 

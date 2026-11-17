@@ -32,7 +32,7 @@ try:  # Qt6 moved QShortcut to QtGui
 except ImportError:
     from qgis.PyQt.QtWidgets import QShortcut
 
-from . import i18n
+from . import early_access, i18n
 from ._compat import enum, mdlite, prompts, retrieval
 
 MAX_VALUE_CHARS = 80
@@ -57,6 +57,13 @@ REF_RE = re.compile(r"\b([A-Z][A-Za-z0-9]*)-(art|sec|all)-([0-9]+[a-z]?(?:\.[0-9
 
 def _wrap(text):
     return " ".join(str(text).split())
+
+
+def early_access_tip(t):
+    """Tooltip for the early-access link: what happens when it is clicked."""
+    if early_access.SIGNUP_EMAIL:
+        return t("ea_tip_mail") % early_access.SIGNUP_EMAIL
+    return t("ea_tip")
 
 
 def _source_link(url, label):
@@ -506,7 +513,7 @@ class RulesDock(QDockWidget):
         self.copy_button.setText(self.t("copy"))
         self.ea_label.setText("%s <a href='ea'>%s</a>" % (escape(self.t("ea_strip")),
                                                          escape(self.t("ea_link"))))
-        self.ea_label.setToolTip(self.t("ea_tip"))
+        self.ea_label.setToolTip(early_access_tip(self.t))
         self.ea_close.setToolTip(self.t("ea_close_tip"))
         self._render_footer()
         if self._last_res is not None:

@@ -290,6 +290,30 @@ STRINGS = {
     'ea_settings': (
         'Norme Milano Pro (in arrivo): accesso anticipato',
         'Norme Milano Pro (coming): early access'),
+    'ea_tip_mail': (
+        "Apre il tuo programma di posta con un breve messaggio già compilato e indirizzato a %s. "
+        "Decidi tu se inviarlo; il plugin non invia nulla.",
+        "Opens your email app with a short message already written and addressed to %s. "
+        "You decide whether to send it; the plugin sends nothing."),
+    'ea_mail_subject': (
+        "Norme Milano Pro: accesso anticipato",
+        "Norme Milano Pro: early access"),
+    'ea_mail_body': (
+        "Buongiorno,\n\nvorrei richiedere l'accesso anticipato gratuito a Norme Milano Pro.\n\n"
+        "Il mio ruolo (architetto, geometra, urbanista, altro): \n"
+        "Per un report su un lotto al prezzo di 29 €, la mia risposta sarebbe (lo comprerei subito / "
+        "forse più avanti / uso solo strumenti gratuiti / non so): \n\n"
+        "(Nota dell'autore di Norme Milano: userò il tuo indirizzo email solo per risponderti in "
+        "merito a Pro. Puoi scrivermi in qualsiasi momento per chiederne la cancellazione.)",
+        "Hello,\n\nI'd like to request free early access to Norme Milano Pro.\n\n"
+        "My role (architect, geometra, planner, other): \n"
+        "For a parcel report at €29, my answer would be (buy one now / maybe later / "
+        "I only use free tools / not sure): \n\n"
+        "(Note from the author of Norme Milano: I'll use your email address only to reply about "
+        "Pro. You can write to me at any time to have it deleted.)"),
+    'ea_mail_failed': (
+        "Impossibile aprire il programma di posta. Scrivi a %s per l'accesso anticipato.",
+        "Your email app could not be opened. Write to %s for early access."),
     'ea_open_failed': (
         'Impossibile aprire il browser. Pagina di iscrizione: %s',
         'The browser could not be opened. Sign-up page: %s'),

@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.1.6
+## 0.2.0
+
+First release of the 0.1.6 work, plus:
+
+- Early access to Norme Milano Pro. After the third lookup a dismissible strip (and a permanent link in Settings) offers to open your own email app with a short prepared message to the author. You decide whether to send it; the plugin itself sends nothing.
+
+### Included from 0.1.6 (never published separately)
 
 - Redesigned dock: one card per constraint with a colour chip and family, a "more" toggle for values, articles grouped into governing and general, and a clearer status line. A one-time early-access notice is built in but stays off until a sign-up page is set.
 - Queries 18 more Tav. R.02 layers (public-transport accessibility, GFU, in itinere plans, mandatory implementation plans, PLIS, art. 136 Navigli, urban green and others) and identifies Tav. R.03 (NAF intervention types, ADR and ARU morphology, services exemption under PS art. 11), R.05 and R.06 (administrative, heritage and landscape constraints, with the law named in each record) and R.07-R.08 (airport risk, noise, radar and obstacle limits).

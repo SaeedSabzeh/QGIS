@@ -13,7 +13,7 @@
 
 **Quick start.** In QGIS, open **Plugins → Manage and Install Plugins**, search for
 **Norme Milano**, then activate its map tool. For a local build, use **Install from ZIP** and
-select `dist/norme_milano-0.1.6.zip`. [QGIS Plugin Repository](https://plugins.qgis.org/plugins/norme_milano/)
+select `dist/norme_milano-0.2.0.zip`. [QGIS Plugin Repository](https://plugins.qgis.org/plugins/norme_milano/)
 
 Click a point in Milan and the plugin shows which planning rules apply there:
 
@@ -25,7 +25,7 @@ Click a point in Milan and the plugin shows which planning rules apply there:
 
 ## Status
 
-Version **0.1.6** redesigns the panel and adds the Comune's constraint maps: intervention types
+Version **0.2.0** redesigns the panel and adds the Comune's constraint maps: intervention types
 (Tav. R.03), administrative, heritage and landscape constraints (Tav. R.05-R.06) and airport limits
 (Tav. R.07-R.08). See the [changelog](CHANGELOG.md). Version 0.1.5 added the live Tav. R.02 zoning
 and Tav. G.17 geology; its build rationale and validation points are in the
