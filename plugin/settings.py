@@ -22,9 +22,10 @@ from qgis.PyQt.QtWidgets import (
     QMessageBox,
     QPushButton,
     QVBoxLayout,
+    QWidget,
 )
 
-from . import net, tasks
+from . import early_access, i18n, net, tasks
 from ._compat import enum, llm, log, pipeline
 
 PREFIX = "norme_milano/"
@@ -39,6 +40,9 @@ DEFAULTS = {
     "ollama_model": llm.DEFAULT_OLLAMA_MODEL,
     "authcfg": "",
     "first_run_done": False,
+    "ui_language": "auto",
+    "lookup_count": 0,
+    "early_access_resolved": False,
 }
 PRIVACY_NOTE = (
     "Privacy: on the free Gemini tier Google may use prompts to improve its products. The "
@@ -78,10 +82,33 @@ def load_settings():
     return out
 
 
+def read_value(name):
+    """One setting, cast to the type of its default (QgsSettings may return strings)."""
+    default = DEFAULTS[name]
+    value = QgsSettings().value(PREFIX + name, default)
+    if isinstance(default, bool):
+        return value in (True, "true", "True", 1, "1")
+    if isinstance(default, int):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return default
+    return value
+
+
+def write_value(name, value):
+    """Write one setting without touching the others."""
+    QgsSettings().setValue(PREFIX + name, value)
+
+
+# Written only through write_value(), so a dialog snapshot can never overwrite them.
+RUNTIME_KEYS = ("lookup_count", "early_access_resolved")
+
+
 def save_settings(values):
     qs = QgsSettings()
     for name in DEFAULTS:
-        if name in values:
+        if name in values and name not in RUNTIME_KEYS:
             qs.setValue(PREFIX + name, values[name])
 
 
@@ -215,59 +242,85 @@ def build_client(settings, api_key=None, transport=None):
 class SettingsDialog(QDialog):
     def __init__(self, parent=None, first_run=False):
         super().__init__(parent)
-        self.setWindowTitle("Norme Milano - Impostazioni / Settings")
         self._settings = load_settings()
         self._test_task = None
         s = self._settings
+        self.lang = i18n.resolve(s.get("ui_language", "auto"))
+        t = self.t
+        self.setWindowTitle(t("set_title"))
+        self.setMinimumWidth(420)
 
         layout = QVBoxLayout(self)
+        layout.setSpacing(8)
         if first_run:
-            welcome = QLabel(
-                "<b>Benvenuto / Welcome.</b> Without any provider the plugin shows the constraints "
-                "and the mapped articles. To ask free-text questions choose Gemini or Ollama.")
+            welcome = QLabel(t("set_welcome"))
             welcome.setWordWrap(True)
             layout.addWidget(welcome)
 
         form = QFormLayout()
+        self.language = QComboBox()
+        for value, label in (("auto", t("set_lang_auto")), ("it", "Italiano"), ("en", "English")):
+            self.language.addItem(label, value)
+        self.language.setCurrentIndex(max(0, self.language.findData(s.get("ui_language", "auto"))))
+        form.addRow(t("set_language"), self.language)
         self.provider = QComboBox()
-        for value, label in PROVIDERS:
-            self.provider.addItem(label, value)
+        for value, _label in PROVIDERS:
+            self.provider.addItem(t("prov_" + value), value)
         self.provider.setCurrentIndex(max(0, self.provider.findData(s["provider"])))
-        form.addRow("Fornitore / Provider", self.provider)
-
-        self.gemini_model = QLineEdit(s["gemini_model"])
-        form.addRow("Gemini model", self.gemini_model)
-        self.gemini_key = QLineEdit()
-        self.gemini_key.setEchoMode(enum(QLineEdit, "EchoMode", "Password"))
-        form.addRow("Gemini API key", self.gemini_key)
-        self.key_note = QLabel("")
-        self.key_note.setWordWrap(True)
-        form.addRow("", self.key_note)
-        link = QLabel('<a href="%s">Create a Gemini key (Google AI Studio)</a>' % GEMINI_KEY_URL)
-        link.setOpenExternalLinks(True)
-        form.addRow("", link)
-        self.remove_key = QPushButton("Remove stored key")
-        self.remove_key.clicked.connect(self._remove_key)
-        form.addRow("", self.remove_key)
-
-        self.ollama_url = QLineEdit(s["ollama_url"])
-        form.addRow("Ollama base URL", self.ollama_url)
-        self.ollama_model = QLineEdit(s["ollama_model"])
-        form.addRow("Ollama model", self.ollama_model)
+        form.addRow(t("set_provider"), self.provider)
         layout.addLayout(form)
 
-        privacy = QLabel(PRIVACY_NOTE)
-        privacy.setWordWrap(True)
-        layout.addWidget(privacy)
+        # Gemini fields
+        self.gemini_box = QWidget()
+        gform = QFormLayout(self.gemini_box)
+        gform.setContentsMargins(0, 0, 0, 0)
+        self.gemini_model = QLineEdit(s["gemini_model"])
+        gform.addRow(t("set_gemini_model"), self.gemini_model)
+        key_row = QHBoxLayout()
+        self.gemini_key = QLineEdit()
+        self.gemini_key.setEchoMode(enum(QLineEdit, "EchoMode", "Password"))
+        key_row.addWidget(self.gemini_key, 1)
+        self.remove_key = QPushButton(t("set_remove_key"))
+        self.remove_key.clicked.connect(self._remove_key)
+        key_row.addWidget(self.remove_key)
+        gform.addRow(t("set_gemini_key"), key_row)
+        self.key_note = QLabel("")
+        self.key_note.setWordWrap(True)
+        gform.addRow("", self.key_note)
+        link = QLabel('<a href="%s">%s</a>' % (GEMINI_KEY_URL, t("set_key_link")))
+        link.setOpenExternalLinks(True)
+        gform.addRow("", link)
+        layout.addWidget(self.gemini_box)
+
+        # Ollama fields
+        self.ollama_box = QWidget()
+        oform = QFormLayout(self.ollama_box)
+        oform.setContentsMargins(0, 0, 0, 0)
+        self.ollama_url = QLineEdit(s["ollama_url"])
+        oform.addRow(t("set_ollama_url"), self.ollama_url)
+        self.ollama_model = QLineEdit(s["ollama_model"])
+        oform.addRow(t("set_ollama_model"), self.ollama_model)
+        layout.addWidget(self.ollama_box)
 
         row = QHBoxLayout()
-        self.test_button = QPushButton("Test connection / Prova la connessione")
+        self.test_button = QPushButton(t("set_test"))
         self.test_button.clicked.connect(self._test_connection)
         row.addWidget(self.test_button)
         self.test_result = QLabel("")
         self.test_result.setWordWrap(True)
         row.addWidget(self.test_result, 1)
         layout.addLayout(row)
+
+        self.privacy = QLabel("")
+        self.privacy.setWordWrap(True)
+        self.privacy.setStyleSheet("color: #5f6368;")
+        layout.addWidget(self.privacy)
+
+        if early_access.enabled():
+            pro = QLabel("<a href='pro'>%s</a>" % t("ea_settings"))
+            pro.setToolTip(t("ea_tip"))
+            pro.linkActivated.connect(lambda _link: early_access.open_signup(self.lang))
+            layout.addWidget(pro)
 
         buttons = QDialogButtonBox(
             enum(QDialogButtonBox, "StandardButton", "Ok")
@@ -280,34 +333,38 @@ class SettingsDialog(QDialog):
         self._refresh_key_ui()
 
     # -- helpers
+    def t(self, key):
+        return i18n.text(key, self.lang)
+
     def _provider(self):
         return self.provider.currentData()
 
     def _sync_enabled(self, *_):
         gem = self._provider() == "gemini"
         oll = self._provider() == "ollama"
-        for w in (self.gemini_model, self.gemini_key):
-            w.setEnabled(gem)
-        for w in (self.ollama_url, self.ollama_model):
-            w.setEnabled(oll)
-        self.test_button.setEnabled(gem or oll)
+        self.gemini_box.setVisible(gem)
+        self.ollama_box.setVisible(oll)
+        self.test_button.setVisible(gem or oll)
+        self.test_result.setVisible(gem or oll)
+        self.privacy.setText(self.t("privacy_gemini" if gem else "privacy_ollama" if oll
+                                    else "privacy_none"))
+        self.adjustSize()
 
     def _refresh_key_ui(self):
         """Placeholder, storage note and Remove button from the current key state."""
         where = key_location(self._settings["authcfg"])
         stored = where in ("auth", "auth-locked", "settings")
-        self.gemini_key.setPlaceholderText(
-            "stored (leave empty to keep it)" if stored else "paste your Gemini API key")
+        self.gemini_key.setPlaceholderText(self.t("key_stored") if stored else self.t("key_paste"))
         if where == "auth":
-            note = NOTE_AUTH
+            note = self.t("note_auth")
         elif where == "auth-locked":
-            note = REENTER_HELP
+            note = self.t("note_reenter")
         elif where == "settings":
-            note = NOTE_PLAIN
+            note = self.t("note_plain")
         elif where == "env":
-            note = NOTE_ENV
+            note = self.t("note_env") % ENV_VAR
         else:
-            note = NOTE_NONE_AUTH if auth_store_ready() else NOTE_PLAIN
+            note = self.t("note_none_auth") if auth_store_ready() else self.t("note_plain")
         self.key_note.setText(note)
         self.remove_key.setEnabled(bool(self._settings["authcfg"]) or bool(_plain_key()))
 
@@ -316,7 +373,8 @@ class SettingsDialog(QDialog):
         s.update(provider=self._provider(),
                  gemini_model=self.gemini_model.text().strip() or DEFAULTS["gemini_model"],
                  ollama_url=self.ollama_url.text().strip() or DEFAULTS["ollama_url"],
-                 ollama_model=self.ollama_model.text().strip() or DEFAULTS["ollama_model"])
+                 ollama_model=self.ollama_model.text().strip() or DEFAULTS["ollama_model"],
+                 ui_language=self.language.currentData() or "auto")
         return s
 
     def _remove_key(self):
@@ -324,7 +382,7 @@ class SettingsDialog(QDialog):
         self._settings["authcfg"] = ""
         save_settings(self._settings)
         self._refresh_key_ui()
-        self.test_result.setText("Stored key removed.")
+        self.test_result.setText(self.t("set_key_removed"))
 
     def _test_connection(self):
         s = self._collect()
@@ -336,7 +394,7 @@ class SettingsDialog(QDialog):
             self.test_result.setText(str(exc))
             return
         self.test_button.setEnabled(False)
-        self.test_result.setText("Testing... / Verifica in corso...")
+        self.test_result.setText(self.t("set_testing"))
 
         def work(is_canceled):
             client = build_client(s, key, net.make_transport(is_canceled))
@@ -346,7 +404,8 @@ class SettingsDialog(QDialog):
         def done(model, error):
             self._test_task = None
             self.test_button.setEnabled(True)
-            self.test_result.setText(("OK: %s" % model) if error is None else "Failed: %s" % error)
+            self.test_result.setText((self.t("set_test_ok") % model) if error is None
+                                     else self.t("set_test_failed") % error)
 
         self._test_task = tasks.start("Norme Milano: test connection", work, done)
 

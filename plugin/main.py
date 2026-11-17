@@ -10,7 +10,7 @@ try:  # Qt6 moved QAction to QtGui
 except ImportError:
     from qgis.PyQt.QtWidgets import QAction
 
-from . import net, settings, tasks
+from . import early_access, i18n, net, settings, tasks
 from ._compat import enum, pipeline
 from .dock import RulesDock
 from .map_tool import PointQueryTool
@@ -56,10 +56,15 @@ class NormeMilanoPlugin:
         self.tool.setAction(self.action)  # QGIS keeps the button checked while the tool is active
         self.tool.pointQueried.connect(self.on_point)
 
-        self.dock = RulesDock(win)
+        self.dock = RulesDock(win, lang=self._lang())
         self.dock.setWindowIcon(QIcon(ICON_PATH))
         self.dock.askRequested.connect(self.on_ask)
         self.dock.settingsRequested.connect(self.open_settings)
+        self.dock.earlyAccessRequested.connect(self._early_access_open)
+        self.dock.earlyAccessDismissed.connect(self._resolve_early_access)
+        if (early_access.enabled() and not settings.read_value("early_access_resolved")
+                and settings.read_value("lookup_count") >= early_access.SHOW_AFTER):
+            self.dock.show_early_access(True)
         self.iface.addDockWidget(enum(Qt, "DockWidgetArea", "RightDockWidgetArea"), self.dock)
         self.dock.hide()
         self._refresh_ask_state()
@@ -102,9 +107,14 @@ class NormeMilanoPlugin:
         else:
             canvas.unsetMapTool(self.tool)
 
+    def _lang(self):
+        return i18n.resolve(settings.load_settings().get("ui_language", "auto"))
+
     def open_settings(self, first_run=False):
         dlg = settings.SettingsDialog(self.iface.mainWindow(), first_run=bool(first_run))
         dlg.exec()
+        if self.dock is not None and self.dock.lang != self._lang():
+            self.dock.retranslate(self._lang())
         self._refresh_ask_state()
 
     def _first_run(self):
@@ -119,8 +129,7 @@ class NormeMilanoPlugin:
     def _refresh_ask_state(self):
         if self.dock is not None:
             provider = settings.is_ask_available(settings.load_settings())
-            self.dock.set_ask_enabled(provider and self._last is not None,
-                                      "Click a point in Milan first." if provider else "")
+            self.dock.set_ask_state(provider, self._last is not None)
 
     # ------------------------------------------------------------------ point query
     def on_point(self, lat, lon):
@@ -147,23 +156,44 @@ class NormeMilanoPlugin:
                 return
             self._query_task = self._query_token = None
             if error is not None:
-                self.dock.show_error("Query failed: %s" % error)
+                self.dock.show_error(self.dock.t("query_failed") % error)
                 return
             if not res.get("scope_note") and not res.get("all_failed"):
                 self._last = res
             self._refresh_ask_state()
             self.dock.show_point_result(res)
+            if self._last is res:
+                self._count_lookup()
 
         task = tasks.start("Norme Milano: query point", work, done)
         if self._query_token is token:
             self._query_task = task
+
+    def _count_lookup(self):
+        count, show = early_access.next_state(settings.read_value("lookup_count"),
+                                              settings.read_value("early_access_resolved"))
+        settings.write_value("lookup_count", count)
+        if show:
+            self.dock.show_early_access(True)
+
+    def _early_access_open(self):
+        if early_access.open_signup(self._lang()):
+            self._resolve_early_access()
+        else:  # keep the strip so the user can try again
+            self.dock.show_error(self.dock.t("ea_open_failed")
+                                 % early_access.signup_url(self._lang()))
+
+    def _resolve_early_access(self):
+        settings.write_value("early_access_resolved", True)
+        if self.dock is not None:
+            self.dock.show_early_access(False)
 
     # ------------------------------------------------------------------ question
     def on_ask(self, question):
         if self._unloaded:
             return
         if self._last is None:
-            self.dock.show_error("Click a point on the map first. / Fare prima clic sulla mappa.")
+            self.dock.show_error(self.dock.t("click_first"))
             return
         s = settings.load_settings()
         if not settings.is_ask_available(s):
@@ -191,9 +221,7 @@ class NormeMilanoPlugin:
             self._ask_task = self._ask_token = None
             self.dock.set_asking(False)
             if error is not None:
-                self.dock.show_error(
-                    "The model request failed: %s. The findings and articles above are still "
-                    "valid." % error)
+                self.dock.show_error(self.dock.t("ask_failed") % error)
                 return
             self.dock.show_answer(ans)
 

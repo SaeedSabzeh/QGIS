@@ -16,7 +16,7 @@ DISCLAIMER_EN = (
     "Agricolo Sud Milano (2000 text; the later amendments are local changes outside Milan)."
 )
 DISCLAIMER_IT = (
-    "Solo orientamento, non e un parere legale. Verificare i testi ufficiali e rivolgersi a un "
+    "Solo orientamento, non è un parere legale. Verificare i testi ufficiali e rivolgersi a un "
     "professionista abilitato."
 )
 LIMITATION_EN = (
@@ -25,7 +25,7 @@ LIMITATION_EN = (
 )
 LIMITATION_IT = (
     "Limite v1: il risultato si riferisce al PUNTO cliccato, non all'intero lotto. Un lotto "
-    "a cavallo di due zone puo essere riportato in modo errato."
+    "a cavallo di due zone può essere riportato in modo errato."
 )
 
 SYSTEM_RULES = """\
