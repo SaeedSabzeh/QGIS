@@ -4,6 +4,8 @@
 + answer prompt + parse, reusing the raw query result of the click. Mirrors core.ask.run.
 """
 
+import re
+
 from . import llm, prompts, retrieval, services
 
 ROLE_NAMES = {"articles": "governing", "general_articles": "general",
@@ -58,12 +60,62 @@ def complete_answer(client, prompt, on_progress=None):
         answer["answer_en"] = "The model reply could not be verified. Try the question again."
     cited = set(answer["cited_articles"])
     supported = {item["article_id"] for item in answer.get("evidence", [])}
+    # "quotes_found" proves that each cited article has a quoted passage, not that the answer
+    # is correct or complete.
     answer["source_check"] = (
-        "complete" if cited and cited <= supported and not answer["rejected_citations"]
+        "quotes_found" if cited and cited <= supported and not answer["rejected_citations"]
         and not answer.get("rejected_evidence")
         else "review"
     )
     return answer
+
+
+DATE_RE = re.compile(r"\b\d{1,2}[./]\d{1,2}[./]\d{2,4}\b")
+REF_RE = re.compile(r"\b(?:artt?|art|comma|commi|c|lett|sez|tav|n)\.?\s*\d+(?:[.,]\d+)*", re.IGNORECASE)
+NUMBER = r"\d+(?:[.,]\d+)*"
+TOKEN_RE = re.compile(r"(?<![\d.,])" + NUMBER)
+UNIT_OR_DECIMAL = re.compile(
+    r"(?<![\d.,])(" + NUMBER + r")"
+    r"(\s?(?:%|‰|m²|mq|m2|metri|metres?|meters?|ml|km|ha|anni|years?|piani|floors?|storeys?"
+    r"|mc|m3|sq\.?\s?m|m)(?![a-zà-ù]))?",
+    re.IGNORECASE)
+
+
+def _canonical(token, lang="it"):
+    """One spelling per number: thousands separators dropped, decimal comma, no trailing zeros.
+    Italian writes 1.234,5 and English 1,234.5, so the answer's language decides."""
+    thousands, decimal = (".", ",") if lang == "it" else (",", ".")
+    t = token.strip().rstrip(".,")
+    if re.fullmatch(r"\d{1,3}(?:%s\d{3})+(?:%s\d+)?" % (re.escape(thousands), re.escape(decimal)), t):
+        t = t.replace(thousands, "")
+    t = t.replace(decimal, ",").replace(".", ",")
+    if "," in t:
+        t = t.rstrip("0").rstrip(",")
+    return t
+
+
+def _clean(text):
+    return REF_RE.sub(" ", DATE_RE.sub(" ", str(text or "")))
+
+
+def unsupported_numbers(answer, articles, cited_texts=None):
+    """Measures, percentages and decimals in the answer that appear in none of the texts.
+    Whole numeric tokens are compared, so 0,35 is not supported by 10,35. Article references
+    and dates are ignored. `cited_texts` (the cited articles' passages) are used when given;
+    otherwise all supplied articles."""
+    texts = " ".join(cited_texts) if cited_texts else " ".join(
+        str(a.get("text", "")) for a in articles)
+    source = {_canonical(t) for t in TOKEN_RE.findall(_clean(texts))}
+    missing, seen = [], set()
+    for lang in ("it", "en"):
+        for token, unit in UNIT_OR_DECIMAL.findall(_clean(answer.get("answer_" + lang, ""))):
+            value = _canonical(token, lang)
+            if not unit and "," not in value:
+                continue  # plain integers (counts, years) are not checked
+            if value not in source and value not in seen:
+                seen.add(value)
+                missing.append(token.rstrip(".,"))  # reported as written in the answer
+    return missing
 
 
 def ask(question, point_result, client, k=None, data_dir=None, on_progress=None):
@@ -100,6 +152,12 @@ def ask(question, point_result, client, k=None, data_dir=None, on_progress=None)
     say("Asking the model...")
     ans = complete_answer(client, prompt, on_progress)
     ans["model"] = client.last_model or client.model
+    ans["fallback_model"] = bool(client.last_model and client.last_model != client.model)
+    cited_texts = [prompt["evidence_texts"][i] for i in ans.get("cited_articles", [])
+                   if i in (prompt.get("evidence_texts") or {})]
+    if missing := unsupported_numbers(ans, articles, cited_texts):
+        warnings.append("numbers not found in the supplied articles: %s; check them against "
+                        "the official text" % ", ".join(missing))
     ans["keywords"] = keywords
     ans["warnings"] = warnings
     ans["articles"] = article_rows(ret["ids"], ret["provenance"], by_id, data_dir)

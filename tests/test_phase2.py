@@ -62,7 +62,7 @@ def test_query_all_service_error_payload_is_an_error():
 def test_query_all_uses_lon_lat_order_and_registry():
     seen = []
     services.query_all(45.5, 9.2, fetch=lambda u, t: seen.append(u) or {"features": []})
-    assert len(seen) == len(services.SERVICES) == 34
+    assert len(seen) == len(services.SERVICES) + len(services.IDENTIFY) == 57
     assert all("geometry=9.2%2C45.5" in u for u in seen)
 
 
@@ -727,7 +727,7 @@ def test_ask_no_key_shows_document_names_and_sources():
     text = out.getvalue()
     assert code == 0
     assert "[PS-art-7] Piano dei Servizi \u2013 art. 7 - " in text
-    assert "Documents used: Piano dei Servizi (2022-12-19); Piano delle Regole (2025-12-04)" in text
+    assert "Documents used: Piano dei Servizi (2022-12-19); Piano delle Regole (2025-12-04, checked on 17/11/2026)" in text
 
 
 # ---- regional parks (parchi_regionali) and the Parco Sud promotion -------------------------

@@ -395,10 +395,11 @@ def test_dialog_and_dock_construct(env):
     d = dock.RulesDock(None)
     d.set_ask_enabled(True)
     head, lines = dock.finding_summary({
-        "label": "X", "values": {"A": 1}, "verify": True, "articles": [3], "why": "w",
-        "note": "n", "external_rule": {"text": "ext", "verify": True}})
-    assert "[VERIFY]" in head and "A=1" in head
-    assert any("External rule" in x and "unverified" in x for x in lines)
+        "label": "X", "values": {"A": "uno", "COD_X": 7}, "verify": True, "articles": [3],
+        "why": "w", "note": "n", "external_rule": {"text": "ext", "verify": True}})
+    assert "[To verify]" in head and "(uno)" in head
+    assert "COD_X" not in head and "7" not in head  # raw codes stay hidden
+    assert any("outside the PGT texts" in x and "unverified" in x for x in lines)
 
 
 def test_findings_rendered_as_wrapped_html(env):
@@ -411,14 +412,17 @@ def test_findings_rendered_as_wrapped_html(env):
         "why": "Perche & motivo", "note": long_note,
         "external_rule": {"text": "ext rule", "verify": True}}], {"layerX": "boom <err>"})
     html = d.findings.toHtml()
-    assert "Nuclei &lt;NAF&gt;" in html and "COD_NUC=15" in html
-    assert "VERIFY" in html and "Piano delle Regole \u2013 art. 3" in html
+    assert "Nuclei &lt;NAF&gt;" in html and "COD_NUC" not in html
+    assert "more:0" in html and "molto lungo " * 40 not in html  # long text starts collapsed
+    d._on_anchor("more:0")
+    html = d.findings.toHtml()
+    assert "To verify" in html and "Piano delle Regole \u2013 art. 3" in html
     assert "Piano delle Regole \u2013 art. 5" in html
     assert "Perche &amp; motivo" in html
     full = " ".join(long_note.split()).replace("<b>fine</b>", "&lt;b&gt;fine&lt;/b&gt;")
     assert full in html  # untruncated and escaped
     assert "<b>fine</b>" not in html
-    assert "External rule" in html and "unverified" in html
+    assert "Rule outside the PGT texts" in html and "unverified" in html
     assert "layerX" in html and "boom &lt;err&gt;" in html
     d.show_findings([])
     assert "No planning constraint" in d.findings.toHtml()
@@ -435,8 +439,8 @@ def test_articles_lazy_text_and_readable_title(env):
     d.show_articles(rows, cited=["PR-art-45"])
     item = d.articles.items[0]
     label = item.text(0)
-    assert label.startswith("Art. 45") and "Fattibilita" in label
-    assert "governing" in label and "cited" in label and "<" not in label
+    assert label == "✓ PdR art. 45 – Classe III - Fattibilita"  # cited, one row
+    assert "<" not in label
     assert item.widget is None and d._articles_loaded == {}
     d.articles.itemExpanded.emit(item)
     assert d._articles_loaded == {"PR-art-45": True}
@@ -543,7 +547,7 @@ def test_late_query_and_answer_callbacks_cannot_replace_new_point(env, monkeypat
     assert not answers
     _, finish_canceled = queued[3]
     finish_canceled(None, "Canceled")
-    assert p._query_task is None and errors == ["Query failed: Canceled"]
+    assert p._query_task is None and errors == ["Lookup failed: Canceled"]
     p.on_point(45.465, 9.256)
     _, finish_after_unload = queued[4]
     p.unload()
@@ -671,9 +675,47 @@ def test_task_progress_reaches_dock_status_only_while_busy(env):
 
 def test_dock_renders_markdown_answer_safely(env):
     from plugin import dock
-    d = dock.RulesDock(None)
+    d = dock.RulesDock(None, lang="it")
     d.show_answer({"answer_it": "1. **Fattibilità** <script>x</script>\n- voce",
                    "answer_en": "**bold**", "cited_articles": [], "model": "m"})
     html = d.answer.toHtml()
     assert "<ol><li><b>Fattibilità</b>" in html and "<ul><li>voce</li></ul>" in html
     assert "<script" not in html and "&lt;script&gt;" in html and "**" not in html
+
+
+def test_early_access_strip_after_third_lookup(env, monkeypatch):
+    from plugin import early_access
+    assert early_access.next_state(0, False) == (0, False)  # off while no page is set
+    monkeypatch.setattr(early_access, "SIGNUP_URL", "https://example.test/pro")
+    count, shows = 0, []
+    for _ in range(4):
+        count, show = early_access.next_state(count, False)
+        shows.append(show)
+    assert shows == [False, False, True, True] and count == 4
+    assert early_access.next_state(count, True) == (4, False)  # resolved: no more counting
+    url = early_access.signup_url("it")
+    assert url == "https://example.test/pro?src=plugin&lang=it"
+
+
+def test_settings_read_value_casts_types(env):
+    from plugin import settings
+    settings.write_value("early_access_resolved", "false")
+    settings.write_value("lookup_count", "7")
+    assert settings.read_value("early_access_resolved") is False
+    assert settings.read_value("lookup_count") == 7
+
+
+def test_early_access_strings_exist_in_both_languages(env):
+    from plugin import i18n
+    for key in ("ea_strip", "ea_link", "ea_tip", "ea_close_tip", "ea_settings", "ea_open_failed"):
+        it, en = i18n.STRINGS[key]
+        assert it and en and it != en
+
+
+def test_settings_dialog_save_keeps_runtime_counters(env):
+    from plugin import settings
+    settings.write_value("lookup_count", 9)
+    snapshot = settings.load_settings()
+    snapshot["lookup_count"] = 1  # stale value from an open dialog
+    settings.save_settings(snapshot)
+    assert settings.read_value("lookup_count") == 9

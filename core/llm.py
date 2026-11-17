@@ -259,7 +259,8 @@ class OllamaClient(_Retrying):
         if prompt_parts.get("system"):
             messages.append({"role": "system", "content": prompt_parts["system"]})
         messages.append({"role": "user", "content": prompt_parts["user"]})
-        payload = {"model": self.model, "messages": messages, "stream": False, "format": "json"}
+        payload = {"model": self.model, "messages": messages, "stream": False,
+                   "format": prompt_parts.get("response_schema") or "json"}
         return self.base_url + "/api/chat", {"Content-Type": "application/json"}, payload
 
     def complete(self, prompt_parts, on_progress=None, budget=None):

@@ -1,0 +1,19 @@
+name: Live map-service check
+
+# The plugin depends on public map services that can change without notice. This job queries
+# the control points weekly and fails when a layer moves, renames a field or stops answering.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: python eval/verify_milan_points.py
