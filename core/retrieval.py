@@ -7,6 +7,7 @@ ids look like "PR-art-45", "PS-art-11", "CG-art-45", "DPA1-sec-21". `retrieve` c
 mapped articles first, then search hits from normative documents before explanatory ones.
 """
 
+import datetime
 import json
 import math
 import re
@@ -95,6 +96,15 @@ def sources_used(ids, data_dir=None):
         v = d.get("version_date")
         extra = {"PTC": ", 2000 text; later amendments are local, outside Milan", "DPA1": ", explanatory"}.get(code, "")
         name = d.get("name", code)
+        if d.get("checked_on"):
+            c = str(d["checked_on"])
+            extra += ", checked on %s/%s/%s" % (c[8:10], c[5:7], c[:4])
+            try:
+                age = (datetime.date.today() - datetime.date.fromisoformat(c)).days
+            except ValueError:
+                age = 0
+            if age > STALE_CHECK_DAYS:
+                extra += ", over %d days ago: check for a newer text" % STALE_CHECK_DAYS
         parts.append("%s (%s%s)" % (name, v, extra) if v else name)
     return "; ".join(parts)
 
@@ -106,6 +116,24 @@ def sources_used(ids, data_dir=None):
 LAYER_RULES = {
     **{name: ("zone", name) for name in services.MUNICIPAL_ZONES},
     "milano_geology": ("zone", "fattibilita_geologica"),
+    "milano_accessibility": ("zone", "milano_accessibility"),
+    "milano_rigen_ambientale": ("zone", "milano_rigen_ambientale"),
+    "milano_piazze": ("zone", "milano_piazze"),
+    "milano_nodi": ("zone", "milano_nodi"),
+    "milano_nuclei_esterni": ("zone", "milano_nuclei_esterni"),
+    "milano_gfu": ("zone", "milano_gfu"),
+    "milano_pedonale": ("zone", "milano_pedonale"),
+    "milano_in_itinere": ("zone", "milano_in_itinere"),
+    "milano_pa_obbligatori": ("zone", "milano_pa_obbligatori"),
+    "milano_agricoltura": ("zone", "milano_agricoltura"),
+    "milano_ticinello": ("zone", "milano_ticinello"),
+    "milano_plis_lambro": ("zone", "milano_plis_lambro"),
+    "milano_plis_martesana": ("zone", "milano_plis_martesana"),
+    "milano_ers": ("zone", "milano_ers"),
+    "milano_navigli_136": ("zone", "milano_navigli_136"),
+    "milano_navigli_riapertura": ("zone", "milano_navigli_riapertura"),
+    "milano_mobilita_nuova": ("zone", "milano_mobilita_nuova"),
+    "milano_verde": ("zone", "milano_verde"),
     "milano_park_north": ("constraint", "parco_regionale"),
     "milano_park_south": ("constraint", "parco_regionale"),
     "pgt_naf": ("zone", "naf"),
@@ -125,6 +153,8 @@ LAYER_RULES = {
     "pgra_R3": ("constraint", "pgra_risk"),
     "pgra_R4": ("constraint", "pgra_risk"),
 }
+for _name in services.IDENTIFY:
+    LAYER_RULES[_name] = ("identify", _name)
 for _s in "HML":
     for _n in ("RP", "RSCM", "RSP", "ACL"):
         LAYER_RULES["pgra_%s_%s" % (_s, _n)] = ("constraint", "pgra_hazard")
@@ -412,6 +442,11 @@ def lookup(query_result, data_dir=None):
             if not rule:
                 continue
             src, key = rule
+            if src == "identify":
+                f = _identify_finding(layer, (zone_map.get("identify") or {}).get(key), attrs)
+                if f:
+                    findings.append(f)
+                continue
             if src == "zone":
                 entry = zone_layers.get(key)
                 if entry:
@@ -433,9 +468,159 @@ def lookup(query_result, data_dir=None):
                             f["articles"] = _union(f["articles"], [f"PTC-art-{number}"])
                             f["why"] += " Tav. R.02 identifies the park zone and references this PTC article."
                     findings.append(f)
+    findings.extend(_identify_failures(errors, zone_map))
+    _flag_previous_plan(findings)
+    if layers.get("milano_geology"):
+        _demote_flood_geology(findings)
+    if (all(name in layers for name in services.MUNICIPAL_ZONES)
+            and not any(name in errors for name in services.MUNICIPAL_ZONES)):
+        _demote_regional_tuc(findings, municipal_zones)
+    findings = _dedupe(findings)
     for finding in findings:
-        finding["map_url"] = services.SERVICES.get(finding["layer"])
+        finding["map_url"] = (services.SERVICES.get(finding["layer"])
+                              or services.IDENTIFY.get(finding["layer"]))
     return findings
+
+
+STALE_CHECK_DAYS = 90
+MILANO_2030 = "20200205"  # Milano 2030 in force since 05/02/2020
+GEOLOGY_ARTICLES = {"PR-art-%d" % n for n in (43, 44, 45, 46)} | {
+    "CG-art-%d" % n for n in (43, 44, 45, 46)}
+INTERNAL_KEYS = ("objectid", "shape", "fid", "id", "st_", "globalid", "_layer")
+
+
+def _identify_finding(layer, entry, attrs):
+    """One finding for a layer of a whole-map identify, or None for labels and drawing aids."""
+    if not entry:
+        return None
+    name = str(attrs.get("_layerName") or "").strip()
+    if not name or any(word in name.lower() for word in entry.get("skip", [])):
+        return None
+    layer_id = str(attrs.get("_layerId"))
+    override = (entry.get("layers") or {}).get(layer_id)
+    renamed = bool(override and override.get("name")
+                   and not name.casefold().startswith(override["name"].casefold()))
+    # A layer with its own rule uses only that rule; the map default is for the other layers.
+    rule = dict(override if override and not renamed else entry.get("default") or {})
+    rule.pop("name", None)
+    rule["description"] = "%s - %s" % (entry.get("map", layer), name)
+    f = _zone_finding(layer, layer, rule, attrs)
+    f["values"] = {k: v for k, v in attrs.items()
+                   if not str(k).lower().startswith(INTERNAL_KEYS) and not _blank(v)
+                   and str(v).strip() not in ("---", "Null", "0")}
+    if renamed:
+        # nothing is governing until a human confirms what the renamed layer is
+        f["verify"] = True
+        f["candidate_articles"] = _union(_union(f.get("articles", []), f.get("candidate_articles", [])),
+                                         override.get("articles", []))
+        f["articles"] = []
+        f["note"] = ("The Comune's service now names layer %s \"%s\" (expected \"%s\"), so the "
+                     "article could not be confirmed. " % (layer_id, name, override["name"])
+                     + f.get("note", "")).strip()
+    reference = _legal_reference(attrs)
+    if reference and not f.get("external_rule"):
+        f["external_rule"] = {"text": reference, "verify": False}
+    return f
+
+
+LEGAL_KEYS = ("rifleg", "rifart", "rif_norme", "legenda")
+LAW_RE = re.compile(r"\b(?:d\.?\s?lgs|legge|l\.?\s?r|lr|dgr|d\.?g\.?r|dpr|d\.?p\.?r|r\.?d|dm|d\.?m|"
+                    r"art)\b\.?", re.IGNORECASE)
+
+
+def _legal_reference(attrs):
+    """The law a vincolo record names itself (e.g. "Dlgs. 3-04-2006 n. 152"), if any. Legend
+    labels count only when they name a law; a decree date follows the law it belongs to."""
+    parts, decree = [], None
+    for key, value in attrs.items():
+        name = str(key).lower()
+        text = "" if _blank(value) else str(value).strip()
+        if not text or text in ("---", "Null", "0"):
+            continue
+        if name == "data_decr":
+            decree = text
+        elif name in LEGAL_KEYS and LAW_RE.search(text) and text not in parts:
+            parts.append(text)
+    if parts and decree:
+        parts.append("decreto del %s" % decree)
+    return "; ".join(parts)
+
+
+def _identify_failures(errors, zone_map):
+    """A visible card for each whole map that did not answer: its vincoli are unknown."""
+    out = []
+    for layer, error in errors.items():
+        entry = (zone_map.get("identify") or {}).get(layer)
+        if layer not in services.IDENTIFY or not entry:
+            continue
+        rule = {"description": "%s - not checked" % entry.get("map", layer), "verify": True,
+                "note": ("This map did not answer (%s), so its constraints at this point are "
+                         "unknown, not absent. Check the map before relying on the result."
+                         % str(error)[:80])}
+        f = _zone_finding(layer, layer, rule, {})
+        f["values"] = {}
+        out.append(f)
+    return out
+
+
+def _demote_regional_tuc(findings, municipal_zones):
+    """The regional TUC record is context, not the rule, once the Comune's own zone layers
+    answered: either the municipal zone (NAF/ADR/ARU) governs, or there is none here.
+    Called only when the municipal zone layers answered (no hit is then a real answer)."""
+    if municipal_zones:
+        note = ("The Comune's own zone on Tav. R.02 (%s) governs here; this regional TUC record "
+                "is context. " % ", ".join(z.removeprefix("milano_").upper() for z in municipal_zones))
+    else:
+        note = ("No municipal zone (NAF, ADR, ARU) on Tav. R.02 here, so this regional TUC record "
+                "gives context only; check the Comune's maps for the zone. ")
+    for f in findings:
+        if f["layer"] == "pgt_previsioni_tuc" and f.get("articles"):
+            f["general_articles"] = _union(f["articles"], f.get("general_articles", []))
+            f["articles"] = []
+            f["note"] = (note + f.get("note", "")).strip()
+
+
+def _dedupe(findings):
+    """Drop repeated findings. Whole-map (identify) hits of the same layer are merged, keeping
+    the values of the first; other layers are merged only when their values are identical."""
+    seen, out = {}, []
+    for f in findings:
+        values = () if f["layer"] in services.IDENTIFY else tuple(
+            sorted(map(str, (f.get("values") or {}).items())))
+        key = (f["layer"], f.get("label"), tuple(f.get("articles", [])), values)
+        if key not in seen:
+            seen[key] = f
+            out.append(f)
+    return out
+
+
+def _flag_previous_plan(findings):
+    """Regional transformation-area records dated before Milano 2030 are not current rules."""
+    for f in findings:
+        if f["layer"] != "pgt_at":
+            continue
+        match = re.search(r"_(\d{8})_", str((f.get("values") or {}).get("SCHEDA_NEW") or ""))
+        if match and match.group(1) < MILANO_2030:
+            d = match.group(1)
+            f["verify"] = True
+            f["note"] = ("This regional record comes from the previous plan (scheda dated "
+                         "%s/%s/%s). Milano 2030, in force since 05/02/2020, may treat this area "
+                         "differently: check Tav. R.02 and the Documento di Piano. "
+                         % (d[6:], d[4:6], d[:4]) + f.get("note", "")).strip()
+
+
+def _demote_flood_geology(findings):
+    """With the Comune's own geology class (Tav. G.17), flood findings' geology articles are
+    context, not the governing rule."""
+    for f in findings:
+        if not f["layer"].startswith("pgra_"):
+            continue
+        moved = [a for a in f.get("articles", []) if a in GEOLOGY_ARTICLES]
+        if moved:
+            f["articles"] = [a for a in f["articles"] if a not in GEOLOGY_ARTICLES]
+            f["general_articles"] = _union(f.get("general_articles", []), moved)
+            f["note"] = ("The Comune's geology class (Tav. G.17) decides which geology article "
+                         "applies here. " + f.get("note", "")).strip()
 
 
 # Role order: directly governing articles first, then general, explanatory (non-normative), then

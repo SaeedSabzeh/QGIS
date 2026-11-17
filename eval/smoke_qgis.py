@@ -106,15 +106,19 @@ def run(archive):
         try:
             for name, lat, lon, label, layer in CONTROLS:
                 click(app, plugin, interface.canvas, lat, lon)
-                findings = plugin.dock.findings.toPlainText()
+                # outside the city the dock shows a separate notice instead of findings
+                findings = (plugin.dock.findings.toPlainText() if layer
+                            else plugin.dock.outside.text())
                 assert label in findings, (name, findings)
                 if layer:
                     assert any(f["layer"] == layer for f in plugin._last["findings"]), name
                     assert "Official map layer" in findings
-                    item = plugin.dock.articles.topLevelItem(0)
+                    tree = plugin.dock.articles
+                    item = next(tree.topLevelItem(i) for i in range(tree.topLevelItemCount())
+                                if tree.topLevelItem(i).childCount())  # skip group headers
                     plugin.dock.articles.expandItem(item)
                     article = plugin.dock.articles.itemWidget(item.child(0), 0)
-                    assert "Open official publication" in article.toPlainText(), name
+                    assert "official publication" in article.toPlainText(), (name, article.toPlainText()[:300])
                 else:
                     assert plugin._last is None and not plugin.dock._ask_allowed
                 print(f"PASS {name}", flush=True)
@@ -126,7 +130,8 @@ def run(archive):
                               "cite": "Piano delle Regole art. 6", "source_url": official}],
                 "evidence": [{"article_id": "PR-art-6", "quote": "Quoted fixture"}],
             })
-            assert plugin.dock.answer.openExternalLinks() and official in plugin.dock.answer.toHtml()
+            # links go through the dock's own handler, which opens https links in the browser
+            assert not plugin.dock.answer.openLinks() and official in plugin.dock.answer.toHtml()
             print("PASS answer links open externally", flush=True)
         finally:
             plugin.unload()

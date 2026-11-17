@@ -433,6 +433,14 @@ def main(argv):
         print("%-5s %3d records  %s" % (row["doc"], row["count"], row["file"]))
     OUT_ARTICLES.write_text(json.dumps(articles, ensure_ascii=False, indent=2) + "\n",
                             encoding="utf-8")
+    if OUT_DOCS.exists():  # keep the manual freshness checks (checked_on, check_note)
+        previous = {d["doc"]: d for d in json.loads(OUT_DOCS.read_text(encoding="utf-8"))}
+        for row in registry:
+            old = previous.get(row["doc"], {})
+            if old.get("version_date") == row.get("version_date"):
+                for key in ("checked_on", "check_note"):
+                    if key in old:
+                        row[key] = old[key]
     OUT_DOCS.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n",
                         encoding="utf-8")
     print("%d records -> %s, registry -> %s" % (len(articles), OUT_ARTICLES, OUT_DOCS))

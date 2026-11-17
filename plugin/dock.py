@@ -76,9 +76,10 @@ def family(f):
         return "flood"
     if "geolog" in key or "fattib" in key or "sism" in key:
         return "geology"
-    if "paes" in key or "sensib" in key or "landscape" in key:
+    if "paes" in key or "sensib" in key or "landscape" in key or "136" in key:
         return "landscape"
-    if "parc" in key or "park" in key or "natura" in key or "zsc" in key or "zps" in key:
+    if any(word in key for word in ("parc", "park", "natura", "zsc", "zps", "plis",
+                                     "ticinello", "verde", "agricolt")):
         return "nature"
     return "zoning"
 
@@ -797,9 +798,12 @@ class RulesDock(QDockWidget):
             self.set_status(self._point_status)  # replace "Preparing the answer…"
         self._answer_shown = True
         self.answer.setVisible(True)
-        self.answer_caption.setText(self.t("answered_by") % (
+        caption = self.t("answered_by") % (
             escape(str(ans.get("model", "?"))),
-            compact_refs(cited, self.lang) if cited else escape(self.t("none"))))
+            compact_refs(cited, self.lang) if cited else escape(self.t("none")))
+        if ans.get("fallback_model"):
+            caption += "<br><span style='color:#6b4a00'>%s</span>" % escape(self.t("fallback_note"))
+        self.answer_caption.setText(caption)
         self.copy_button.setText(self.t("copy"))
         self.caption_row.setVisible(True)
         self._fit_question()

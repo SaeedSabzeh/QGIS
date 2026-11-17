@@ -293,6 +293,9 @@ STRINGS = {
     'ea_open_failed': (
         'Impossibile aprire il browser. Pagina di iscrizione: %s',
         'The browser could not be opened. Sign-up page: %s'),
+    'fallback_note': (
+        'Risposta di un modello di riserva: verificala con attenzione.',
+        'Answered by a fallback model: check it carefully.'),
 }
 
 

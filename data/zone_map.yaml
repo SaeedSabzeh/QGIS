@@ -47,6 +47,111 @@ layers:
     why: >-
       The Comune's Tav. R.02, layer 40, identifies the ARU. Art. 22 defines it and art. 23
       regulates the interventions. Check Tav. R.03 for the detailed morphology.
+  milano_accessibility:
+    description: "Ambiti caratterizzati da elevati livelli di accessibilità (Tav. R.02)"
+    articles: [PR-art-17]
+    general_articles: [PR-art-6]
+    note: "The higher maximum index applies only under the conditions of art. 17; read it before relying on it."
+    why: >-
+      Tav. R.02, layer 0, marks the areas with high public-transport accessibility. Art. 17 "Criteri di densità, accessibilità" sets the higher maximum floor-area index there; art. 6 gives the base and maximum indices.
+  milano_rigen_ambientale:
+    description: "Ambiti di rigenerazione ambientale (Tav. R.02)"
+    articles: [PR-art-14, PR-art-15]
+    why: >-
+      Tav. R.02, layer 2. Capo I "Rigenerazione": art. 14 "Definizione" and art. 15 "Disciplina".
+  milano_piazze:
+    description: "Piazze - ambiti di rigenerazione (Tav. R.02)"
+    articles: [PR-art-14, PR-art-15]
+    why: >-
+      Tav. R.02, layer 3. Art. 15 c.1 b lists the Piazze among the regeneration areas.
+  milano_nodi:
+    description: "Nodi di interscambio - ambiti di rigenerazione (Tav. R.02)"
+    articles: [PR-art-14, PR-art-15]
+    general_articles: [PR-art-17]
+    why: >-
+      Tav. R.02, layer 4. Interchange nodes are regeneration areas under Capo I (art. 14-15).
+  milano_nuclei_esterni:
+    description: "Nuclei storici esterni - ambiti di rigenerazione (Tav. R.02)"
+    articles: [PR-art-14, PR-art-15]
+    why: >-
+      Tav. R.02, layer 5. Outer historic cores are regeneration areas under Capo I (art. 14-15).
+  milano_gfu:
+    description: "Grandi Funzioni Urbane (Tav. R.02, art. 16)"
+    articles: [PR-art-16]
+    general_articles: [PR-art-14, PR-art-15]
+    note: "Interventions in a GFU follow the procedure of art. 16 (usually a plan or programme), not the ordinary TUC rules."
+    why: >-
+      Tav. R.02, layer 6, "Grandi funzioni urbane (Art. 16)". Art. 16 governs these areas.
+  milano_pedonale:
+    description: "Spazi a vocazione pedonale - ambiti di rigenerazione (Tav. R.02)"
+    articles: [PR-art-14, PR-art-15]
+    why: >-
+      Tav. R.02, layer 7. Pedestrian-oriented spaces are regeneration areas under Capo I.
+  milano_in_itinere:
+    description: "Ambiti interessati da provvedimenti in itinere approvati e adottati (Tav. R.02)"
+    articles: [PR-art-52]
+    general_articles: [PR-art-53]
+    note: "The approved or adopted plan named in the municipal records keeps applying here; ask the Comune for it."
+    why: >-
+      Tav. R.02, layer 10, "Norme transitorie e finali (Artt. 52-53)". Art. 52 governs areas covered by plans already approved or adopted; those plans' own rules continue to apply.
+  milano_pa_obbligatori:
+    description: "Piani Attuativi obbligatori (Tav. R.02)"
+    articles: [PR-art-26]
+    general_articles: [PR-art-13]
+    note: "Building here first needs the implementation plan (piano attuativo) required by art. 26."
+    why: >-
+      Tav. R.02, layer 12. Art. 26 "Piani Attuativi obbligatori" requires an implementation plan before building here.
+  milano_agricoltura:
+    description: "Aree destinate all'agricoltura (Tav. R.02)"
+    articles: [PR-art-24, PR-art-25]
+    why: >-
+      Tav. R.02, layer 13. Capo VII "Aree destinate all'agricoltura": art. 24 "Individuazione" and art. 25 "Disciplina".
+  milano_ticinello:
+    description: "Parco Agricolo Ticinello (Tav. R.02)"
+    articles: [PR-art-35]
+    general_articles: [PR-art-24, PR-art-25]
+    why: >-
+      Tav. R.02, layer 16, inside the parks group. Art. 35 governs the areas of regional parks and PLIS shown on Tav. R.02.
+  milano_plis_lambro:
+    description: "PLIS Media Valle del Lambro (Tav. R.02, art. 35.3)"
+    articles: [PR-art-35]
+    why: >-
+      Tav. R.02, layer 19, "Aree interessate da Parchi Locali di Interesse Sovracomunale (Art. 35.3)". Art. 35 c.3 governs PLIS areas.
+  milano_plis_martesana:
+    description: "Proposta PLIS Martesana (Tav. R.02, art. 35.3)"
+    articles: []
+    candidate_articles: [PR-art-35]
+    verify: true
+    why: >-
+      Tav. R.02, layer 20. A proposed PLIS: art. 35 c.3 applies once it is recognised; check its status.
+  milano_ers:
+    description: "Aree per l'Edilizia Residenziale Sociale (ERS) (Tav. R.02)"
+    articles: [PR-art-9]
+    why: >-
+      Tav. R.02, layer 21. Art. 9 "Edilizia Residenziale Sociale" governs these areas.
+  milano_navigli_136:
+    description: "Tutela paesaggistica tra Naviglio Grande e Pavese (art. 136 D.Lgs 42/2004)"
+    articles: [PR-art-36]
+    general_articles: [PR-art-34]
+    why: >-
+      Tav. R.02, layer 22. A landscape protection under art. 136 of the Codice dei beni culturali e del paesaggio: art. 36 "Beni ed aree soggette a tutele sovraordinate" applies, and works need landscape authorisation (art. 146 D.Lgs 42/2004).
+  milano_navigli_riapertura:
+    description: "Ambito del progetto di riapertura dei Navigli (Tav. R.02)"
+    articles: [PR-art-51]
+    general_articles: [PR-art-49, PR-art-50]
+    why: >-
+      Tav. R.02, layer 24. Art. 51 refers this area to agreements on the Martesana-Darsena connection and the reopening of the Navigli.
+  milano_mobilita_nuova:
+    description: "Aree per la mobilità stradale di nuova previsione (Tav. R.02, art. 8.4 NA PdS)"
+    articles: [PS-art-8]
+    why: >-
+      Tav. R.02, layer 27, "Art. 8.4 NA PdS": the Piano dei Servizi art. 8 governs new road areas.
+  milano_verde:
+    description: "Verde urbano (Tav. R.02)"
+    articles: [PS-art-8]
+    general_articles: [PS-art-10]
+    why: >-
+      Tav. R.02, layer 36. Urban green is a localised service: Piano dei Servizi art. 8, with the green and blue infrastructure of art. 10.
 
   naf:
     layer_id: 12
@@ -342,3 +447,111 @@ layers:
         "1":
           verify: true
           note: "Class I is not described in this NTA."
+
+# Whole-map lookups (one ArcGIS "identify" request per Comune map). Every layer the point falls
+# in becomes a finding labelled "Tav. R.0x - <layer name>". `default` applies to every layer of
+# the map; `layers` overrides it by layer id; `skip` lists layer-name words that are labels or
+# drawing aids, not constraints.
+identify:
+  milano_r03:
+    map: "Tav. R.03 Indicazioni morfologiche"
+    skip: [label, testo]
+    default:
+      candidate_articles: [PR-art-19, PR-art-21, PR-art-23]
+      why: >-
+        Tav. R.03 gives the morphological rules of the TUC; the article depends on the zone
+        (NAF art. 19, ADR art. 21, ARU art. 23).
+      verify: true
+    layers:
+      "0":
+        name: "TUC - TESSUTO URBANO CONSOLIDATO"
+        general_articles: [PR-art-6, PR-art-8, PR-art-13]
+        why: >-
+          Tav. R.03 confirms the point lies in the Tessuto Urbano Consolidato (TUC), where the
+          general TUC rules apply (art. 6, 8, 13).
+        verify: false
+      "3": &naf_intervention
+        name: "Interventi di manutenzione"
+        articles: [PR-art-19]
+        why: >-
+          Tav. R.03 assigns the NAF intervention type shown here; art. 19 c.2 sets what each
+          intervention type allows.
+        verify: false
+      "4": *naf_intervention
+      "5": *naf_intervention
+      "6": *naf_intervention
+      "7": *naf_intervention
+      "8":
+        name: "Recupero e realizzazione di corti"
+        articles: [PR-art-19]
+        why: "Tav. R.03 marks courtyards and gardens to recover in the NAF; art. 19 sets the rule."
+        verify: false
+      "10":
+        name: "Insiemi urbani unitari"
+        articles: [PR-art-21]
+        why: "Tav. R.03 marks a unified urban ensemble (insieme urbano unitario), governed for the ADR by art. 21."
+      "11":
+        name: "Morfologia tessuti"
+        articles: [PR-art-21]
+        why: "Tav. R.03 gives the fabric morphology of the ADR; art. 21 sets its rules."
+      "14":
+        name: "Tessuti di rinnovamento urbano"
+        articles: [PR-art-23]
+        why: "Tav. R.03 marks the fabric of urban renewal (ARU); art. 23 sets its rules."
+        verify: false
+      "15":
+        name: "DOTAZIONI TERRITORIALI"
+        articles: [PS-art-11]
+        why: >-
+          Tav. R.03 marks the limit of the exemption from territorial services (dotazioni
+          territoriali); art. 11 of the Piano dei Servizi says when new buildings in the TUC must
+          provide services and when they are exempt.
+        verify: false
+  milano_r05:
+    map: "Tav. R.05 Vincoli amministrativi e per la difesa del suolo"
+    skip: [testo, label]
+    default:
+      articles: [PR-art-36]
+      why: >-
+        Tav. R.05 shows a limitation set by sector law (road, rail, power line, cemetery,
+        purifier or well setbacks, woods, quarries, major-accident plants). Art. 36 refers to
+        that law, which decides what is allowed; check it with the competent body.
+  milano_r06:
+    map: "Tav. R.06 Vincoli di tutela e salvaguardia"
+    skip: [testo, label]
+    default:
+      articles: [PR-art-36]
+      general_articles: [PR-art-34]
+      why: >-
+        Tav. R.06 shows a heritage, landscape or environmental protection (for example D.Lgs
+        42/2004). Art. 36 refers to that protection: works need the permit or opinion it
+        requires (for cultural assets the Soprintendenza, for landscape art. 146 D.Lgs 42/2004).
+  milano_r07:
+    map: "Tav. R.07 Rischi, rumori e radar per la navigazione aerea"
+    skip: [testate, label]
+    default:
+      articles: [PR-art-37]
+      why: "Tav. R.07 shows an airport constraint; art. 37 refers to the airport rules."
+    layers:
+      "5": {name: "Piano di rischio aeroportuale", articles: [PR-art-37, PR-art-38], why: "Airport risk plan (art. 7 Codice della navigazione): art. 38 \"Piano di rischio aeroportuale\"."}
+      "12": {name: "Piano di rischio aeroportuale", articles: [PR-art-37, PR-art-38], why: "Airport risk plan (art. 7 Codice della navigazione): art. 38 \"Piano di rischio aeroportuale\"."}
+      "4": {name: "Curve di isolivello", articles: [PR-art-37, PR-art-39], why: "Airport noise curves (LVA): art. 39 \"Rumore aeroportuale\"."}
+      "7": {name: "Stazioni radar", articles: [PR-art-37, PR-art-40], why: "Radar station: art. 40 \"Radar\"."}
+      "8": {name: "Fasce di rispetto", articles: [PR-art-37, PR-art-40], why: "Radar protection sector with a maximum height for structures: art. 40 \"Radar\"."}
+  milano_r08:
+    map: "Tav. R.08 Ostacoli e pericoli per la navigazione aerea"
+    skip: [testate, label, isolivello, limiti superfici]
+    default:
+      general_articles: [PR-art-37, PR-art-41]
+      why: >-
+        Tav. R.08 shows an obstacle-limitation surface around the airport, which covers most of
+        the city; art. 41 "Ostacoli e pericoli per la navigazione aerea" matters for tall
+        buildings, antennas and cranes (ENAC assessment).
+    layers:
+      "7":
+        name: "Pericoli per la navigazione aerea"
+        articles: [PR-art-37, PR-art-41]
+        general_articles: []
+        why: >-
+          Tav. R.08 marks an area of hazards to air navigation (lights, reflective surfaces,
+          wildlife attractors); art. 41.3 limits what may be built or installed there.
